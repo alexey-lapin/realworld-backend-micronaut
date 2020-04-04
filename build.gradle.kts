@@ -4,9 +4,19 @@ plugins {
     id("com.diffplug.gradle.spotless")
 }
 
+val enableJacoco = project.hasProperty("enableJacoco")
+val jacocoClassesDir = file("$buildDir/jacoco/classes")
+
 allprojects {
     apply(plugin = "idea")
     apply(plugin = "com.diffplug.gradle.spotless")
+
+    if (enableJacoco) {
+        apply(plugin = "jacoco")
+        configure<JacocoPluginExtension> {
+            toolVersion = Versions.jacoco
+        }
+    }
 
     repositories {
         mavenCentral()
@@ -28,6 +38,20 @@ subprojects {
                 endWithNewline()
             }
         }
+
+        afterEvaluate {
+            if (enableJacoco) {
+                val jarTask = tasks["jar"] as Jar
+                val extractJar by tasks.registering(Copy::class) {
+                    from(zipTree(jarTask.archivePath))
+                    into(jacocoClassesDir)
+                    include("**/*.class")
+                    includeEmptyDirs = false
+                    onlyIf { jarTask.enabled }
+                }
+                jarTask.finalizedBy(extractJar)
+            }
+        }
     }
 
     configure<JavaPluginConvention> {
@@ -38,6 +62,32 @@ subprojects {
     tasks {
         withType<Test> {
             useJUnitPlatform()
+        }
+    }
+}
+
+if (enableJacoco) {
+    tasks {
+        val jacocoMerge by registering(JacocoMerge::class) {
+            subprojects.forEach { project ->
+                executionData(fileTree("dir" to "${project.buildDir}/jacoco", "include" to "*.exec"))
+                dependsOn(project.tasks.withType<Test>())
+            }
+        }
+        register<JacocoReport>("jacocoRootReport") {
+            dependsOn(jacocoMerge)
+            subprojects.forEach { project ->
+                project.pluginManager.withPlugin("java") {
+                    sourceDirectories.from(project.the<SourceSetContainer>()["main"].allSource.srcDirs)
+                }
+            }
+            classDirectories.from(files(jacocoClassesDir))
+            executionData(jacocoMerge.get().destinationFile)
+            reports {
+                html.isEnabled = true
+                xml.isEnabled = true
+                csv.isEnabled = false
+            }
         }
     }
 }
