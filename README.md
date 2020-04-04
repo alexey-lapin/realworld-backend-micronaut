@@ -1,3 +1,5 @@
+# ![RealWorld Example App using Spring](example-logo.png)
+
 [![CI](https://github.com/alexey-lapin/realworld-backend-micronaut/workflows/CI/badge.svg)](https://github.com/alexey-lapin/realworld-backend-micronaut/actions)
 [![Codecov](https://img.shields.io/codecov/c/gh/alexey-lapin/realworld-backend-micronaut?logo=codecov)](https://codecov.io/gh/alexey-lapin/realworld-backend-micronaut)
 
