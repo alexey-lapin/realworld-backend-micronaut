@@ -1,1 +1,1 @@
-web: java -Dserver.port=${PORT} -jar service/build/libs/service.jar
+web: java -Dserver.port=${PORT} -jar service/build/libs/service-all.jar
