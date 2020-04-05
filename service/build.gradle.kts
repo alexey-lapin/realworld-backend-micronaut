@@ -10,6 +10,7 @@ dependencies {
     annotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     annotationProcessor("io.micronaut:micronaut-inject-java")
     annotationProcessor("io.micronaut:micronaut-validation")
+    annotationProcessor("io.micronaut:micronaut-security")
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
 
     implementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
@@ -20,10 +21,18 @@ dependencies {
     implementation("io.micronaut:micronaut-inject")
     implementation("io.micronaut:micronaut-management")
     implementation("io.micronaut:micronaut-runtime")
+    implementation("io.micronaut:micronaut-security")
     implementation("io.micronaut:micronaut-validation")
     implementation("javax.annotation:javax.annotation-api")
 
-    runtimeOnly("ch.qos.logback:logback-classic:1.2.3")
+    implementation("io.jsonwebtoken:jjwt-api:${Versions.jwt}")
+
+    implementation(project(":service-bus"))
+    implementation(project(":service-api"))
+
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${Versions.jwt}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${Versions.jwt}")
+    runtimeOnly("ch.qos.logback:logback-classic:${Versions.logback}")
     runtimeOnly("com.h2database:h2")
 
     testAnnotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
@@ -31,7 +40,7 @@ dependencies {
 
     testImplementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     testImplementation("io.micronaut.test:micronaut-test-junit5")
-    testImplementation("org.assertj:assertj-core:3.14.0")
+    testImplementation("org.assertj:assertj-core:${Versions.assertj}")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }

@@ -6,6 +6,36 @@ micronaut:
     port: ${PORT:8080}
     cors:
       enabled: true
+  security:
+    enabled: true
+    intercept-url-map:
+      - pattern: /**
+        httpMethod: OPTIONS
+        access:
+          - isAnonymous()
+      - pattern: ${api.version}/articles/feed
+        httpMethod: GET
+        access:
+          - isAuthenticated()
+      - pattern: ${api.version}/users/**
+        httpMethod: POST
+        access:
+          - isAnonymous()
+      - pattern: ${api.version}/articles/**
+        httpMethod: GET
+        access:
+          - isAnonymous()
+      - pattern: ${api.version}/profiles/**
+        httpMethod: GET
+        access:
+          - isAnonymous()
+      - pattern: ${api.version}/tags/**
+        httpMethod: GET
+        access:
+          - isAnonymous()
+      - pattern: ${api.version}/**
+        access:
+          - isAuthenticated()
 ---
 datasources:
   default:
@@ -26,6 +56,16 @@ jpa:
               provider: none
 ---
 jackson:
+  serializationInclusion: ALWAYS
   serialization:
-    failOnEmptyBeans: false
-    writeDatesAsTimestamps: true
+    fail_on_empty_beans: false
+    write_dates_as_timestamps: false
+  deserialization:
+    unwrap_root_value: true
+
+security:
+  jwt:
+    secret: MWY1MmQ2NTItODIxNC00ZGM0LWFiODQtOGFiNGZmMjlhZjdj
+
+api:
+  version: /api
