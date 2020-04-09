@@ -23,9 +23,9 @@
  */
 package com.github.al.realworld.application.command;
 
+import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.DeleteComment;
 import com.github.al.realworld.api.command.DeleteCommentResult;
-import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.Comment;
 import com.github.al.realworld.domain.repository.ArticleRepository;
@@ -33,13 +33,12 @@ import lombok.RequiredArgsConstructor;
 
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
-
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.github.al.realworld.application.exception.NoAuthorizationException.forbidden;
-import static com.github.al.realworld.application.exception.ResourceNotFoundException.notFound;
+import static com.github.al.realworld.application.exception.Exceptions.forbidden;
+import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
 @RequiredArgsConstructor
 @Singleton
@@ -59,7 +58,7 @@ public class DeleteCommentHandler implements CommandHandler<DeleteCommentResult,
                 .orElseThrow(() -> notFound("comment [id=%s] does not exist", command.getId()));
 
         if (!comment.getAuthor().getUsername().equals(command.getCurrentUsername())) {
-            throw forbidden();
+            throw forbidden("comment [id=%s] is not owned by %s", comment.getId(), command.getCurrentUsername());
         }
 
         Set<Comment> alteredComments = article.getComments().stream()

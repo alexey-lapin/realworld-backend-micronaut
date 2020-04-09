@@ -23,10 +23,10 @@
  */
 package com.github.al.realworld.application.command;
 
+import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.FollowProfile;
 import com.github.al.realworld.api.command.FollowProfileResult;
 import com.github.al.realworld.application.ProfileAssembler;
-import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.domain.model.Profile;
 import com.github.al.realworld.domain.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +34,8 @@ import lombok.RequiredArgsConstructor;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 
-import static com.github.al.realworld.application.exception.InvalidRequestException.invalidRequest;
-import static com.github.al.realworld.application.exception.ResourceNotFoundException.notFound;
+import static com.github.al.realworld.application.exception.Exceptions.badRequest;
+import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
 /**
  * follower - one who follows someone (current user)
@@ -51,7 +51,7 @@ public class FollowProfileHandler implements CommandHandler<FollowProfileResult,
     @Override
     public FollowProfileResult handle(FollowProfile command) {
         Profile currentProfile = profileRepository.findByUsername(command.getFollower())
-                .orElseThrow(() -> invalidRequest("user [name=%s] does not exist", command.getFollower()));
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getFollower()));
 
         Profile followee = profileRepository.findByUsername(command.getFollowee())
                 .orElseThrow(() -> notFound("user [name=%s] does not exist", command.getFollowee()));

@@ -63,8 +63,8 @@ public class ArticleController implements ArticleOperations {
     public GetArticlesResult findByFilters(@Nullable String tag,
                                            @Nullable String author,
                                            @Nullable String favorited,
-                                           @Nullable Integer limit,
-                                           @Nullable Integer offset) {
+                                           Integer limit,
+                                           Integer offset) {
         return bus.executeQuery(new GetArticles(auth.currentUsername(), tag, author, favorited, limit, offset));
     }
 
@@ -74,8 +74,8 @@ public class ArticleController implements ArticleOperations {
     }
 
     @Override
-    public GetFeedResult feed() {
-        return bus.executeQuery(new GetFeed(auth.currentUsername()));
+    public GetFeedResult feed(Integer limit, Integer offset) {
+        return bus.executeQuery(new GetFeed(auth.currentUsername(), limit, offset));
     }
 
     @Override

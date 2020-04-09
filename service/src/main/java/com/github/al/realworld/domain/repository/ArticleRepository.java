@@ -34,9 +34,9 @@ public interface ArticleRepository {
 
     Optional<Article> findByTitle(String title);
 
-    List<Article> findByFilters(String tag, String author, String favorited);
+    List<Article> findByFilters(String tag, String author, String favorited, Integer limit, Integer offset);
 
-    List<Article> findByFollowees(List<String> followees);
+    List<Article> findByFollowees(List<String> followees, Integer limit, Integer offset);
 
     void delete(Article article);
 

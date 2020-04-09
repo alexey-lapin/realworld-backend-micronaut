@@ -1,6 +1,6 @@
 micronaut:
   application:
-    name: realworld-micronaut-backend
+    name: realworld-backend-micronaut
   server:
     host: 0.0.0.0
     port: ${PORT:8080}

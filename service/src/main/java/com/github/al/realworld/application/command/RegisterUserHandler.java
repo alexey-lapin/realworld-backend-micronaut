@@ -38,7 +38,7 @@ import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
-import static com.github.al.realworld.application.exception.InvalidRequestException.invalidRequest;
+import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 
 @RequiredArgsConstructor
 @Singleton
@@ -53,11 +53,11 @@ public class RegisterUserHandler implements CommandHandler<RegisterUserResult, R
     public RegisterUserResult handle(RegisterUser command) {
         Optional<User> userByEmailOptional = userRepository.findByEmail(command.getEmail());
         if (userByEmailOptional.isPresent()) {
-            throw invalidRequest("user [email=%s] already exists", command.getEmail());
+            throw badRequest("user [email=%s] already exists", command.getEmail());
         }
         Optional<User> userByUsernameOptional = userRepository.findByUsername(command.getUsername());
         if (userByUsernameOptional.isPresent()) {
-            throw invalidRequest("user [name=%s] already exists", command.getUsername());
+            throw badRequest("user [name=%s] already exists", command.getUsername());
         }
 
         Profile profile = Profile.builder()

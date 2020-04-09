@@ -23,11 +23,11 @@
  */
 package com.github.al.realworld.application.query;
 
+import com.github.al.bus.QueryHandler;
 import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.api.query.GetFeed;
 import com.github.al.realworld.api.query.GetFeedResult;
 import com.github.al.realworld.application.ArticleAssembler;
-import com.github.al.bus.QueryHandler;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.Profile;
 import com.github.al.realworld.domain.model.User;
@@ -37,13 +37,12 @@ import lombok.RequiredArgsConstructor;
 
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.github.al.realworld.application.exception.InvalidRequestException.invalidRequest;
+import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 
 @RequiredArgsConstructor
 @Singleton
@@ -57,12 +56,13 @@ public class GetFeedHandler implements QueryHandler<GetFeedResult, GetFeed> {
     public GetFeedResult handle(GetFeed query) {
         Profile currentProfile = userRepository.findByUsername(query.getCurrentUsername())
                 .map(User::getProfile)
-                .orElseThrow(() -> invalidRequest("user [name=%s] does not exist", query.getCurrentUsername()));
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", query.getCurrentUsername()));
 
         Set<Profile> followees = currentProfile.getFollowees();
 
+        List<String> followeesUsernames = followees.stream().map(Profile::getUsername).collect(Collectors.toList());
         List<Article> articles = articleRepository
-                .findByFollowees(followees.stream().map(Profile::getUsername).collect(Collectors.toList()));
+                .findByFollowees(followeesUsernames, query.getLimit(), query.getOffset());
 
         ArrayList<ArticleDto> results = new ArrayList<>();
 

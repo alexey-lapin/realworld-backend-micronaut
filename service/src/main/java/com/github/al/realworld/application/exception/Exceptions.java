@@ -23,8 +23,21 @@
  */
 package com.github.al.realworld.application.exception;
 
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.exceptions.HttpStatusException;
+
 public class Exceptions {
 
+    public static HttpStatusException notFound(String message, Object... args) {
+        return new HttpStatusException(HttpStatus.NOT_FOUND, String.format(message, args));
+    }
 
+    public static HttpStatusException badRequest(String message, Object... args) {
+        return new HttpStatusException(HttpStatus.BAD_REQUEST, String.format(message, args));
+    }
+
+    public static HttpStatusException forbidden(String message, Object... args) {
+        return new HttpStatusException(HttpStatus.FORBIDDEN, String.format(message, args));
+    }
 
 }

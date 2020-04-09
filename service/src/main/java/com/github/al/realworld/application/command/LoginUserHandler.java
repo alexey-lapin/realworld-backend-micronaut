@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 
-import static com.github.al.realworld.application.exception.InvalidRequestException.invalidRequest;
+import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 
 @RequiredArgsConstructor
 @Singleton
@@ -50,10 +50,10 @@ public class LoginUserHandler implements CommandHandler<LoginUserResult, LoginUs
     @Override
     public LoginUserResult handle(LoginUser command) {
         User user = userRepository.findByEmail(command.getEmail())
-                .orElseThrow(() -> invalidRequest("user [email=%s] does not exist", command.getEmail()));
+                .orElseThrow(() -> badRequest("user [email=%s] does not exist", command.getEmail()));
 
         if (!passwordEncoder.matches(command.getPassword(), user.getPassword())) {
-            throw invalidRequest("user [name=%s] password is incorrect");
+            throw badRequest("user [name=%s] password is incorrect");
         }
 
         return new LoginUserResult(UserAssembler.assemble(user, jwtService));

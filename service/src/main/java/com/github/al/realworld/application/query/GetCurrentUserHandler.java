@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 
-import static com.github.al.realworld.application.exception.InvalidRequestException.invalidRequest;
+import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 
 @RequiredArgsConstructor
 @Singleton
@@ -48,7 +48,7 @@ public class GetCurrentUserHandler implements QueryHandler<GetCurrentUserResult,
     @Override
     public GetCurrentUserResult handle(GetCurrentUser query) {
         User user = userRepository.findByUsername(query.getUsername())
-                .orElseThrow(() -> invalidRequest("user [name=%s] does not exist", query.getUsername()));
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", query.getUsername()));
 
         return new GetCurrentUserResult(UserAssembler.assemble(user, jwtService));
     }

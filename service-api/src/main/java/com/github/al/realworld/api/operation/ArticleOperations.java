@@ -54,15 +54,16 @@ public interface ArticleOperations {
     GetArticlesResult findByFilters(@QueryValue @Nullable String tag,
                                     @QueryValue @Nullable String author,
                                     @QueryValue @Nullable String favorited,
-                                    @QueryValue @Nullable Integer limit,
-                                    @QueryValue @Nullable Integer offset);
+                                    @QueryValue(defaultValue = "20") Integer limit,
+                                    @QueryValue(defaultValue = "0") Integer offset);
 
     @Status(HttpStatus.CREATED)
     @Post("/articles")
     CreateArticleResult create(@Valid @Body CreateArticle command);
 
     @Get("/articles/feed")
-    GetFeedResult feed();
+    GetFeedResult feed(@QueryValue(defaultValue = "20") Integer limit,
+                       @QueryValue(defaultValue = "0") Integer offset);
 
     @Get("/articles/{slug}")
     GetArticleResult findBySlug(@PathVariable String slug);

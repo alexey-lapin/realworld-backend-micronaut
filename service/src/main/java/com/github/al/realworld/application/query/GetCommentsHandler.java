@@ -40,7 +40,7 @@ import javax.transaction.Transactional;
 
 import java.util.ArrayList;
 
-import static com.github.al.realworld.application.exception.ResourceNotFoundException.notFound;
+import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
 @RequiredArgsConstructor
 @Singleton

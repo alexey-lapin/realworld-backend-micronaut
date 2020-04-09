@@ -35,8 +35,8 @@ import javax.transaction.Transactional;
 
 import java.util.Objects;
 
-import static com.github.al.realworld.application.exception.NoAuthorizationException.forbidden;
-import static com.github.al.realworld.application.exception.ResourceNotFoundException.notFound;
+import static com.github.al.realworld.application.exception.Exceptions.forbidden;
+import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
 @RequiredArgsConstructor
 @Singleton
@@ -51,7 +51,7 @@ public class DeleteArticleHandler implements CommandHandler<DeleteArticleResult,
                 .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.getSlug()));
 
         if (!Objects.equals(article.getAuthor().getUsername(), command.getCurrentUsername())) {
-            throw forbidden();
+            throw forbidden("article [slug=%s] is not owned by %s", command.getSlug(), command.getCurrentUsername());
         }
 
         articleRepository.delete(article);

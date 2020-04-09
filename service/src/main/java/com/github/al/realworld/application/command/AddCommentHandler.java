@@ -39,8 +39,8 @@ import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
 
-import static com.github.al.realworld.application.exception.InvalidRequestException.invalidRequest;
-import static com.github.al.realworld.application.exception.ResourceNotFoundException.notFound;
+import static com.github.al.realworld.application.exception.Exceptions.badRequest;
+import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
 @RequiredArgsConstructor
 @Singleton
@@ -57,7 +57,7 @@ public class AddCommentHandler implements CommandHandler<AddCommentResult, AddCo
 
         Profile profile = userRepository.findByUsername(command.getCurrentUsername())
                 .map(User::getProfile)
-                .orElseThrow(() -> invalidRequest("user [name=%s] does not exist", command.getCurrentUsername()));
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getCurrentUsername()));
 
         ZonedDateTime now = ZonedDateTime.now();
 

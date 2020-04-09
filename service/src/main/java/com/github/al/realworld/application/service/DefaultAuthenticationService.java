@@ -34,13 +34,8 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private final SecurityService securityService;
 
-    @SuppressWarnings("unchecked")
     @Override
     public String currentUsername() {
-//        Optional<User> principal = (Optional<User>) SecurityContextHolder.getContext()
-//                .getAuthentication()
-//                .getPrincipal();
-//        return principal.map(User::getUsername).orElse(null);
         return securityService.username().orElse(null);
     }
 

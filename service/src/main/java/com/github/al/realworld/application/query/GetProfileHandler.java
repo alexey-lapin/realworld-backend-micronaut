@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 
-import static com.github.al.realworld.application.exception.ResourceNotFoundException.notFound;
+import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
 @RequiredArgsConstructor
 @Singleton

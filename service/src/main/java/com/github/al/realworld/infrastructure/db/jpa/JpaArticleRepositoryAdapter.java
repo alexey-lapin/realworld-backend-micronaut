@@ -25,6 +25,9 @@ package com.github.al.realworld.infrastructure.db.jpa;
 
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.repository.ArticleRepository;
+import io.micronaut.data.model.Pageable;
+import io.micronaut.data.model.Sort;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import javax.inject.Singleton;
@@ -48,13 +51,15 @@ public class JpaArticleRepositoryAdapter implements ArticleRepository {
     }
 
     @Override
-    public List<Article> findByFilters(String tag, String author, String favorited) {
-        return repository.findByFilters(tag, author, favorited);
+    public List<Article> findByFilters(String tag, String author, String favorited, Integer limit, Integer offset) {
+        OffsetBasedPageable pageable = new OffsetBasedPageable(limit, offset, Sort.of(Sort.Order.desc("createdAt")));
+        return repository.findByFilters(tag, author, favorited, pageable);
     }
 
     @Override
-    public List<Article> findByFollowees(List<String> followees) {
-        return repository.findByFollowees(followees);
+    public List<Article> findByFollowees(List<String> followees, Integer limit, Integer offset) {
+        OffsetBasedPageable pageable = new OffsetBasedPageable(limit, offset, Sort.of(Sort.Order.desc("createdAt")));
+        return repository.findByFollowees(followees, pageable);
     }
 
     @Override
@@ -69,4 +74,14 @@ public class JpaArticleRepositoryAdapter implements ArticleRepository {
         }
         return repository.save(article);
     }
+
+    @RequiredArgsConstructor
+    @Getter
+    private static class OffsetBasedPageable implements Pageable {
+        private final int size;
+        private int number;
+        private final long offset;
+        private final Sort sort;
+    }
+
 }

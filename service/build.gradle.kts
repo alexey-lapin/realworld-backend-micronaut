@@ -13,6 +13,9 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-security")
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
 
+    implementation(project(":service-bus"))
+    implementation(project(":service-api"))
+
     implementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     implementation("io.micronaut.configuration:micronaut-jdbc-tomcat")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
@@ -23,17 +26,14 @@ dependencies {
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut:micronaut-security")
     implementation("io.micronaut:micronaut-validation")
-    implementation("javax.annotation:javax.annotation-api")
 
     implementation("io.jsonwebtoken:jjwt-api:${Versions.jwt}")
+    implementation("javax.annotation:javax.annotation-api")
 
-    implementation(project(":service-bus"))
-    implementation(project(":service-api"))
-
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:${Versions.jwt}")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${Versions.jwt}")
     runtimeOnly("ch.qos.logback:logback-classic:${Versions.logback}")
     runtimeOnly("com.h2database:h2")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${Versions.jwt}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${Versions.jwt}")
 
     testAnnotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")

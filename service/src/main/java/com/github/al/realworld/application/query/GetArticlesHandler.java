@@ -52,7 +52,7 @@ public class GetArticlesHandler implements QueryHandler<GetArticlesResult, GetAr
     @Override
     public GetArticlesResult handle(GetArticles query) {
         List<Article> articles = articleRepository
-                .findByFilters(query.getTag(), query.getAuthor(), query.getFavorited());
+                .findByFilters(query.getTag(), query.getAuthor(), query.getFavorited(), query.getLimit(), query.getOffset());
 
         Profile currentProfile = userRepository.findByUsername(query.getCurrentUsername())
                 .map(User::getProfile)

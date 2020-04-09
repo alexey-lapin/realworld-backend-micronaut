@@ -42,8 +42,8 @@ public class AddComment implements Command<AddCommentResult> {
 
     @With
     private String slug;
-    private String body;
     @With
     private String currentUsername;
+    private String body;
 
 }

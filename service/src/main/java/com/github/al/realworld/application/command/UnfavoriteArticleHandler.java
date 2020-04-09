@@ -41,8 +41,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.github.al.realworld.application.exception.InvalidRequestException.invalidRequest;
-import static com.github.al.realworld.application.exception.ResourceNotFoundException.notFound;
+import static com.github.al.realworld.application.exception.Exceptions.badRequest;
+import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
 @RequiredArgsConstructor
 @Singleton
@@ -59,7 +59,7 @@ public class UnfavoriteArticleHandler implements CommandHandler<UnfavoriteArticl
 
         Profile currentProfile = userRepository.findByUsername(command.getCurrentUsername())
                 .map(User::getProfile)
-                .orElseThrow(() -> invalidRequest("user [name=%s] does not exist", command.getCurrentUsername()));
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getCurrentUsername()));
 
 
         Set<Profile> alteredFavoritedProfiles = article.getFavoredProfiles().stream()

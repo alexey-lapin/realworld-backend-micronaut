@@ -38,8 +38,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.github.al.realworld.application.exception.InvalidRequestException.invalidRequest;
-import static com.github.al.realworld.application.exception.ResourceNotFoundException.notFound;
+import static com.github.al.realworld.application.exception.Exceptions.badRequest;
+import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
 /**
  * follower - one who follows someone (current user)
@@ -55,7 +55,7 @@ public class UnfollowProfileHandler implements CommandHandler<UnfollowProfileRes
     @Override
     public UnfollowProfileResult handle(UnfollowProfile command) {
         Profile currentProfile = profileRepository.findByUsername(command.getFollower())
-                .orElseThrow(() -> invalidRequest("user [name=%s] does not exist", command.getFollower()));
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getFollower()));
 
         Profile followee = profileRepository.findByUsername(command.getFollowee())
                 .orElseThrow(() -> notFound("user [name=%s] does not exist", command.getFollowee()));
