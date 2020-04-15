@@ -26,9 +26,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
+      - name: Run app for testing
+        run: nohup java -jar service/build/libs/service.jar &
+
       - name: Run postman collection
         run: >
-          nohup java -jar service/build/libs/service.jar &;
           npx newman run
           https://raw.githubusercontent.com/gothinkster/realworld/master/api/Conduit.postman_collection.json
           --global-var "APIURL=http://localhost:8080/api"
