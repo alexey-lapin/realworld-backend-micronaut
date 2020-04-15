@@ -66,28 +66,28 @@ public interface ArticleOperations {
                        @QueryValue(defaultValue = "0") Integer offset);
 
     @Get("/articles/{slug}")
-    GetArticleResult findBySlug(@PathVariable String slug);
+    GetArticleResult findBySlug(@PathVariable("slug") String slug);
 
     @Put("/articles/{slug}")
-    UpdateArticleResult updateBySlug(@PathVariable String slug, @Valid @Body UpdateArticle command);
+    UpdateArticleResult updateBySlug(@PathVariable("slug") String slug, @Valid @Body UpdateArticle command);
 
     @Status(HttpStatus.NO_CONTENT)
     @Delete("/articles/{slug}")
-    void deleteBySlug(@PathVariable String slug);
+    void deleteBySlug(@PathVariable("slug") String slug);
 
     @Post("/articles/{slug}/favorite")
-    FavoriteArticleResult favorite(@PathVariable String slug);
+    FavoriteArticleResult favorite(@PathVariable("slug") String slug);
 
     @Delete("/articles/{slug}/favorite")
-    UnfavoriteArticleResult unfavorite(@PathVariable String slug);
+    UnfavoriteArticleResult unfavorite(@PathVariable("slug") String slug);
 
     @Get("/articles/{slug}/comments")
-    GetCommentsResult findAllComments(@PathVariable String slug);
+    GetCommentsResult findAllComments(@PathVariable("slug") String slug);
 
     @Post("/articles/{slug}/comments")
-    AddCommentResult addComment(@PathVariable String slug, @Valid @Body AddComment command);
+    AddCommentResult addComment(@PathVariable("slug") String slug, @Valid @Body AddComment command);
 
     @Delete("/articles/{slug}/comments/{id}")
-    void deleteComment(@PathVariable String slug, @PathVariable Long id);
+    void deleteComment(@PathVariable("slug") String slug, @PathVariable("id") Long id);
 
 }
