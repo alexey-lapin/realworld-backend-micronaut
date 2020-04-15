@@ -26,7 +26,9 @@ package com.github.al.realworld.api.command;
 import com.github.al.realworld.api.dto.ProfileDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 public class UnfollowProfileResult {

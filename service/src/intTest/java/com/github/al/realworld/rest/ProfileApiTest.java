@@ -29,10 +29,13 @@ import com.github.al.realworld.api.query.GetProfileResult;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.annotation.MicronautTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 
+import static com.github.al.realworld.rest.auth.AuthSupport.login;
+import static com.github.al.realworld.rest.auth.AuthSupport.logout;
 import static com.github.al.realworld.rest.auth.AuthSupport.register;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -42,6 +45,11 @@ public class ProfileApiTest {
 
     @Inject
     private ProfileClient profileClient;
+
+    @AfterEach
+    void afterEach() {
+        logout();
+    }
 
     @Test
     void should_returnNull_when_userIsNotRegistered() {
@@ -67,6 +75,23 @@ public class ProfileApiTest {
         );
 
         assertThat(ex.getStatus().getCode()).isEqualTo(HttpStatus.UNAUTHORIZED.getCode());
+    }
+
+    @Test
+    void should_returnCorrectProfileData_when_followAndUnfollow() {
+        String user1 = register();
+        String user2 = register();
+        login(user1);
+
+        profileClient.follow(user2);
+
+        ProfileDto profile1 = profileClient.findByUsername(user2).getProfile();
+        assertThat(profile1.getFollowing()).isTrue();
+
+        profileClient.unfollow(user2);
+
+        ProfileDto profile2 = profileClient.findByUsername(user2).getProfile();
+        assertThat(profile2.getFollowing()).isFalse();
     }
 
 }
