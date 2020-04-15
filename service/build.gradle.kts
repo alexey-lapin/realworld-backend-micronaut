@@ -3,6 +3,26 @@ plugins {
     id("com.github.johnrengelman.shadow")
 }
 
+sourceSets {
+    create("intTest") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+configurations["intTestImplementation"].extendsFrom(configurations["implementation"])
+configurations["intTestImplementation"].extendsFrom(configurations["testImplementation"])
+configurations["intTestRuntimeOnly"].extendsFrom(configurations["runtimeOnly"])
+configurations["intTestRuntimeOnly"].extendsFrom(configurations["testRuntimeOnly"])
+
+idea {
+    module {
+        testSourceDirs.addAll(sourceSets["intTest"].java.srcDirs)
+        testResourceDirs.addAll(sourceSets["intTest"].resources.srcDirs)
+        scopes["TEST"]!!["plus"]!!.add(configurations["intTestCompile"])
+    }
+}
+
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
     compileOnly("org.projectlombok:lombok:${Versions.lombok}")
@@ -41,8 +61,15 @@ dependencies {
     testImplementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     testImplementation("io.micronaut.test:micronaut-test-junit5")
     testImplementation("org.assertj:assertj-core:${Versions.assertj}")
+    testImplementation("org.mockito:mockito-core:${Versions.mockito}")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+
+    "intTestAnnotationProcessor"(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
+    "intTestAnnotationProcessor"("io.micronaut:micronaut-inject-java")
+
+    "intTestAnnotationProcessor"("org.projectlombok:lombok:${Versions.lombok}")
+    "intTestCompileOnly"("org.projectlombok:lombok:${Versions.lombok}")
 }
 
 configure<JavaPluginConvention> {
@@ -58,6 +85,17 @@ tasks {
     shadowJar {
         mergeServiceFiles()
     }
+
+    register<Test>("integrationTest") {
+        description = "Runs the integration tests."
+        group = "verification"
+
+        testClassesDirs = sourceSets["intTest"].output.classesDirs
+        classpath = sourceSets["intTest"].runtimeClasspath
+        shouldRunAfter("test")
+    }
+
+    named("check") { dependsOn("integrationTest") }
 
     // used by Heroku
     register("stage") {

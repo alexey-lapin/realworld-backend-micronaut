@@ -21,23 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.dto;
+package com.github.al.realworld.api.operation;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.http.client.annotation.Client;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-public class UserDto {
-
-    private String email;
-    private String token;
-    private String username;
-    private String bio;
-    private String image;
-
+@Client("${api.version}")
+public interface ArticleClient extends ArticleOperations {
 }

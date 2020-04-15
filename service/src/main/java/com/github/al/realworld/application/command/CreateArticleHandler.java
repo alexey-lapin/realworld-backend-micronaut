@@ -78,9 +78,11 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
                 .updatedAt(now)
                 .author(currentProfile);
 
-        command.getTagList().stream()
-                .map(t -> tagRepository.findByName(t).orElseGet(() -> new Tag(t)))
-                .forEach(articleBuilder::tag);
+        if (command.getTagList() != null) {
+            command.getTagList().stream()
+                    .map(t -> tagRepository.findByName(t).orElseGet(() -> new Tag(t)))
+                    .forEach(articleBuilder::tag);
+        }
 
         Article savedArticle = articleRepository.save(articleBuilder.build());
 

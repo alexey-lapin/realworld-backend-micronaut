@@ -21,23 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.dto;
+package com.github.al.realworld.rest.auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.http.HttpHeaders;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.MutableHttpRequest;
+import io.micronaut.http.annotation.Filter;
+import io.micronaut.http.filter.ClientFilterChain;
+import io.micronaut.http.filter.HttpClientFilter;
+import org.reactivestreams.Publisher;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-public class UserDto {
+@Filter("/**")
+public class AuthFilter implements HttpClientFilter {
 
-    private String email;
-    private String token;
-    private String username;
-    private String bio;
-    private String image;
+    @Override
+    public Publisher<? extends HttpResponse<?>> doFilter(MutableHttpRequest<?> request, ClientFilterChain chain) {
+        String token = AuthSupport.TokenHolder.token;
+        if (token != null) {
+            request.header(HttpHeaders.AUTHORIZATION, "Token " + token);
+        }
+        return chain.proceed(request);
+    }
 
 }
