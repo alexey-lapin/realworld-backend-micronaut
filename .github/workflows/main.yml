@@ -21,12 +21,14 @@ jobs:
         with:
           java-version: 1.8
 
+      - uses: actions/setup-node@v1
+
       - name: Build with Gradle
         run: ./gradlew build
 
       - name: Run postman collection
         run: >
-          ./gradlew run;
+          nohup java -jar service/build/libs/service.jar &;
           npx newman run
           https://raw.githubusercontent.com/gothinkster/realworld/master/api/Conduit.postman_collection.json
           --global-var "APIURL=http://localhost:8080/api"
