@@ -27,12 +27,15 @@ jobs:
         run: ./gradlew build
 
       - name: Run app for testing
-        run: nohup java -jar service/build/libs/service.jar &
+        run: |
+          nohup java -jar service/build/libs/service.jar &
+          sleep 5s
 
       - name: Run postman collection
         run: >
           npx newman run
           https://raw.githubusercontent.com/gothinkster/realworld/master/api/Conduit.postman_collection.json
+          --delay 200
           --global-var "APIURL=http://localhost:8080/api"
           --global-var "USERNAME=u`date +%s`" \
           --global-var "EMAIL=u`date +%s`@example.com" \
