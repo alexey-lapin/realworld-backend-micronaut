@@ -23,12 +23,8 @@
  */
 package com.github.al.realworld.api.operation;
 
-import com.github.al.realworld.api.query.GetTagsResult;
-import io.micronaut.http.annotation.Get;
+import io.micronaut.http.client.annotation.Client;
 
-public interface TagsOperations {
-
-    @Get("/tags")
-    GetTagsResult findAll();
-
+@Client("${api.version}")
+public interface ProfileClient extends ProfileOperations {
 }

@@ -60,6 +60,7 @@ jackson:
   serialization:
     fail_on_empty_beans: false
     write_dates_as_timestamps: false
+    wrap_root_value: true
   deserialization:
     unwrap_root_value: true
 

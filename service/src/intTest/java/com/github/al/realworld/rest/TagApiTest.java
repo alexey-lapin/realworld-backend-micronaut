@@ -21,23 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.dto;
+package com.github.al.realworld.rest;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.github.al.realworld.api.operation.TagClient;
+import io.micronaut.test.annotation.MicronautTest;
+import org.junit.jupiter.api.Test;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-public class UserDto {
+import javax.inject.Inject;
 
-    private String email;
-    private String token;
-    private String username;
-    private String bio;
-    private String image;
+@MicronautTest
+public class TagApiTest {
+
+    @Inject
+    private TagClient tagClient;
+
+    @Test
+    void test() {
+        tagClient.findAll();
+    }
 
 }

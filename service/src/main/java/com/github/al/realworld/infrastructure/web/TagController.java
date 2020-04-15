@@ -21,23 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.dto;
+package com.github.al.realworld.infrastructure.web;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.github.al.bus.Bus;
+import com.github.al.realworld.api.operation.TagOperations;
+import com.github.al.realworld.api.query.GetTags;
+import com.github.al.realworld.api.query.GetTagsResult;
+import io.micronaut.http.annotation.Controller;
+import lombok.RequiredArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-public class UserDto {
+@RequiredArgsConstructor
+@Controller("${api.version}")
+public class TagController implements TagOperations {
 
-    private String email;
-    private String token;
-    private String username;
-    private String bio;
-    private String image;
+    private final Bus bus;
+
+    @Override
+    public GetTagsResult findAll() {
+        return bus.executeQuery(new GetTags());
+    }
 
 }

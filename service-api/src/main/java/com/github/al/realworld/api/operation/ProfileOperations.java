@@ -34,12 +34,12 @@ import io.micronaut.http.annotation.Post;
 public interface ProfileOperations {
 
     @Get("/profiles/{username}")
-    GetProfileResult findByUsername(@PathVariable String username);
+    GetProfileResult findByUsername(@PathVariable("username") String username);
 
     @Post("/profiles/{username}/follow")
-    FollowProfileResult follow(@PathVariable String username);
+    FollowProfileResult follow(@PathVariable("username") String username);
 
     @Delete("/profiles/{username}/follow")
-    UnfollowProfileResult unfollow(@PathVariable String username);
+    UnfollowProfileResult unfollow(@PathVariable("username") String username);
 
 }

@@ -21,23 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.dto;
+package com.github.al.realworld.api.operation;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.github.al.realworld.api.query.GetTagsResult;
+import io.micronaut.http.annotation.Get;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-public class UserDto {
+public interface TagOperations {
 
-    private String email;
-    private String token;
-    private String username;
-    private String bio;
-    private String image;
+    @Get("/tags")
+    GetTagsResult findAll();
 
 }
