@@ -37,8 +37,8 @@ jobs:
           https://raw.githubusercontent.com/gothinkster/realworld/master/api/Conduit.postman_collection.json
           --delay-request 200
           --global-var "APIURL=http://localhost:8080/api"
-          --global-var "USERNAME=u`date +%s`" \
-          --global-var "EMAIL=u`date +%s`@example.com" \
+          --global-var "USERNAME=u`date +%s`"
+          --global-var "EMAIL=u`date +%s`@example.com"
           --global-var "PASSWORD=password"
 
       - name: Deploy to Heroku
