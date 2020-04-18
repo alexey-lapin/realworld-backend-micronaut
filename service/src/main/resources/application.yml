@@ -51,7 +51,7 @@ jpa:
     properties:
         hibernate:
             hbm2ddl:
-              auto: update
+              auto: none
             bytecode:
               provider: none
 ---
@@ -69,3 +69,9 @@ security:
 
 api:
   version: /api
+
+liquibase:
+  enabled: true
+  datasources:
+    default:
+      change-log: "classpath:db/database-changelog.xml"

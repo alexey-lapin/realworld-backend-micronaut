@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 
-import static com.github.al.realworld.rest.auth.AuthSupport.login;
 import static com.github.al.realworld.rest.auth.AuthSupport.logout;
 import static com.github.al.realworld.rest.auth.AuthSupport.register;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,9 +78,8 @@ public class ProfileApiTest {
 
     @Test
     void should_returnCorrectProfileData_when_followAndUnfollow() {
-        String user1 = register();
-        String user2 = register();
-        login(user1);
+        register().login();
+        String user2 = register().getUsername();
 
         profileClient.follow(user2);
 

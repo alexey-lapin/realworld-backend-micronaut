@@ -43,7 +43,7 @@ import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
 /**
  * follower - one who follows someone (current user)
- * followee - is one who is followed
+ * followee - one who is followed
  */
 @RequiredArgsConstructor
 @Singleton

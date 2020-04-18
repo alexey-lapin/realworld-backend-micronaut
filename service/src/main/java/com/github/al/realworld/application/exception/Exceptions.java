@@ -40,4 +40,8 @@ public class Exceptions {
         return new HttpStatusException(HttpStatus.FORBIDDEN, String.format(message, args));
     }
 
+    public static HttpStatusException unauthorized(String message, Object... args) {
+        return new HttpStatusException(HttpStatus.UNAUTHORIZED, String.format(message, args));
+    }
+
 }

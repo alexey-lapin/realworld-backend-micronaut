@@ -26,10 +26,11 @@ package com.github.al.realworld.rest.auth;
 import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.LoginUserResult;
 import com.github.al.realworld.api.command.RegisterUser;
-import com.github.al.realworld.api.command.RegisterUserResult;
 import com.github.al.realworld.api.operation.UserClient;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import javax.inject.Inject;
 import java.util.UUID;
@@ -46,22 +47,22 @@ public class AuthSupport {
         INSTANCE = this;
     }
 
-    public static String register() {
+    public static RegisteredUser register() {
         String uuid = UUID.randomUUID().toString();
-        register(uuid, email(uuid), uuid);
-        return uuid;
+        return register(uuid, email(uuid), uuid);
     }
 
-    private static String email(String uuid) {
-        return uuid + "@ex.com";
-    }
-
-    public static void register(String username, String email, String password) {
-        RegisterUserResult result = INSTANCE.userClient.register(RegisterUser.builder()
+    public static RegisteredUser register(String username, String email, String password) {
+        INSTANCE.userClient.register(RegisterUser.builder()
                 .username(username)
                 .email(email)
                 .password(password)
                 .build());
+        return new RegisteredUser(email, username, password);
+    }
+
+    private static String email(String uuid) {
+        return uuid + "@ex.com";
     }
 
     public static void login(String cred) {
@@ -79,6 +80,19 @@ public class AuthSupport {
 
     public static class TokenHolder {
         public static String token;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public static class RegisteredUser {
+        private String email;
+        private String username;
+        private String password;
+
+        public RegisteredUser login() {
+            AuthSupport.login(email, password);
+            return this;
+        }
     }
 
 }

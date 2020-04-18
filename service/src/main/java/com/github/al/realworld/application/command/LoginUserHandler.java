@@ -37,6 +37,7 @@ import javax.inject.Singleton;
 import javax.transaction.Transactional;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
+import static com.github.al.realworld.application.exception.Exceptions.unauthorized;
 
 @RequiredArgsConstructor
 @Singleton
@@ -53,7 +54,7 @@ public class LoginUserHandler implements CommandHandler<LoginUserResult, LoginUs
                 .orElseThrow(() -> badRequest("user [email=%s] does not exist", command.getEmail()));
 
         if (!passwordEncoder.matches(command.getPassword(), user.getPassword())) {
-            throw badRequest("user [name=%s] password is incorrect");
+            throw unauthorized("user [email=%s] password is incorrect", command.getEmail());
         }
 
         return new LoginUserResult(UserAssembler.assemble(user, jwtService));

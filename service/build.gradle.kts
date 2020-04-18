@@ -38,6 +38,7 @@ dependencies {
 
     implementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     implementation("io.micronaut.configuration:micronaut-jdbc-tomcat")
+    implementation("io.micronaut.configuration:micronaut-liquibase")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-http-server-netty")

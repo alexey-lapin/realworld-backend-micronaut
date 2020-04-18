@@ -70,8 +70,15 @@ public class AddCommentHandler implements CommandHandler<AddCommentResult, AddCo
 
         Article alteredArticle = article.toBuilder().comment(comment).build();
 
-        articleRepository.save(alteredArticle);
+        Article savedArticle = articleRepository.save(alteredArticle);
 
-        return new AddCommentResult(CommentAssembler.assemble(comment, profile));
+        Comment savedComment = savedArticle.getComments().stream()
+                .filter(c -> c.getCreatedAt().equals(comment.getCreatedAt()))
+                .filter(c -> c.getAuthor().equals(comment.getAuthor()))
+                .findFirst()
+                // should never happen
+                .orElseThrow(() -> new RuntimeException("saved comment not found"));
+
+        return new AddCommentResult(CommentAssembler.assemble(savedComment, profile));
     }
 }
