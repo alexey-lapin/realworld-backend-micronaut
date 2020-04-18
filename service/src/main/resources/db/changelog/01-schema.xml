@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="01" author="al">
+        <createTable tableName="profile">
+            <column name="username" type="varchar(100)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="bio" type="varchar(200)"/>
+            <column name="image" type="varchar(200)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="02" author="al">
+        <createTable tableName="user">
+            <column name="username" type="varchar(100)">
+                <!--                <constraints primaryKey="true"/>-->
+            </column>
+            <column name="email" type="varchar(100)"/>
+            <column name="password" type="varchar(100)"/>
+            <column name="profile_username" type="varchar(100)">
+                <constraints foreignKeyName="fk_user_profile"
+                             referencedTableName="profile"
+                             referencedColumnNames="username"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="03" author="al">
+        <createTable tableName="article">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="slug" type="varchar(100)"/>
+            <column name="title" type="varchar(100)"/>
+            <column name="description" type="varchar(500)"/>
+            <column name="createdat" type="timestamp with time zone"/>
+            <column name="updatedat" type="timestamp with time zone"/>
+            <column name="body" type="varchar(5000)"/>
+            <column name="author_username" type="varchar(100)">
+                <constraints foreignKeyName="fk_article_profile"
+                             referencedTableName="profile"
+                             referencedColumnNames="username"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="04" author="al">
+        <createTable tableName="comment">
+            <column name="id" type="number">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="createdat" type="timestamp with time zone"/>
+            <column name="updatedat" type="timestamp with time zone"/>
+            <column name="body" type="varchar(5000)"/>
+            <column name="author_username" type="varchar(100)">
+                <constraints foreignKeyName="fk_comment_profile"
+                             referencedTableName="profile"
+                             referencedColumnNames="username"/>
+            </column>
+            <column name="article_id" type="uuid">
+                <constraints foreignKeyName="fk_comment_article"
+                             referencedTableName="article"
+                             referencedColumnNames="id"/>
+            </column>
+        </createTable>
+
+    </changeSet>
+
+    <changeSet id="05" author="al">
+        <createTable tableName="tag">
+            <column name="id" type="number">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(200)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="06" author="al">
+        <createTable tableName="article_tags">
+            <column name="article_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_article_tags_article"
+                             referencedTableName="article"
+                             referencedColumnNames="id"/>
+            </column>
+            <column name="tag_id" type="number">
+                <constraints nullable="false"
+                             foreignKeyName="fk_article_tags_tag"
+                             referencedTableName="tag"
+                             referencedColumnNames="id"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="article_tags" columnNames="article_id,tag_id"/>
+    </changeSet>
+
+    <changeSet id="07" author="al">
+        <createTable tableName="followers">
+            <column name="follower" type="varchar(100)">
+                <constraints nullable="false"
+                             foreignKeyName="fk_followers_follower"
+                             referencedTableName="profile"
+                             referencedColumnNames="username"/>
+            </column>
+            <column name="followee" type="varchar(100)">
+                <constraints nullable="false"
+                             foreignKeyName="fk_followers_followee"
+                             referencedTableName="profile"
+                             referencedColumnNames="username"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="followers" columnNames="follower,followee"/>
+    </changeSet>
+
+    <changeSet id="08" author="al">
+        <createTable tableName="article_favorites">
+            <column name="article_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_article_favorites_article"
+                             referencedTableName="article"
+                             referencedColumnNames="id"/>
+            </column>
+            <column name="username" type="varchar(100)">
+                <constraints nullable="false"
+                             foreignKeyName="fk_article_favorites_profile"
+                             referencedTableName="profile"
+                             referencedColumnNames="username"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="article_favorites" columnNames="article_id,username"/>
+    </changeSet>
+
+    <changeSet id="09" author="al">
+        <createSequence cycle="false"
+                        incrementBy="1"
+                        ordered="true"
+                        sequenceName="hibernate_sequence"
+                        startValue="0"/>
+    </changeSet>
+
+</databaseChangeLog>

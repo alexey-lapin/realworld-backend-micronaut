@@ -23,9 +23,11 @@
  */
 package com.github.al.realworld.rest;
 
+import com.github.al.realworld.api.command.AddComment;
 import com.github.al.realworld.api.command.CreateArticle;
 import com.github.al.realworld.api.command.UpdateArticle;
 import com.github.al.realworld.api.dto.ArticleDto;
+import com.github.al.realworld.api.dto.CommentDto;
 import com.github.al.realworld.api.operation.ArticleClient;
 import com.github.al.realworld.api.query.GetArticleResult;
 import io.micronaut.http.HttpStatus;
@@ -35,8 +37,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+import java.util.List;
+import java.util.UUID;
 
-import static com.github.al.realworld.rest.auth.AuthSupport.login;
 import static com.github.al.realworld.rest.auth.AuthSupport.logout;
 import static com.github.al.realworld.rest.auth.AuthSupport.register;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,36 +65,23 @@ public class ArticleApiTest {
 
     @Test
     void should_returnCorrectArticleData() {
-        String user = register();
-        login(user);
+        String user = register().login().getUsername();
 
-        CreateArticle command = CreateArticle.builder()
-                .title(TEST_TITLE)
-                .description(TEST_DESCRIPTION)
-                .body(TEST_BODY)
-                .build();
-
+        CreateArticle command = createArticleCommand();
         ArticleDto article = articleClient.create(command).getArticle();
 
-        assertThat(article.getSlug()).isEqualTo(TEST_TITLE);
-        assertThat(article.getTitle()).isEqualTo(TEST_TITLE);
-        assertThat(article.getDescription()).isEqualTo(TEST_DESCRIPTION);
-        assertThat(article.getBody()).isEqualTo(TEST_BODY);
+        assertThat(article.getSlug()).isEqualTo(command.getTitle());
+        assertThat(article.getTitle()).isEqualTo(command.getTitle());
+        assertThat(article.getDescription()).isEqualTo(command.getDescription());
+        assertThat(article.getBody()).isEqualTo(command.getBody());
         assertThat(article.getAuthor().getUsername()).isEqualTo(user);
     }
 
     @Test
     void should_returnCorrectArticleData_when_favoriteAndUnfavorite() {
-        String user = register();
-        login(user);
+        String user = register().login().getUsername();
 
-        CreateArticle command = CreateArticle.builder()
-                .title(TEST_TITLE + 2)
-                .description(TEST_DESCRIPTION)
-                .body(TEST_BODY)
-                .build();
-
-        ArticleDto created = articleClient.create(command).getArticle();
+        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
 
         ArticleDto favoritedArticle = articleClient.favorite(created.getSlug()).getArticle();
         assertThat(favoritedArticle.getFavorited()).isTrue();
@@ -104,16 +94,9 @@ public class ArticleApiTest {
 
     @Test
     void should_returnCorrectArticleData_when_delete() {
-        String user = register();
-        login(user);
+        String user = register().login().getUsername();
 
-        CreateArticle command = CreateArticle.builder()
-                .title(TEST_TITLE + 3)
-                .description(TEST_DESCRIPTION)
-                .body(TEST_BODY)
-                .build();
-
-        ArticleDto created = articleClient.create(command).getArticle();
+        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
 
         articleClient.deleteBySlug(created.getSlug());
 
@@ -123,19 +106,11 @@ public class ArticleApiTest {
 
     @Test
     void should_throw403_when_deleteNotOwned() {
-        String user1 = register();
-        login(user1);
+        register().login();
 
-        CreateArticle command = CreateArticle.builder()
-                .title(TEST_TITLE + 4)
-                .description(TEST_DESCRIPTION)
-                .body(TEST_BODY)
-                .build();
+        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
 
-        ArticleDto created = articleClient.create(command).getArticle();
-
-        String user2 = register();
-        login(user2);
+        register().login();
 
         HttpClientResponseException exception = catchThrowableOfType(
                 () -> articleClient.deleteBySlug(created.getSlug()),
@@ -147,24 +122,16 @@ public class ArticleApiTest {
 
     @Test
     void should_returnCorrectArticleData_when_deleteNotExisting() {
-        String user = register();
-        login(user);
+        register().login();
 
         articleClient.deleteBySlug("not-existing");
     }
 
     @Test
     void should_returnCorrectArticleData_when_update() {
-        String user = register();
-        login(user);
+        register().login();
 
-        CreateArticle createCommand = CreateArticle.builder()
-                .title(TEST_TITLE + 5)
-                .description(TEST_DESCRIPTION)
-                .body(TEST_BODY)
-                .build();
-
-        ArticleDto created = articleClient.create(createCommand).getArticle();
+        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
 
         UpdateArticle updateCommand = UpdateArticle.builder()
                 .title(ALTERED_TITLE)
@@ -178,6 +145,83 @@ public class ArticleApiTest {
         assertThat(updated.getTitle()).isEqualTo(ALTERED_TITLE);
         assertThat(updated.getDescription()).isEqualTo(ALTERED_DESCRIPTION);
         assertThat(updated.getBody()).isEqualTo(ALTERED_BODY);
+    }
+
+    @Test
+    void shouldReturnCorrectCommentData_whenCreateDeleteComment() {
+        String user = register().login().getUsername();
+
+        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
+
+        AddComment addComment = AddComment.builder().body(TEST_BODY).build();
+
+        CommentDto comment = articleClient.addComment(created.getSlug(), addComment).getComment();
+
+        assertThat(comment.getId()).isNotNull();
+        assertThat(comment.getAuthor().getUsername()).isEqualTo(user);
+        assertThat(comment.getBody()).isEqualTo(TEST_BODY);
+        assertThat(comment.getCreatedAt()).isNotNull();
+        assertThat(comment.getUpdatedAt()).isNotNull();
+
+        List<CommentDto> comments = articleClient.findAllComments(created.getSlug()).getComments();
+
+        assertThat(comments).hasSize(1);
+
+        articleClient.deleteComment(created.getSlug(), comment.getId());
+
+        comments = articleClient.findAllComments(created.getSlug()).getComments();
+
+        assertThat(comments).hasSize(1);
+    }
+
+    @Test
+    void should_throw403_when_commentIsNotOwned() {
+        register().login();
+
+        ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
+
+        AddComment addComment = AddComment.builder().body(TEST_BODY).build();
+        CommentDto comment = articleClient.addComment(article.getSlug(), addComment).getComment();
+
+        register().login();
+
+        HttpClientResponseException exception = catchThrowableOfType(
+                () -> articleClient.deleteComment(article.getSlug(), comment.getId()),
+                HttpClientResponseException.class
+        );
+
+        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.FORBIDDEN.getCode());
+    }
+
+    @Test
+    void should_throw404_when_addCommentArticleDoesNotExist() {
+        register().login();
+
+        articleClient.addComment(UUID.randomUUID().toString(), AddComment.builder().body(TEST_BODY).build());
+    }
+
+    @Test
+    void should_throw404_when_deleteCommentArticleDoesNotExist() {
+        register().login();
+
+        articleClient.deleteComment(UUID.randomUUID().toString(), 9999999L);
+    }
+
+    @Test
+    void should_throw404_when_deleteCommentDoesNotExist() {
+        register().login();
+
+        ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
+
+        articleClient.deleteComment(article.getSlug(), 9999999L);
+    }
+
+    private static CreateArticle createArticleCommand() {
+        return CreateArticle.builder()
+                .title(UUID.randomUUID().toString())
+                .description(UUID.randomUUID().toString())
+                .body(UUID.randomUUID().toString())
+                .build();
     }
 
 }
