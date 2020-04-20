@@ -6,31 +6,19 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="01" author="al">
-        <createTable tableName="profile">
-            <column name="username" type="varchar(100)">
+        <createTable tableName="user">
+            <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
+            <column name="username" type="varchar(100)"/>
+            <column name="email" type="varchar(100)"/>
+            <column name="password" type="varchar(100)"/>
             <column name="bio" type="varchar(200)"/>
             <column name="image" type="varchar(200)"/>
         </createTable>
     </changeSet>
 
     <changeSet id="02" author="al">
-        <createTable tableName="user">
-            <column name="username" type="varchar(100)">
-                <!--                <constraints primaryKey="true"/>-->
-            </column>
-            <column name="email" type="varchar(100)"/>
-            <column name="password" type="varchar(100)"/>
-            <column name="profile_username" type="varchar(100)">
-                <constraints foreignKeyName="fk_user_profile"
-                             referencedTableName="profile"
-                             referencedColumnNames="username"/>
-            </column>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="03" author="al">
         <createTable tableName="article">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
@@ -41,15 +29,15 @@
             <column name="createdat" type="timestamp with time zone"/>
             <column name="updatedat" type="timestamp with time zone"/>
             <column name="body" type="varchar(5000)"/>
-            <column name="author_username" type="varchar(100)">
-                <constraints foreignKeyName="fk_article_profile"
-                             referencedTableName="profile"
-                             referencedColumnNames="username"/>
+            <column name="author_id" type="uuid">
+                <constraints foreignKeyName="fk_article_user"
+                             referencedTableName="user"
+                             referencedColumnNames="id"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="04" author="al">
+    <changeSet id="03" author="al">
         <createTable tableName="comment">
             <column name="id" type="number">
                 <constraints primaryKey="true"/>
@@ -57,10 +45,10 @@
             <column name="createdat" type="timestamp with time zone"/>
             <column name="updatedat" type="timestamp with time zone"/>
             <column name="body" type="varchar(5000)"/>
-            <column name="author_username" type="varchar(100)">
-                <constraints foreignKeyName="fk_comment_profile"
-                             referencedTableName="profile"
-                             referencedColumnNames="username"/>
+            <column name="author_id" type="uuid">
+                <constraints foreignKeyName="fk_comment_user"
+                             referencedTableName="user"
+                             referencedColumnNames="id"/>
             </column>
             <column name="article_id" type="uuid">
                 <constraints foreignKeyName="fk_comment_article"
@@ -68,10 +56,9 @@
                              referencedColumnNames="id"/>
             </column>
         </createTable>
-
     </changeSet>
 
-    <changeSet id="05" author="al">
+    <changeSet id="04" author="al">
         <createTable tableName="tag">
             <column name="id" type="number">
                 <constraints primaryKey="true"/>
@@ -80,7 +67,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="06" author="al">
+    <changeSet id="05" author="al">
         <createTable tableName="article_tags">
             <column name="article_id" type="uuid">
                 <constraints nullable="false"
@@ -98,25 +85,25 @@
         <addPrimaryKey tableName="article_tags" columnNames="article_id,tag_id"/>
     </changeSet>
 
-    <changeSet id="07" author="al">
-        <createTable tableName="followers">
-            <column name="follower" type="varchar(100)">
+    <changeSet id="06" author="al">
+        <createTable tableName="follow_relation">
+            <column name="follower_id" type="uuid">
                 <constraints nullable="false"
                              foreignKeyName="fk_followers_follower"
-                             referencedTableName="profile"
-                             referencedColumnNames="username"/>
+                             referencedTableName="user"
+                             referencedColumnNames="id"/>
             </column>
-            <column name="followee" type="varchar(100)">
+            <column name="followee_id" type="uuid">
                 <constraints nullable="false"
                              foreignKeyName="fk_followers_followee"
-                             referencedTableName="profile"
-                             referencedColumnNames="username"/>
+                             referencedTableName="user"
+                             referencedColumnNames="id"/>
             </column>
         </createTable>
-        <addPrimaryKey tableName="followers" columnNames="follower,followee"/>
+        <addPrimaryKey tableName="follow_relation" columnNames="follower_id,followee_id"/>
     </changeSet>
 
-    <changeSet id="08" author="al">
+    <changeSet id="07" author="al">
         <createTable tableName="article_favorites">
             <column name="article_id" type="uuid">
                 <constraints nullable="false"
@@ -124,17 +111,17 @@
                              referencedTableName="article"
                              referencedColumnNames="id"/>
             </column>
-            <column name="username" type="varchar(100)">
+            <column name="user_id" type="uuid">
                 <constraints nullable="false"
-                             foreignKeyName="fk_article_favorites_profile"
-                             referencedTableName="profile"
-                             referencedColumnNames="username"/>
+                             foreignKeyName="fk_article_favorites_user"
+                             referencedTableName="user"
+                             referencedColumnNames="id"/>
             </column>
         </createTable>
-        <addPrimaryKey tableName="article_favorites" columnNames="article_id,username"/>
+        <addPrimaryKey tableName="article_favorites" columnNames="article_id,user_id"/>
     </changeSet>
 
-    <changeSet id="09" author="al">
+    <changeSet id="08" author="al">
         <createSequence cycle="false"
                         incrementBy="1"
                         ordered="true"

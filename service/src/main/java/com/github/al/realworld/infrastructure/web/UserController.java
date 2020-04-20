@@ -63,7 +63,7 @@ public class UserController implements UserOperations {
 
     @Override
     public UpdateUserResult update(@Valid UpdateUser command) {
-        return bus.executeCommand(command);
+        return bus.executeCommand(command.withCurrentUsername(auth.currentUsername()));
     }
 
 }

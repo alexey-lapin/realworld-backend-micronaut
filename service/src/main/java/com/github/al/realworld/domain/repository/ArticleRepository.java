@@ -27,6 +27,7 @@ import com.github.al.realworld.domain.model.Article;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ArticleRepository {
 
@@ -36,7 +37,7 @@ public interface ArticleRepository {
 
     List<Article> findByFilters(String tag, String author, String favorited, Integer limit, Integer offset);
 
-    List<Article> findByFollowees(List<String> followees, Integer limit, Integer offset);
+    List<Article> findByFollowees(List<UUID> followees, Integer limit, Integer offset);
 
     void delete(Article article);
 

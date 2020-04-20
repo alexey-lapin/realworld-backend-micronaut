@@ -24,44 +24,36 @@
 package com.github.al.realworld.domain.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Singular;
 
-import javax.persistence.CascadeType;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import java.util.Set;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
+import javax.persistence.Table;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-public class Profile {
+@Table(name = "follow_relation")
+public class FollowRelation {
+
+    @EmbeddedId
+    private FollowRelationId id;
 
     @EqualsAndHashCode.Include
-    @Id
-    private String username;
-    private String bio;
-    private String image;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("followerId")
+    private User follower;
 
-    @Singular
-    @ManyToMany(mappedBy = "followees", cascade = CascadeType.ALL)
-    private Set<Profile> followers;
-
-    @Singular
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "followers",
-            joinColumns = @JoinColumn(name = "followee", referencedColumnName = "username"),
-            inverseJoinColumns = @JoinColumn(name = "follower", referencedColumnName = "username")
-    )
-    private Set<Profile> followees;
+    @EqualsAndHashCode.Include
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("followeeId")
+    private User followee;
 
 }

@@ -44,7 +44,7 @@ public interface DataArticleRepository extends CrudRepository<Article, UUID> {
     @Query("SELECT DISTINCT article_ FROM Article article_ " +
             "LEFT JOIN article_.tags t " +
             "LEFT JOIN article_.author p " +
-            "LEFT JOIN article_.favoredProfiles f " +
+            "LEFT JOIN article_.favoredUsers f " +
             "WHERE " +
             "(:tag IS NULL OR t.name = :tag) AND " +
             "(:author IS NULL OR p.username = :author) AND " +
@@ -54,7 +54,7 @@ public interface DataArticleRepository extends CrudRepository<Article, UUID> {
                                 @Nullable String favorited,
                                 Pageable pageable);
 
-    @Query("SELECT article_ FROM Article article_ JOIN article_.author au WHERE au.username IN :followees")
-    List<Article> findByFollowees(List<String> followees, Pageable pageable);
+    @Query("SELECT article_ FROM Article article_ JOIN article_.author au WHERE au.id IN :followees")
+    List<Article> findByFollowees(List<UUID> followees, Pageable pageable);
 
 }

@@ -21,15 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.domain.repository;
+package com.github.al.realworld.infrastructure.db.jpa;
 
-import com.github.al.realworld.domain.model.Profile;
+import com.github.al.realworld.domain.model.FollowRelation;
+import com.github.al.realworld.domain.model.FollowRelationId;
+import com.github.al.realworld.domain.model.User;
+import io.micronaut.data.annotation.Repository;
+import io.micronaut.data.repository.CrudRepository;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.UUID;
 
-public interface ProfileRepository {
+@Repository
+public interface DataFollowRelationRepository extends CrudRepository<FollowRelation, FollowRelationId> {
 
-    Optional<Profile> findByUsername(String username);
+    List<FollowRelation> findByFollowerId(UUID followerId);
 
-    Profile save(Profile profile);
+    List<FollowRelation> findByFolloweeId(UUID followeeId);
+
+    void deleteByFollowerAndFollowee(User follower, User followee);
+
 }

@@ -25,8 +25,10 @@ package com.github.al.realworld.rest;
 
 import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.RegisterUser;
+import com.github.al.realworld.api.command.UpdateUser;
 import com.github.al.realworld.api.dto.UserDto;
 import com.github.al.realworld.api.operation.UserClient;
+import com.github.al.realworld.rest.auth.AuthSupport;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.annotation.MicronautTest;
@@ -41,6 +43,12 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 @MicronautTest
 public class UserApiTest {
+
+    public static final String ALTERED_EMAIL = "altered-email@example.com";
+    public static final String ALTERED_USERNAME = "altered-username";
+    public static final String ALTERED_PASSWORD = "altered-password";
+    public static final String ALTERED_BIO = "altered-bio";
+    public static final String ALTERED_IMAGE = "altered-image";
 
     @Inject
     private UserClient userClient;
@@ -94,23 +102,58 @@ public class UserApiTest {
 
     @Test
     void should_returnCorrectData_whenUpdateUser() {
-        RegisterUser command = registerCommand();
+        register().login();
 
-        userClient.register(command);
+        UpdateUser updateUser = UpdateUser.builder()
+                .email(ALTERED_EMAIL)
+                .username(ALTERED_USERNAME)
+                .password(ALTERED_PASSWORD)
+                .bio(ALTERED_BIO)
+                .image(ALTERED_IMAGE)
+                .build();
 
-        UserDto user = userClient.login(new LoginUser(command.getEmail(), command.getPassword())).getUser();
+        UserDto user = userClient.update(updateUser).getUser();
 
-        assertThat(user.getToken()).isNotBlank();
+        assertThat(user.getEmail()).isEqualTo(ALTERED_EMAIL);
+        assertThat(user.getUsername()).isEqualTo(ALTERED_USERNAME);
+        assertThat(user.getBio()).isEqualTo(ALTERED_BIO);
+        assertThat(user.getImage()).isEqualTo(ALTERED_IMAGE);
     }
 
     @Test
-    void name() {
+    void should_throw400_whenUpdateUserWithExistingEmail() {
+        AuthSupport.RegisteredUser registeredUser = register();
+
         register().login();
 
-//        UpdateUser updateUser = UpdateUser.builder()
-//                .build();
-//        userClient.update(updateUser);
+        UpdateUser updateUser = UpdateUser.builder()
+                .email(registeredUser.getEmail())
+                .build();
 
+        HttpClientResponseException exception = catchThrowableOfType(
+                () -> userClient.update(updateUser),
+                HttpClientResponseException.class
+        );
+
+        assertThat(exception).isNotNull();
+    }
+
+    @Test
+    void should_throw400_whenUpdateUserWithExistingName() {
+        AuthSupport.RegisteredUser registeredUser = register();
+
+        register().login();
+
+        UpdateUser updateUser = UpdateUser.builder()
+                .username(registeredUser.getUsername())
+                .build();
+
+        HttpClientResponseException exception = catchThrowableOfType(
+                () -> userClient.update(updateUser),
+                HttpClientResponseException.class
+        );
+
+        assertThat(exception).isNotNull();
     }
 
     private static RegisterUser registerCommand() {

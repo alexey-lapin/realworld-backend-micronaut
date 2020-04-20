@@ -27,8 +27,11 @@ import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.FollowProfile;
 import com.github.al.realworld.api.command.FollowProfileResult;
 import com.github.al.realworld.application.ProfileAssembler;
-import com.github.al.realworld.domain.model.Profile;
-import com.github.al.realworld.domain.repository.ProfileRepository;
+import com.github.al.realworld.domain.model.FollowRelation;
+import com.github.al.realworld.domain.model.FollowRelationId;
+import com.github.al.realworld.domain.model.User;
+import com.github.al.realworld.domain.repository.FollowRelationRepository;
+import com.github.al.realworld.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 import javax.inject.Singleton;
@@ -45,22 +48,26 @@ import static com.github.al.realworld.application.exception.Exceptions.notFound;
 @Singleton
 public class FollowProfileHandler implements CommandHandler<FollowProfileResult, FollowProfile> {
 
-    private final ProfileRepository profileRepository;
+    private final UserRepository userRepository;
+    private final FollowRelationRepository followRelationRepository;
 
     @Transactional
     @Override
     public FollowProfileResult handle(FollowProfile command) {
-        Profile currentProfile = profileRepository.findByUsername(command.getFollower())
+        User currentUser = userRepository.findByUsername(command.getFollower())
                 .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getFollower()));
 
-        Profile followee = profileRepository.findByUsername(command.getFollowee())
+        User followee = userRepository.findByUsername(command.getFollowee())
                 .orElseThrow(() -> notFound("user [name=%s] does not exist", command.getFollowee()));
 
-        Profile alteredFollowee = followee.toBuilder().follower(currentProfile).build();
+        FollowRelation follow = new FollowRelation(
+                new FollowRelationId(currentUser.getId(), followee.getId()),
+                currentUser,
+                followee);
 
-        Profile alteredCurrentProfile = currentProfile.toBuilder().followee(followee).build();
-        profileRepository.save(alteredCurrentProfile);
+        User alteredFollowee = followee.toBuilder().follower(follow).build();
+        userRepository.save(alteredFollowee);
 
-        return new FollowProfileResult(ProfileAssembler.assemble(alteredFollowee, alteredCurrentProfile));
+        return new FollowProfileResult(ProfileAssembler.assemble(alteredFollowee, currentUser));
     }
 }

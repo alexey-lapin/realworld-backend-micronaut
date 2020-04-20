@@ -21,31 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.db.jpa;
+package com.github.al.realworld.domain.repository;
 
-import com.github.al.realworld.domain.model.Profile;
-import com.github.al.realworld.domain.repository.ProfileRepository;
-import lombok.RequiredArgsConstructor;
+import com.github.al.realworld.domain.model.FollowRelation;
+import com.github.al.realworld.domain.model.User;
 
-import javax.inject.Singleton;
-import java.util.Optional;
+import java.util.List;
+import java.util.UUID;
 
-@RequiredArgsConstructor
-@Singleton
-public class JpaProfileRepositoryAdapter implements ProfileRepository {
+public interface FollowRelationRepository {
 
-    private final DataProfileRepository repository;
+    FollowRelation save(FollowRelation entity);
 
-    @Override
-    public Optional<Profile> findByUsername(String username) {
-        return repository.findByUsername(username);
-    }
+    List<FollowRelation> findByFollowerId(UUID followerId);
 
-    @Override
-    public Profile save(Profile profile) {
-        if (repository.existsById(profile.getUsername())) {
-            return repository.update(profile);
-        }
-        return repository.save(profile);
-    }
+    List<FollowRelation> findByFolloweeId(UUID followeeId);
+
+    void deleteByFollowerAndFollowee(User follower, User followee);
+
 }

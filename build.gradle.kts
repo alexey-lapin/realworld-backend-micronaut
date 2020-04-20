@@ -63,6 +63,8 @@ subprojects {
         withType<Test> {
             useJUnitPlatform()
         }
+
+        named("build").get().shouldRunAfter("spotlessJava")
     }
 }
 

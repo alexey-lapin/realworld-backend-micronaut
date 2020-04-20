@@ -29,7 +29,6 @@ import com.github.al.realworld.api.command.CreateArticleResult;
 import com.github.al.realworld.application.ArticleAssembler;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
-import com.github.al.realworld.domain.model.Profile;
 import com.github.al.realworld.domain.model.Tag;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
@@ -62,8 +61,7 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
             throw badRequest("article [title=%s] already exists", command.getTitle());
         }
 
-        Profile currentProfile = userRepository.findByUsername(command.getCurrentUsername())
-                .map(User::getProfile)
+        User currentUser = userRepository.findByUsername(command.getCurrentUsername())
                 .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getCurrentUsername()));
 
         ZonedDateTime now = ZonedDateTime.now();
@@ -76,7 +74,7 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
                 .body(command.getBody())
                 .createdAt(now)
                 .updatedAt(now)
-                .author(currentProfile);
+                .author(currentUser);
 
         if (command.getTagList() != null) {
             command.getTagList().stream()
@@ -86,6 +84,6 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
 
         Article savedArticle = articleRepository.save(articleBuilder.build());
 
-        return new CreateArticleResult(ArticleAssembler.assemble(savedArticle, currentProfile));
+        return new CreateArticleResult(ArticleAssembler.assemble(savedArticle, currentUser));
     }
 }

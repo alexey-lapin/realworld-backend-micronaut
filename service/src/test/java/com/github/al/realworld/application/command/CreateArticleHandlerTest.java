@@ -27,7 +27,6 @@ import com.github.al.realworld.api.command.CreateArticle;
 import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
-import com.github.al.realworld.domain.model.Profile;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.TagRepository;
@@ -86,7 +85,7 @@ class CreateArticleHandlerTest {
     @Test
     void should_returnCorrectArticleData() {
         User user = User.builder()
-                .profile(Profile.builder().username("test-username").build())
+                .username("test-username")
                 .build();
         when(userRepository.findByUsername("test-username")).thenReturn(Optional.of(user));
 
