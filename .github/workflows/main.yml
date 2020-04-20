@@ -11,8 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      HOST: localhost
     steps:
       - uses: actions/checkout@v2
         with:
@@ -62,8 +60,6 @@ jobs:
 
       - name: 'Run tests with JaCoCo'
         shell: bash
-        env:
-          HOST: localhost
         run: |
           ./gradlew --version
           ./gradlew --scan --no-parallel --stacktrace --warning-mode=all -PenableJacoco build jacocoRootReport

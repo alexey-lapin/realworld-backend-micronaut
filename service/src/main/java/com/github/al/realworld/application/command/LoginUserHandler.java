@@ -28,9 +28,9 @@ import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.LoginUserResult;
 import com.github.al.realworld.application.UserAssembler;
 import com.github.al.realworld.application.service.JwtService;
+import com.github.al.realworld.application.service.PasswordEncoder;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
-import io.micronaut.security.authentication.providers.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 
 import javax.inject.Singleton;
