@@ -53,11 +53,15 @@ public class UpdateUserHandler implements CommandHandler<UpdateUserResult, Updat
         User user = userRepository.findByUsername(command.getCurrentUsername())
                 .orElseThrow(() -> notFound("user [name=%s] does not exist", command.getCurrentUsername()));
 
-        if (command.getUsername() != null && userRepository.findByUsername(command.getUsername()).isPresent()) {
+        if (command.getUsername() != null
+                && !command.getUsername().equals(user.getUsername())
+                && userRepository.findByUsername(command.getUsername()).isPresent()) {
             throw badRequest("user [name=%s] already exists", command.getUsername());
         }
 
-        if (command.getEmail() != null && userRepository.findByEmail(command.getEmail()).isPresent()) {
+        if (command.getEmail() != null
+                && !command.getEmail().equals(user.getEmail())
+                && userRepository.findByEmail(command.getEmail()).isPresent()) {
             throw badRequest("user [email=%s] already exists", command.getEmail());
         }
 
