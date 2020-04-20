@@ -21,15 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.domain.repository;
+package com.github.al.realworld.application.service;
 
-import com.github.al.realworld.domain.model.Profile;
+public interface PasswordEncoder {
 
-import java.util.Optional;
+    /**
+     * @param rawPassword The plain text password
+     * @return The result of encoding the password
+     */
+    String encode(String rawPassword);
 
-public interface ProfileRepository {
+    /**
+     *
+     * @param rawPassword The plain text password
+     * @param encodedPassword The encoded password to match against
+     * @return true if the passwords match
+     */
+    boolean matches(String rawPassword, String encodedPassword);
 
-    Optional<Profile> findByUsername(String username);
-
-    Profile save(Profile profile);
 }

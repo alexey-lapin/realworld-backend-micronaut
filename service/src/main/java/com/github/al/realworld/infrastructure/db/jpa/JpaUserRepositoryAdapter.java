@@ -48,7 +48,7 @@ public class JpaUserRepositoryAdapter implements UserRepository {
 
     @Override
     public User save(User user) {
-        if (repository.existsById(user.getUsername())) {
+        if (repository.existsById(user.getId())) {
             return repository.update(user);
         }
         return repository.save(user);

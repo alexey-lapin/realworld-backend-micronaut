@@ -29,7 +29,6 @@ import com.github.al.realworld.application.CommentAssembler;
 import com.github.al.bus.QueryHandler;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.Comment;
-import com.github.al.realworld.domain.model.Profile;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
@@ -53,8 +52,7 @@ public class GetCommentHandler implements QueryHandler<GetCommentResult, GetComm
         Article article = articleRepository.findBySlug(query.getSlug())
                 .orElseThrow(() -> notFound("article [slug=%s] does not exists", query.getSlug()));
 
-        Profile currentProfile = userRepository.findByUsername(query.getCurrentUsername())
-                .map(User::getProfile)
+        User currentUser = userRepository.findByUsername(query.getCurrentUsername())
                 .orElse(null);
 
         Comment comment = article.getComments().stream()
@@ -62,6 +60,6 @@ public class GetCommentHandler implements QueryHandler<GetCommentResult, GetComm
                 .findFirst()
                 .orElseThrow(() -> notFound("comment [id=%s] does not exists", query.getId()));
 
-        return new GetCommentResult(CommentAssembler.assemble(comment, currentProfile));
+        return new GetCommentResult(CommentAssembler.assemble(comment, currentUser));
     }
 }

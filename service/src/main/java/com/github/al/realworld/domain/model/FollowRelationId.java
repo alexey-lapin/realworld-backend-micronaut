@@ -21,17 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.db.jpa;
+package com.github.al.realworld.domain.model;
 
-import com.github.al.realworld.domain.model.Profile;
-import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.repository.CrudRepository;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.util.Optional;
+import javax.persistence.Embeddable;
+import java.io.Serializable;
+import java.util.UUID;
 
-@Repository
-public interface DataProfileRepository extends CrudRepository<Profile, String> {
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@EqualsAndHashCode
+@Embeddable
+public class FollowRelationId implements Serializable {
 
-    Optional<Profile> findByUsername(String username);
+    private UUID followerId;
+    private UUID followeeId;
 
 }

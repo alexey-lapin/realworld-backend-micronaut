@@ -34,6 +34,8 @@ public class UserAssembler {
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .token(jwtService.getToken(user))
+                .bio(user.getBio())
+                .image(user.getImage())
                 .build();
     }
 

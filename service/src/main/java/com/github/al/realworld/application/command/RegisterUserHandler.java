@@ -28,15 +28,15 @@ import com.github.al.realworld.api.command.RegisterUser;
 import com.github.al.realworld.api.command.RegisterUserResult;
 import com.github.al.realworld.application.UserAssembler;
 import com.github.al.realworld.application.service.JwtService;
-import com.github.al.realworld.domain.model.Profile;
+import com.github.al.realworld.application.service.PasswordEncoder;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
-import io.micronaut.security.authentication.providers.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 
@@ -60,15 +60,11 @@ public class RegisterUserHandler implements CommandHandler<RegisterUserResult, R
             throw badRequest("user [name=%s] already exists", command.getUsername());
         }
 
-        Profile profile = Profile.builder()
-                .username(command.getUsername())
-                .build();
-
         User user = User.builder()
+                .id(UUID.randomUUID())
                 .username(command.getUsername())
                 .email(command.getEmail())
                 .password(passwordEncoder.encode(command.getPassword()))
-                .profile(profile)
                 .build();
         userRepository.save(user);
 

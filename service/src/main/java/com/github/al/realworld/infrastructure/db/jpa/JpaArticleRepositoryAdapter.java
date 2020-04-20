@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Singleton
@@ -57,7 +58,7 @@ public class JpaArticleRepositoryAdapter implements ArticleRepository {
     }
 
     @Override
-    public List<Article> findByFollowees(List<String> followees, Integer limit, Integer offset) {
+    public List<Article> findByFollowees(List<UUID> followees, Integer limit, Integer offset) {
         OffsetBasedPageable pageable = new OffsetBasedPageable(limit, offset, Sort.of(Sort.Order.desc("createdAt")));
         return repository.findByFollowees(followees, pageable);
     }

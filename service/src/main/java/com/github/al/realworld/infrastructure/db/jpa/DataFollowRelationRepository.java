@@ -23,29 +23,22 @@
  */
 package com.github.al.realworld.infrastructure.db.jpa;
 
-import com.github.al.realworld.domain.model.Profile;
-import com.github.al.realworld.domain.repository.ProfileRepository;
-import lombok.RequiredArgsConstructor;
+import com.github.al.realworld.domain.model.FollowRelation;
+import com.github.al.realworld.domain.model.FollowRelationId;
+import com.github.al.realworld.domain.model.User;
+import io.micronaut.data.annotation.Repository;
+import io.micronaut.data.repository.CrudRepository;
 
-import javax.inject.Singleton;
-import java.util.Optional;
+import java.util.List;
+import java.util.UUID;
 
-@RequiredArgsConstructor
-@Singleton
-public class JpaProfileRepositoryAdapter implements ProfileRepository {
+@Repository
+public interface DataFollowRelationRepository extends CrudRepository<FollowRelation, FollowRelationId> {
 
-    private final DataProfileRepository repository;
+    List<FollowRelation> findByFollowerId(UUID followerId);
 
-    @Override
-    public Optional<Profile> findByUsername(String username) {
-        return repository.findByUsername(username);
-    }
+    List<FollowRelation> findByFolloweeId(UUID followeeId);
 
-    @Override
-    public Profile save(Profile profile) {
-        if (repository.existsById(profile.getUsername())) {
-            return repository.update(profile);
-        }
-        return repository.save(profile);
-    }
+    void deleteByFollowerAndFollowee(User follower, User followee);
+
 }

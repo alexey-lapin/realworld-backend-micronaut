@@ -21,36 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.application.query;
-
-import com.github.al.realworld.api.query.GetProfile;
-import com.github.al.realworld.api.query.GetProfileResult;
-import com.github.al.realworld.application.ProfileAssembler;
-import com.github.al.bus.QueryHandler;
-import com.github.al.realworld.domain.model.User;
-import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+package com.github.al.realworld.application.service;
 
 import javax.inject.Singleton;
-import javax.transaction.Transactional;
+import java.util.Objects;
 
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
-
-@RequiredArgsConstructor
 @Singleton
-public class GetProfileHandler implements QueryHandler<GetProfileResult, GetProfile> {
+public class NoopPasswordEncoder implements PasswordEncoder {
 
-    private final UserRepository userRepository;
-
-    @Transactional
     @Override
-    public GetProfileResult handle(GetProfile query) {
-        User currentUser = userRepository.findByUsername(query.getCurrentUsername())
-                .orElse(null);
+    public String encode(String rawPassword) {
+        return rawPassword;
+    }
 
-        User user = userRepository.findByUsername(query.getUsername())
-                .orElseThrow(() -> notFound("user [name=%s] does not exist", query.getUsername()));
-
-        return new GetProfileResult(ProfileAssembler.assemble(user, currentUser));
+    @Override
+    public boolean matches(String rawPassword, String encodedPassword) {
+        return Objects.equals(rawPassword, encodedPassword);
     }
 }

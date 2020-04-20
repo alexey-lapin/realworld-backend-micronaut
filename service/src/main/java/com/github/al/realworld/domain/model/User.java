@@ -26,28 +26,41 @@ package com.github.al.realworld.domain.model;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
+import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 public class User {
 
+    @EqualsAndHashCode.Include
     @Id
+    private UUID id;
     private String username;
     private String email;
     private String password;
-    @MapsId
-    @OneToOne(cascade = CascadeType.ALL)
-    private Profile profile;
+    private String bio;
+    private String image;
+
+    @Singular
+    @OneToMany(
+            mappedBy = "followee",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private Set<FollowRelation> followers;
 
 }

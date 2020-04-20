@@ -54,6 +54,6 @@ public class Comment {
     @Lob
     private String body;
     @OneToOne
-    private Profile author;
+    private User author;
 
 }

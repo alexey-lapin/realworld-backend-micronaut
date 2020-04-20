@@ -21,36 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.application.query;
+package com.github.al.realworld.domain.repository;
 
-import com.github.al.realworld.api.query.GetProfile;
-import com.github.al.realworld.api.query.GetProfileResult;
-import com.github.al.realworld.application.ProfileAssembler;
-import com.github.al.bus.QueryHandler;
+import com.github.al.realworld.domain.model.FollowRelation;
 import com.github.al.realworld.domain.model.User;
-import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 
-import javax.inject.Singleton;
-import javax.transaction.Transactional;
+import java.util.List;
+import java.util.UUID;
 
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+public interface FollowRelationRepository {
 
-@RequiredArgsConstructor
-@Singleton
-public class GetProfileHandler implements QueryHandler<GetProfileResult, GetProfile> {
+    FollowRelation save(FollowRelation entity);
 
-    private final UserRepository userRepository;
+    List<FollowRelation> findByFollowerId(UUID followerId);
 
-    @Transactional
-    @Override
-    public GetProfileResult handle(GetProfile query) {
-        User currentUser = userRepository.findByUsername(query.getCurrentUsername())
-                .orElse(null);
+    List<FollowRelation> findByFolloweeId(UUID followeeId);
 
-        User user = userRepository.findByUsername(query.getUsername())
-                .orElseThrow(() -> notFound("user [name=%s] does not exist", query.getUsername()));
+    void deleteByFollowerAndFollowee(User follower, User followee);
 
-        return new GetProfileResult(ProfileAssembler.assemble(user, currentUser));
-    }
 }

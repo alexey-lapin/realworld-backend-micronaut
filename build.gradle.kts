@@ -62,7 +62,13 @@ subprojects {
     tasks {
         withType<Test> {
             useJUnitPlatform()
+            testLogging {
+                showStackTraces = true
+                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            }
         }
+
+        named("build").get().shouldRunAfter("spotlessJava")
     }
 }
 

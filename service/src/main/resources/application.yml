@@ -2,7 +2,7 @@ micronaut:
   application:
     name: realworld-backend-micronaut
   server:
-    host: 0.0.0.0
+    host: ${HOST:0.0.0.0}
     port: ${PORT:8080}
     cors:
       enabled: true

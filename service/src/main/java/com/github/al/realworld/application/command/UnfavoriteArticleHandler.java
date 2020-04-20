@@ -28,7 +28,6 @@ import com.github.al.realworld.api.command.UnfavoriteArticleResult;
 import com.github.al.realworld.application.ArticleAssembler;
 import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.domain.model.Article;
-import com.github.al.realworld.domain.model.Profile;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
@@ -57,22 +56,20 @@ public class UnfavoriteArticleHandler implements CommandHandler<UnfavoriteArticl
         Article article = articleRepository.findBySlug(command.getSlug())
                 .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.getSlug()));
 
-        Profile currentProfile = userRepository.findByUsername(command.getCurrentUsername())
-                .map(User::getProfile)
+        User currentUser = userRepository.findByUsername(command.getCurrentUsername())
                 .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getCurrentUsername()));
 
-
-        Set<Profile> alteredFavoritedProfiles = article.getFavoredProfiles().stream()
-                .filter(favoritedProfile -> !Objects.equals(favoritedProfile, currentProfile))
+        Set<User> alteredFavoritedProfiles = article.getFavoredUsers().stream()
+                .filter(favoritedUser -> !Objects.equals(favoritedUser, currentUser))
                 .collect(Collectors.toSet());
 
         Article alteredArticle = article.toBuilder()
-                .clearFavoredProfiles()
-                .favoredProfiles(alteredFavoritedProfiles)
+                .clearFavoredUsers()
+                .favoredUsers(alteredFavoritedProfiles)
                 .build();
 
         Article savedArticle = articleRepository.save(alteredArticle);
 
-        return new UnfavoriteArticleResult(ArticleAssembler.assemble(savedArticle, currentProfile));
+        return new UnfavoriteArticleResult(ArticleAssembler.assemble(savedArticle, currentUser));
     }
 }

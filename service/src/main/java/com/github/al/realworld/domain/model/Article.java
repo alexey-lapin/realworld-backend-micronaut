@@ -61,7 +61,7 @@ public class Article {
     private String body;
 
     @OneToOne
-    private Profile author;
+    private User author;
 
     @Singular
     @OneToMany(cascade = CascadeType.ALL)
@@ -80,8 +80,8 @@ public class Article {
     @ManyToMany
     @JoinTable(name = "article_favorites",
             joinColumns = @JoinColumn(name = "article_id"),
-            inverseJoinColumns = @JoinColumn(name = "username")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<Profile> favoredProfiles;
+    private Set<User> favoredUsers;
 
 }

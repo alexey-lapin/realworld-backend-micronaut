@@ -21,23 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.config.security;
+package com.github.al.realworld.infrastructure.db.jpa;
 
-import io.micronaut.security.authentication.providers.PasswordEncoder;
+import com.github.al.realworld.domain.model.FollowRelation;
+import com.github.al.realworld.domain.model.User;
+import com.github.al.realworld.domain.repository.FollowRelationRepository;
+import lombok.RequiredArgsConstructor;
 
 import javax.inject.Singleton;
-import java.util.Objects;
+import java.util.List;
+import java.util.UUID;
 
+@RequiredArgsConstructor
 @Singleton
-public class NoopPasswordEncoder implements PasswordEncoder {
+public class JpaFollowRelationRepositoryAdapter implements FollowRelationRepository {
+
+    private final DataFollowRelationRepository repository;
 
     @Override
-    public String encode(String rawPassword) {
-        return rawPassword;
+    public FollowRelation save(FollowRelation entity) {
+        return repository.save(entity);
     }
 
     @Override
-    public boolean matches(String rawPassword, String encodedPassword) {
-        return Objects.equals(rawPassword, encodedPassword);
+    public List<FollowRelation> findByFollowerId(UUID followerId) {
+        return repository.findByFollowerId(followerId);
+    }
+
+    @Override
+    public List<FollowRelation> findByFolloweeId(UUID followeeId) {
+        return repository.findByFolloweeId(followeeId);
+    }
+
+    @Override
+    public void deleteByFollowerAndFollowee(User follower, User followee) {
+        repository.deleteByFollowerAndFollowee(follower, followee);
     }
 }

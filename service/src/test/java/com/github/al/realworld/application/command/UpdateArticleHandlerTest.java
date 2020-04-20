@@ -28,7 +28,6 @@ import com.github.al.realworld.api.command.UpdateArticleResult;
 import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
-import com.github.al.realworld.domain.model.Profile;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
@@ -81,7 +80,7 @@ class UpdateArticleHandlerTest {
     void should_throw400_when_articleDoesNotOwnedByCurrentUser() {
         Article article = Article.builder()
                 .slug(TEST_SLUG)
-                .author(Profile.builder().username(TEST_USERNAME).build())
+                .author(User.builder().username(TEST_USERNAME).build())
                 .body(TEST_BODY)
                 .build();
         when(articleRepository.findBySlug(TEST_SLUG)).thenReturn(Optional.of(article));
@@ -103,7 +102,7 @@ class UpdateArticleHandlerTest {
     void should_throw400_when_currentUserDoesNotExist() {
         Article article = Article.builder()
                 .slug(TEST_SLUG)
-                .author(Profile.builder().username(TEST_USERNAME).build())
+                .author(User.builder().username(TEST_USERNAME).build())
                 .body(TEST_BODY)
                 .build();
         when(articleRepository.findBySlug(TEST_SLUG)).thenReturn(Optional.of(article));
@@ -125,14 +124,13 @@ class UpdateArticleHandlerTest {
     void should_returnCorrectArticleData_when_commandHasAllProperties() {
         Article article = Article.builder()
                 .slug(TEST_SLUG)
-                .author(Profile.builder().username(TEST_USERNAME).build())
+                .author(User.builder().username(TEST_USERNAME).build())
                 .body(TEST_BODY)
                 .build();
         when(articleRepository.findBySlug(TEST_SLUG)).thenReturn(Optional.of(article));
 
         User user = User.builder()
                 .username(TEST_USERNAME)
-                .profile(Profile.builder().username(TEST_USERNAME).build())
                 .build();
         when(userRepository.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(user));
 
@@ -156,14 +154,13 @@ class UpdateArticleHandlerTest {
     void should_returnCorrectArticleData_when_commandDoesNotHaveAllProperties() {
         Article article = Article.builder()
                 .slug(TEST_SLUG)
-                .author(Profile.builder().username(TEST_USERNAME).build())
+                .author(User.builder().username(TEST_USERNAME).build())
                 .body(TEST_BODY)
                 .build();
         when(articleRepository.findBySlug(TEST_SLUG)).thenReturn(Optional.of(article));
 
         User user = User.builder()
                 .username(TEST_USERNAME)
-                .profile(Profile.builder().username(TEST_USERNAME).build())
                 .build();
         when(userRepository.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(user));
 
