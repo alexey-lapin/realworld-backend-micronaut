@@ -11,14 +11,20 @@ We've gone to great lengths to adhere to the Micronaut community styleguides & b
 
 For more information on how to this works with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
 
-**Heroku**: https://realworld-backend-micronaut.herokuapp.com/api
+Actual application is accessible on **Heroku**: https://realworld-backend-micronaut.herokuapp.com/api
 
 # How it works
-This application basically uses Micronaut Framework with Java 8 with some other modules known to development community:
-- Hibernate 5
-- Jackson for JSON
+This application basically uses Micronaut Framework with Java 8 with some other modules:
+- [Micronaut Data](https://micronaut-projects.github.io/micronaut-data/latest/guide/) with Hibernate
+- Json Web Token [jjwt](https://github.com/jwtk/jjwt)
 - H2 in memory database
-- Jsonwebtoken jjwt
+
+Some other highlights:
+- [Liquibase](https://www.liquibase.org/) for the database changes management
+- [Micronaut declarative http clients](https://docs.micronaut.io/snapshot/guide/index.html#clientAnnotation) for integration tests
+- [Github Actions](https://github.com/alexey-lapin/realworld-backend-micronaut/actions) as CI
+- Execution of [Realworld Postman collection](https://github.com/gothinkster/realworld/blob/master/api/Conduit.postman_collection.json) is part of CI
+- Deployment on [Heroku](https://realworld-backend-micronaut.herokuapp.com/api) is part of CI
 
 # Getting started
 Java 8 or above is required
