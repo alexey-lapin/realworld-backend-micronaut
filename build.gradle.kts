@@ -43,7 +43,7 @@ subprojects {
             if (enableJacoco) {
                 val jarTask = tasks["jar"] as Jar
                 val extractJar by tasks.registering(Copy::class) {
-                    from(zipTree(jarTask.archivePath))
+                    from(zipTree(jarTask.archiveFile))
                     into(jacocoClassesDir)
                     include("**/*.class")
                     includeEmptyDirs = false
