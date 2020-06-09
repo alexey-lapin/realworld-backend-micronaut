@@ -15,13 +15,13 @@ configurations["intTestImplementation"].extendsFrom(configurations["testImplemen
 configurations["intTestRuntimeOnly"].extendsFrom(configurations["runtimeOnly"])
 configurations["intTestRuntimeOnly"].extendsFrom(configurations["testRuntimeOnly"])
 
-idea {
-    module {
-        testSourceDirs.addAll(sourceSets["intTest"].java.srcDirs)
-        testResourceDirs.addAll(sourceSets["intTest"].resources.srcDirs)
-        scopes["TEST"]!!["plus"]!!.add(configurations["intTestCompile"])
-    }
-}
+//idea {
+//    module {
+//        testSourceDirs.addAll(sourceSets["intTest"].java.srcDirs)
+//        testResourceDirs.addAll(sourceSets["intTest"].resources.srcDirs)
+//        scopes["TEST"]!!["plus"]!!.add(configurations["intTestCompile"])
+//    }
+//}
 
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
