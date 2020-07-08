@@ -24,6 +24,8 @@
 package com.github.al.realworld.infrastructure.config.security;
 
 import com.github.al.realworld.domain.repository.UserRepository;
+import edu.umd.cs.findbugs.annotations.Nullable;
+import io.micronaut.http.HttpRequest;
 import io.micronaut.security.authentication.AuthenticationProvider;
 import io.micronaut.security.authentication.AuthenticationRequest;
 import io.micronaut.security.authentication.AuthenticationResponse;
@@ -39,8 +41,9 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     private final UserRepository userRepository;
 
     @Override
-    public Publisher<AuthenticationResponse> authenticate(AuthenticationRequest authenticationRequest) {
-//        authenticationRequest.getIdentity()
+    public Publisher<AuthenticationResponse> authenticate(@Nullable HttpRequest<?> httpRequest,
+                                                          AuthenticationRequest<?, ?> authenticationRequest) {
         return null;
     }
+
 }

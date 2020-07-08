@@ -1,8 +1,8 @@
 object Versions {
 
     val lombok = "1.18.12"
-    val mn = "1.3.6"
-    val jwt = "0.11.1"
+    val mn = "2.0.0"
+    val jwt = "0.11.2"
     val logback = "1.2.3"
 
     val assertj = "3.16.1"
