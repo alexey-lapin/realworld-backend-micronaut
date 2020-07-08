@@ -6,6 +6,7 @@ micronaut:
     port: ${PORT:8080}
     cors:
       enabled: true
+    thread-selection: AUTO
   security:
     enabled: true
     intercept-url-map:

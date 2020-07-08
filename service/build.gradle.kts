@@ -23,6 +23,10 @@ idea {
     }
 }
 
+configurations.all {
+    resolutionStrategy.force("org.liquibase:liquibase-core:${Versions.liquibase}")
+}
+
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
     compileOnly("org.projectlombok:lombok:${Versions.lombok}")
@@ -30,23 +34,23 @@ dependencies {
     annotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     annotationProcessor("io.micronaut:micronaut-inject-java")
     annotationProcessor("io.micronaut:micronaut-validation")
-    annotationProcessor("io.micronaut:micronaut-security")
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
+    annotationProcessor("io.micronaut.security:micronaut-security")
 
     implementation(project(":service-bus"))
     implementation(project(":service-api"))
 
     implementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
-    implementation("io.micronaut.configuration:micronaut-jdbc-tomcat")
-    implementation("io.micronaut.configuration:micronaut-liquibase")
-    implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-http-server-netty")
     implementation("io.micronaut:micronaut-inject")
     implementation("io.micronaut:micronaut-management")
     implementation("io.micronaut:micronaut-runtime")
-    implementation("io.micronaut:micronaut-security")
     implementation("io.micronaut:micronaut-validation")
+    implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
+    implementation("io.micronaut.liquibase:micronaut-liquibase")
+    implementation("io.micronaut.security:micronaut-security")
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
 
     implementation("io.jsonwebtoken:jjwt-api:${Versions.jwt}")
     implementation("javax.annotation:javax.annotation-api")
