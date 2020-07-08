@@ -70,4 +70,5 @@ public class RegisterUserHandler implements CommandHandler<RegisterUserResult, R
 
         return new RegisterUserResult(UserAssembler.assemble(user, jwtService));
     }
+
 }

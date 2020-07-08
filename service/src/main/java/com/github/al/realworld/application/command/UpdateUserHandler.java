@@ -77,4 +77,5 @@ public class UpdateUserHandler implements CommandHandler<UpdateUserResult, Updat
 
         return new UpdateUserResult(UserAssembler.assemble(savedUser, jwtService));
     }
+
 }

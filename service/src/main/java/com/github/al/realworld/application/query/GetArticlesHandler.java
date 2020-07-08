@@ -61,4 +61,5 @@ public class GetArticlesHandler implements QueryHandler<GetArticlesResult, GetAr
 
         return new GetArticlesResult(results, results.size());
     }
+
 }

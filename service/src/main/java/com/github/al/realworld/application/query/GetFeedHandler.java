@@ -74,4 +74,5 @@ public class GetFeedHandler implements QueryHandler<GetFeedResult, GetFeed> {
 
         return new GetFeedResult(results, results.size());
     }
+
 }

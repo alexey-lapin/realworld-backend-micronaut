@@ -58,9 +58,9 @@ public class UnfollowProfileHandler implements CommandHandler<UnfollowProfileRes
         User followee = userRepository.findByUsername(command.getFollowee())
                 .orElseThrow(() -> notFound("user [name=%s] does not exist", command.getFollowee()));
 
-
         followRelationRepository.deleteByFollowerAndFollowee(currentUser, followee);
 
         return new UnfollowProfileResult(ProfileAssembler.assemble(followee, currentUser));
     }
+
 }

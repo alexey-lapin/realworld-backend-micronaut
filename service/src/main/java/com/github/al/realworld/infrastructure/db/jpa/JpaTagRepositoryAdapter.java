@@ -45,4 +45,5 @@ public class JpaTagRepositoryAdapter implements TagRepository {
     public Iterable<Tag> findAll() {
         return repository.findAll();
     }
+
 }

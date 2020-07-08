@@ -58,4 +58,5 @@ public class DeleteArticleHandler implements CommandHandler<DeleteArticleResult,
 
         return new DeleteArticleResult();
     }
+
 }

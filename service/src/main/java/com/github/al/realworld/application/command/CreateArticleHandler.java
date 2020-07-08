@@ -86,4 +86,5 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
 
         return new CreateArticleResult(ArticleAssembler.assemble(savedArticle, currentUser));
     }
+
 }

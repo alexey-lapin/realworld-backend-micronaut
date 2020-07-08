@@ -63,4 +63,5 @@ public class GetCommentsHandler implements QueryHandler<GetCommentsResult, GetCo
 
         return new GetCommentsResult(result);
     }
+
 }

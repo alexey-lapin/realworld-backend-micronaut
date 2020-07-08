@@ -63,4 +63,5 @@ public class FavoriteArticleHandler implements CommandHandler<FavoriteArticleRes
 
         return new FavoriteArticleResult(ArticleAssembler.assemble(savedArticle, currentUser));
     }
+
 }

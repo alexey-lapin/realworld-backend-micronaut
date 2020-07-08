@@ -79,4 +79,5 @@ public class AddCommentHandler implements CommandHandler<AddCommentResult, AddCo
 
         return new AddCommentResult(CommentAssembler.assemble(savedComment, currentUser));
     }
+
 }

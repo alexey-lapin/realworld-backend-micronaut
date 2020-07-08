@@ -52,4 +52,5 @@ public class GetCurrentUserHandler implements QueryHandler<GetCurrentUserResult,
 
         return new GetCurrentUserResult(UserAssembler.assemble(user, jwtService));
     }
+
 }

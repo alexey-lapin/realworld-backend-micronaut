@@ -70,4 +70,5 @@ public class FollowProfileHandler implements CommandHandler<FollowProfileResult,
 
         return new FollowProfileResult(ProfileAssembler.assemble(alteredFollowee, currentUser));
     }
+
 }

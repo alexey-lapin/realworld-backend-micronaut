@@ -70,4 +70,5 @@ public class DeleteCommentHandler implements CommandHandler<DeleteCommentResult,
 
         return new DeleteCommentResult();
     }
+
 }

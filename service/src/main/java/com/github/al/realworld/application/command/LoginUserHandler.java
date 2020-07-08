@@ -59,4 +59,5 @@ public class LoginUserHandler implements CommandHandler<LoginUserResult, LoginUs
 
         return new LoginUserResult(UserAssembler.assemble(user, jwtService));
     }
+
 }

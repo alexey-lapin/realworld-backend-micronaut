@@ -56,4 +56,5 @@ public class GetArticleHandler implements QueryHandler<GetArticleResult, GetArti
 
         return new GetArticleResult(ArticleAssembler.assemble(article, currentUser));
     }
+
 }

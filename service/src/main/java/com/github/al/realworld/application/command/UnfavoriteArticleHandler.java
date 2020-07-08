@@ -72,4 +72,5 @@ public class UnfavoriteArticleHandler implements CommandHandler<UnfavoriteArticl
 
         return new UnfavoriteArticleResult(ArticleAssembler.assemble(savedArticle, currentUser));
     }
+
 }

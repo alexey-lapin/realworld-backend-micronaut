@@ -62,4 +62,5 @@ public class GetCommentHandler implements QueryHandler<GetCommentResult, GetComm
 
         return new GetCommentResult(CommentAssembler.assemble(comment, currentUser));
     }
+
 }

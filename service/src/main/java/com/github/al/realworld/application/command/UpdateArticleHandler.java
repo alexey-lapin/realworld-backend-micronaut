@@ -76,4 +76,5 @@ public class UpdateArticleHandler implements CommandHandler<UpdateArticleResult,
 
         return new UpdateArticleResult(ArticleAssembler.assemble(alteredArticle, currentUser));
     }
+
 }

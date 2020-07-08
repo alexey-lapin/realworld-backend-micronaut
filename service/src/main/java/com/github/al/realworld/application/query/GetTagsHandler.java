@@ -53,4 +53,5 @@ public class GetTagsHandler implements QueryHandler<GetTagsResult, GetTags> {
 
         return result;
     }
+
 }
