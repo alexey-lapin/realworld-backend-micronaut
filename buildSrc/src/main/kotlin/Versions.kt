@@ -4,6 +4,7 @@ object Versions {
     val mn = "2.0.0"
     val jwt = "0.11.2"
     val logback = "1.2.3"
+    val liquibase = "3.10.1"
 
     val assertj = "3.16.1"
     val mockito = "3.3.3"

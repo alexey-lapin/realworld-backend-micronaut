@@ -23,6 +23,10 @@ idea {
     }
 }
 
+configurations.all {
+    resolutionStrategy.force("org.liquibase:liquibase-core:${Versions.liquibase}")
+}
+
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
     compileOnly("org.projectlombok:lombok:${Versions.lombok}")
