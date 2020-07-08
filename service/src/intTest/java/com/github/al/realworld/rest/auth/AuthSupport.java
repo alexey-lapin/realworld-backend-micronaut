@@ -33,8 +33,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.UUID;
 
+@Singleton
 public class AuthSupport {
 
     private static AuthSupport INSTANCE;

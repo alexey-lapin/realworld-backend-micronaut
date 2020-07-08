@@ -46,7 +46,7 @@ dependencies {
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     implementation("io.micronaut.liquibase:micronaut-liquibase")
     implementation("io.micronaut.security:micronaut-security")
-    implementation("io.micronaut.sql:micronaut-jdbc")
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
 
     implementation("io.jsonwebtoken:jjwt-api:${Versions.jwt}")
     implementation("javax.annotation:javax.annotation-api")
