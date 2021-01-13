@@ -26,8 +26,8 @@
             <column name="slug" type="varchar(100)"/>
             <column name="title" type="varchar(100)"/>
             <column name="description" type="varchar(500)"/>
-            <column name="createdat" type="timestamp with time zone"/>
-            <column name="updatedat" type="timestamp with time zone"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
             <column name="body" type="varchar(5000)"/>
             <column name="author_id" type="uuid">
                 <constraints foreignKeyName="fk_article_user"
@@ -42,8 +42,8 @@
             <column name="id" type="number">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="createdat" type="timestamp with time zone"/>
-            <column name="updatedat" type="timestamp with time zone"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
             <column name="body" type="varchar(5000)"/>
             <column name="author_id" type="uuid">
                 <constraints foreignKeyName="fk_comment_user"
