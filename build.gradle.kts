@@ -1,7 +1,7 @@
 plugins {
     java
     id("com.github.ben-manes.versions")
-    id("com.diffplug.gradle.spotless")
+    id("com.diffplug.spotless")
 }
 
 val enableJacoco = project.hasProperty("enableJacoco")
@@ -9,7 +9,7 @@ val jacocoClassesDir = file("$buildDir/jacoco/classes")
 
 allprojects {
     apply(plugin = "idea")
-    apply(plugin = "com.diffplug.gradle.spotless")
+    apply(plugin = "com.diffplug.spotless")
 
     if (enableJacoco) {
         apply(plugin = "jacoco")
