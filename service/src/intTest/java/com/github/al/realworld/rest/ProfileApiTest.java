@@ -28,7 +28,7 @@ import com.github.al.realworld.api.operation.ProfileClient;
 import com.github.al.realworld.api.query.GetProfileResult;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
-import io.micronaut.test.annotation.MicronautTest;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

@@ -24,7 +24,7 @@
 package com.github.al.realworld.rest;
 
 import com.github.al.realworld.api.operation.TagClient;
-import io.micronaut.test.annotation.MicronautTest;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
