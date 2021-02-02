@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.api.command;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.github.al.bus.Command;
 import io.micronaut.core.annotation.Introspected;
@@ -41,11 +42,17 @@ import lombok.With;
 public class UpdateArticle implements Command<UpdateArticleResult> {
 
     @With
-    private String slug;
-    private String title;
-    private String description;
-    private String body;
-    @With
+    @JsonIgnore
     private String currentUsername;
+
+    @With
+    @JsonIgnore
+    private String slug;
+
+    private String title;
+
+    private String description;
+
+    private String body;
 
 }

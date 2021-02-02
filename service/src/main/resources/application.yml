@@ -14,6 +14,14 @@ micronaut:
         httpMethod: OPTIONS
         access:
           - isAnonymous()
+      - pattern: /swagger/**
+        httpMethod: GET
+        access:
+          - isAnonymous()
+      - pattern: /swagger-ui/**
+        httpMethod: GET
+        access:
+          - isAnonymous()
       - pattern: ${api.version}/articles/feed
         httpMethod: GET
         access:
@@ -37,6 +45,14 @@ micronaut:
       - pattern: ${api.version}/**
         access:
           - isAuthenticated()
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
 ---
 datasources:
   default:

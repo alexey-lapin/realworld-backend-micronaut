@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.api.command;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.github.al.bus.Command;
 import io.micronaut.core.annotation.Introspected;
@@ -43,14 +44,19 @@ import java.util.List;
 @JsonRootName("article")
 public class CreateArticle implements Command<CreateArticleResult> {
 
+    @With
+    @JsonIgnore
+    private String currentUsername;
+
     @NotBlank
     private String title;
+
     @NotBlank
     private String description;
+
     @NotBlank
     private String body;
+
     private List<String> tagList;
-    @With
-    private String currentUsername;
 
 }
