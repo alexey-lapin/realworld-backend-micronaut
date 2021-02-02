@@ -31,7 +31,7 @@ import com.github.al.realworld.api.operation.UserClient;
 import com.github.al.realworld.rest.auth.AuthSupport;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
-import io.micronaut.test.annotation.MicronautTest;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
