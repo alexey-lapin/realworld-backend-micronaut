@@ -42,6 +42,7 @@ public class LoginUser implements Command<LoginUserResult> {
 
     @Email
     private String email;
+
     @NotBlank
     private String password;
 

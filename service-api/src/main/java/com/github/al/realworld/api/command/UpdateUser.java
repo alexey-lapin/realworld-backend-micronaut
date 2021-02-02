@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.api.command;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.github.al.bus.Command;
 import io.micronaut.core.annotation.Introspected;
@@ -43,12 +44,18 @@ import javax.validation.constraints.Email;
 public class UpdateUser implements Command<UpdateUserResult> {
 
     @With
+    @JsonIgnore
     private String currentUsername;
+
     @Email
     private String email;
+
     private String username;
+
     private String password;
+
     private String image;
+
     private String bio;
 
 }

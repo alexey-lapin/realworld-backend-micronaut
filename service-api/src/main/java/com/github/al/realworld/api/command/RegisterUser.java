@@ -40,8 +40,10 @@ public class RegisterUser implements Command<RegisterUserResult> {
 
     @Email
     private String email;
+
     @NotBlank
     private String username;
+
     @NotBlank
     private String password;
 

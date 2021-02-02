@@ -35,6 +35,7 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-inject-java")
     annotationProcessor("io.micronaut:micronaut-validation")
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
+    annotationProcessor("io.micronaut.openapi:micronaut-openapi")
     annotationProcessor("io.micronaut.security:micronaut-security")
 
     implementation(project(":service-bus"))
@@ -53,6 +54,7 @@ dependencies {
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
 
     implementation("io.jsonwebtoken:jjwt-api:${Versions.jwt}")
+    implementation("io.swagger.core.v3:swagger-annotations")
     implementation("javax.annotation:javax.annotation-api")
 
     runtimeOnly("ch.qos.logback:logback-classic:${Versions.logback}")
@@ -98,6 +100,25 @@ tasks {
         testClassesDirs = sourceSets["intTest"].output.classesDirs
         classpath = sourceSets["intTest"].runtimeClasspath
         shouldRunAfter("test")
+    }
+
+    register<Copy>("copyOpenApiConfig") {
+        from(rootProject.file("openapi.properties"))
+        destinationDir = rootProject.buildDir
+        expand(
+            mapOf(
+                "name" to rootProject.name,
+                "version" to rootProject.version,
+                "description" to rootProject.description
+            )
+        )
+    }
+
+    named<JavaCompile>("compileJava") {
+        options.isFork = true
+        options.forkOptions.jvmArgs =
+            listOf("-Dmicronaut.openapi.config.file=${rootProject.file("build/openapi.properties")}")
+        dependsOn("copyOpenApiConfig")
     }
 
     named("check") { dependsOn("integrationTest") }

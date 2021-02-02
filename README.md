@@ -25,6 +25,7 @@ Some other highlights:
 - [Github Actions](https://github.com/alexey-lapin/realworld-backend-micronaut/actions) as CI
 - Execution of [Realworld Postman collection](https://github.com/gothinkster/realworld/blob/master/api/Conduit.postman_collection.json) is part of CI
 - Deployment on [Heroku](https://realworld-backend-micronaut.herokuapp.com/api) is part of CI
+- OpenAPI support with [swagger-ui](https://realworld-backend-micronaut.herokuapp.com/swagger-ui)
 
 # Getting started
 Java 8 or above is required

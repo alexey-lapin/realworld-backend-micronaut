@@ -7,9 +7,13 @@ plugins {
 val enableJacoco = project.hasProperty("enableJacoco")
 val jacocoClassesDir = file("$buildDir/jacoco/classes")
 
+description = "Real world backend API built in Micronaut"
+
 allprojects {
     apply(plugin = "idea")
     apply(plugin = "com.diffplug.spotless")
+
+    version = "0.1.0"
 
     if (enableJacoco) {
         apply(plugin = "jacoco")
