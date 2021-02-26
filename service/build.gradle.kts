@@ -1,10 +1,14 @@
 import com.gorylenko.GenerateGitPropertiesTask
 import com.gorylenko.GitPropertiesPluginExtension
 
+import io.micronaut.gradle.graalvm.NativeImageTask
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
     application
     id("com.github.johnrengelman.shadow")
     id("com.gorylenko.gradle-git-properties")
+    id("io.micronaut.application")
 }
 
 sourceSets {
@@ -27,6 +31,14 @@ idea {
     }
 }
 
+micronaut {
+    version.set(Versions.mn)
+    processing {
+        annotations("com.github.al.realworld.*")
+//        sourceSets(sourceSets["intTest"])
+    }
+}
+
 configurations.all {
     resolutionStrategy.force("org.liquibase:liquibase-core:${Versions.liquibase}")
 }
@@ -35,17 +47,11 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
     compileOnly("org.projectlombok:lombok:${Versions.lombok}")
 
-    annotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
-    annotationProcessor("io.micronaut:micronaut-inject-java")
-    annotationProcessor("io.micronaut:micronaut-validation")
-    annotationProcessor("io.micronaut.data:micronaut-data-processor")
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
-    annotationProcessor("io.micronaut.security:micronaut-security")
 
     implementation(project(":service-bus"))
     implementation(project(":service-api"))
 
-    implementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-http-server-netty")
     implementation("io.micronaut:micronaut-inject")
@@ -67,10 +73,8 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:${Versions.jwt}")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:${Versions.jwt}")
 
-    testAnnotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")
 
-    testImplementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     testImplementation("io.micronaut.test:micronaut-test-junit5")
     testImplementation("org.assertj:assertj-core:${Versions.assertj}")
     testImplementation("org.mockito:mockito-core:${Versions.mockito}")
@@ -84,11 +88,6 @@ dependencies {
     "intTestCompileOnly"("org.projectlombok:lombok:${Versions.lombok}")
 }
 
-configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 configure<GitPropertiesPluginExtension> {
     keys = listOf("git.branch", "git.commit.id", "git.commit.id.abbrev", "git.commit.time")
 }
@@ -98,9 +97,9 @@ application {
 }
 
 tasks {
-    shadowJar {
-        mergeServiceFiles()
-    }
+//    shadowJar {
+//        mergeServiceFiles()
+//    }
 
     register<Test>("integrationTest") {
         description = "Runs the integration tests."
@@ -132,6 +131,16 @@ tasks {
         options.forkOptions.jvmArgs =
             listOf("-Dmicronaut.openapi.config.file=${rootProject.file("build/openapi.properties")}")
         dependsOn("copyOpenApiConfig")
+    }
+
+    withType<NativeImageTask> {
+        verbose(true)
+//        val main = rootProject.project("service-api").sourceSets.main.get()
+//        println("**** " + main.output.asPath)
+//        classpath(main.output)
+        if (OperatingSystem.current().isWindows) {
+            executable("native-image.cmd")
+        }
     }
 
     named("check") { dependsOn("integrationTest") }

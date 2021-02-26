@@ -68,6 +68,169 @@ jobs:
         if: github.ref == 'refs/heads/master' && job.status == 'success'
         run: git push https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git HEAD:master -f
 
+  graal-8-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup GraalVM CE
+        uses: rinx/setup-graalvm-ce@v0.0.5
+        with:
+          graalvm-version: "21.0.0.2"
+          java-version: "java8"
+          native-image: "true"
+
+      - uses: actions/setup-node@v1
+
+      - name: Cache Gradle wrapper and dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches/
+            ~/.gradle/wrapper/dists
+          key: test-${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'gradle/**', 'buildSrc/src/main/**') }}
+          restore-keys: |
+            test-${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build nativeImage -x check
+
+      - name: Save app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app
+          path: |
+            service/build/native-image/application
+            service-api/build/libs/*
+
+      - name: Run app for testing
+        run: |
+          nohup ./service/build/native-image/application &
+          sleep 5s
+
+      - name: Run postman collection
+        run: >
+          npx newman run
+          https://raw.githubusercontent.com/gothinkster/realworld/master/api/Conduit.postman_collection.json
+          --delay-request 200
+          --global-var "APIURL=http://localhost:8080/api"
+          --global-var "USERNAME=username"
+          --global-var "EMAIL=username@example.com"
+          --global-var "PASSWORD=password"
+
+  graal-11-linux:
+    if: "false"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup GraalVM CE
+        uses: rinx/setup-graalvm-ce@v0.0.5
+        with:
+          graalvm-version: "21.0.0.2"
+          java-version: "java11"
+          native-image: "true"
+
+      - uses: actions/setup-node@v1
+
+      - name: Cache Gradle wrapper and dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches/
+            ~/.gradle/wrapper/dists
+          key: test-${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'gradle/**', 'buildSrc/src/main/**') }}
+          restore-keys: |
+            test-${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew nativeImage
+
+      - name: Save app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app
+          path: |
+            service/build/native-image/application
+
+      - name: Run app for testing
+        run: |
+          nohup ./service/build/native-image/application &
+          sleep 5s
+
+      - name: Run postman collection
+        run: >
+          npx newman run
+          https://raw.githubusercontent.com/gothinkster/realworld/master/api/Conduit.postman_collection.json
+          --delay-request 200
+          --global-var "APIURL=http://localhost:8080/api"
+          --global-var "USERNAME=username"
+          --global-var "EMAIL=username@example.com"
+          --global-var "PASSWORD=password"
+
+  graal-8-windows:
+    if: "false"
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup GraalVM CE
+        uses: DeLaGuardo/setup-graalvm@master
+        with:
+          graalvm-version: "21.0.0.2.java8"
+
+      - name: Install native-image component
+        run: |
+          gu.cmd install native-image
+
+      - name: Install native-image component
+        run: |
+          native-image.cmd --version
+
+
+      - uses: actions/setup-node@v1
+
+      - name: Cache Gradle wrapper and dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches/
+            ~/.gradle/wrapper/dists
+          key: test-${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'gradle/**', 'buildSrc/src/main/**') }}
+          restore-keys: |
+            test-${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew nativeImage --stacktrace
+
+      - name: Save app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app
+          path: |
+            service/build/native-image/application
+
+      - name: Run app for testing
+        run: |
+          nohup ./service/build/native-image/application &
+          sleep 5s
+
+      - name: Run postman collection
+        run: >
+          npx newman run
+          https://raw.githubusercontent.com/gothinkster/realworld/master/api/Conduit.postman_collection.json
+          --delay-request 200
+          --global-var "APIURL=http://localhost:8080/api"
+          --global-var "USERNAME=username"
+          --global-var "EMAIL=username@example.com"
+          --global-var "PASSWORD=password"
+
   coverage:
     runs-on: ubuntu-latest
     steps:

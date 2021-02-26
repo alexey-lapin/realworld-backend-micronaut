@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.api.dto;
 
+import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +35,7 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @Builder
 @Getter
+@Introspected
 public class CommentDto {
 
     private Long id;

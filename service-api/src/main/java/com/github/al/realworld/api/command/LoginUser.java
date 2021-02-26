@@ -33,10 +33,10 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-@Introspected
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Introspected
 @JsonRootName("user")
 public class LoginUser implements Command<LoginUserResult> {
 

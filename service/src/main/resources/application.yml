@@ -107,3 +107,14 @@ liquibase:
   datasources:
     default:
       change-log: "classpath:db/database-changelog.xml"
+
+endpoints:
+  info:
+    enabled: true
+    sensitive: false
+  beans:
+    enabled: true
+    sensitive: false
+  routes:
+    enabled: true
+    sensitive: false

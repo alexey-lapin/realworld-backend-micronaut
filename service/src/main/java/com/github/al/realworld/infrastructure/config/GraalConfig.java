@@ -21,20 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.command;
+package com.github.al.realworld.infrastructure.config;
 
-import com.github.al.realworld.api.dto.ArticleDto;
-import io.micronaut.core.annotation.Introspected;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.core.annotation.TypeHint;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Introspected
-@Getter
-public class FavoriteArticleResult {
-
-    private ArticleDto article;
-
+@TypeHint(
+        typeNames = {
+                "java.util.UUID",
+                "io.jsonwebtoken.impl.DefaultJwtBuilder",
+                "io.jsonwebtoken.impl.DefaultJwtParserBuilder"
+        },
+        accessType = {
+                TypeHint.AccessType.ALL_DECLARED_CONSTRUCTORS,
+                TypeHint.AccessType.ALL_DECLARED_FIELDS,
+                TypeHint.AccessType.ALL_PUBLIC_METHODS
+        }
+)
+public class GraalConfig {
 }

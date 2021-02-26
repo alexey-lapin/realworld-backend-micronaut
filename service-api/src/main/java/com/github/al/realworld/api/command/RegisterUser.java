@@ -26,15 +26,19 @@ package com.github.al.realworld.api.command;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.github.al.bus.Command;
 import io.micronaut.core.annotation.Introspected;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-@Introspected
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Getter
+@Introspected
 @JsonRootName("user")
 public class RegisterUser implements Command<RegisterUserResult> {
 
