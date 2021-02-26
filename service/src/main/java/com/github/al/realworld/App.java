@@ -23,12 +23,12 @@
  */
 package com.github.al.realworld;
 
-import io.micronaut.core.annotation.TypeHint;
 import io.micronaut.runtime.Micronaut;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 @OpenAPIDefinition(
         info = @Info(
@@ -46,17 +46,11 @@ import io.swagger.v3.oas.annotations.info.License;
                 )
         )
 )
-@TypeHint(
-        typeNames = "io.jsonwebtoken.impl.DefaultJwtBuilder",
-        accessType = {
-                TypeHint.AccessType.ALL_DECLARED_CONSTRUCTORS,
-                TypeHint.AccessType.ALL_DECLARED_FIELDS,
-                TypeHint.AccessType.ALL_PUBLIC_METHODS
-        }
-)
 public class App {
 
     public static void main(String[] args) {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
         Micronaut.run(args);
     }
 
