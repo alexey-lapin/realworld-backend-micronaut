@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 @OpenAPIDefinition(
         info = @Info(
@@ -48,6 +49,8 @@ import io.swagger.v3.oas.annotations.info.License;
 public class App {
 
     public static void main(String[] args) {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
         Micronaut.run(args);
     }
 

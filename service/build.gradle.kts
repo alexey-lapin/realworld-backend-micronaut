@@ -56,12 +56,12 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:${Versions.jwt}")
     implementation("io.swagger.core.v3:swagger-annotations")
     implementation("javax.annotation:javax.annotation-api")
+    implementation("org.slf4j:jul-to-slf4j:${Versions.slf4j}")
 
     runtimeOnly("ch.qos.logback:logback-classic:${Versions.logback}")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:${Versions.jwt}")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:${Versions.jwt}")
-    runtimeOnly("org.slf4j:jul-to-slf4j:1.7.26")
 
     testAnnotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")
