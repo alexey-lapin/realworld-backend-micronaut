@@ -1,6 +1,7 @@
 plugins {
     application
     id("com.github.johnrengelman.shadow")
+    id("io.micronaut.application")
 }
 
 sourceSets {
@@ -23,6 +24,14 @@ idea {
     }
 }
 
+micronaut {
+    version.set(Versions.mn)
+    processing {
+        annotations("com.github.al.realworld.*")
+//        sourceSets(sourceSets["intTest"])
+    }
+}
+
 configurations.all {
     resolutionStrategy.force("org.liquibase:liquibase-core:${Versions.liquibase}")
 }
@@ -31,7 +40,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
     compileOnly("org.projectlombok:lombok:${Versions.lombok}")
 
-    annotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
+//    annotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     annotationProcessor("io.micronaut:micronaut-inject-java")
     annotationProcessor("io.micronaut:micronaut-validation")
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
@@ -41,7 +50,7 @@ dependencies {
     implementation(project(":service-bus"))
     implementation(project(":service-api"))
 
-    implementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
+//    implementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-http-server-netty")
     implementation("io.micronaut:micronaut-inject")
@@ -62,10 +71,10 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:${Versions.jwt}")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:${Versions.jwt}")
 
-    testAnnotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
+//    testAnnotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")
 
-    testImplementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
+//    testImplementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     testImplementation("io.micronaut.test:micronaut-test-junit5")
     testImplementation("org.assertj:assertj-core:${Versions.assertj}")
     testImplementation("org.mockito:mockito-core:${Versions.mockito}")
