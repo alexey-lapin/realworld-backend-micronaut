@@ -1,7 +1,7 @@
 pluginManagement {
     plugins {
-        id("com.diffplug.spotless") version "5.10.2"
-        id("com.github.ben-manes.versions") version "0.36.0"
+        id("com.diffplug.spotless") version "5.11.0"
+        id("com.github.ben-manes.versions") version "0.38.0"
         id("com.github.johnrengelman.shadow") version "6.1.0"
     }
 }
