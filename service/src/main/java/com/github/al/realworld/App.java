@@ -49,6 +49,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 public class App {
 
     public static void main(String[] args) {
+        // make liquibase and other jul-lovers log to slf4j
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
         Micronaut.run(args);
