@@ -35,6 +35,7 @@ import com.github.al.realworld.api.query.GetArticleResult;
 import com.github.al.realworld.api.query.GetArticlesResult;
 import com.github.al.realworld.api.query.GetCommentsResult;
 import com.github.al.realworld.api.query.GetFeedResult;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Delete;
@@ -45,7 +46,6 @@ import io.micronaut.http.annotation.Put;
 import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.annotation.Status;
 
-import javax.annotation.Nullable;
 import javax.validation.Valid;
 
 public interface ArticleOperations {
