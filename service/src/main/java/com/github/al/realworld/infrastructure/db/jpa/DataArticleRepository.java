@@ -24,12 +24,12 @@
 package com.github.al.realworld.infrastructure.db.jpa;
 
 import com.github.al.realworld.domain.model.Article;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.Query;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.data.repository.CrudRepository;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

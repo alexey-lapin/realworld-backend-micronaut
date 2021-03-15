@@ -46,10 +46,10 @@ import com.github.al.realworld.api.query.GetCommentsResult;
 import com.github.al.realworld.api.query.GetFeed;
 import com.github.al.realworld.api.query.GetFeedResult;
 import com.github.al.realworld.application.service.AuthenticationService;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.annotation.Controller;
 import lombok.RequiredArgsConstructor;
 
-import javax.annotation.Nullable;
 import javax.validation.Valid;
 
 @RequiredArgsConstructor
