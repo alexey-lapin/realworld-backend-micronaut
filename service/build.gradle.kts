@@ -1,3 +1,4 @@
+import com.gorylenko.GenerateGitPropertiesTask
 import com.gorylenko.GitPropertiesPluginExtension
 
 plugins {
@@ -120,6 +121,10 @@ tasks {
                 "description" to rootProject.description
             )
         )
+    }
+
+    named<GenerateGitPropertiesTask>("generateGitProperties") {
+        onlyIf { !source.isEmpty }
     }
 
     named<JavaCompile>("compileJava") {
