@@ -79,6 +79,21 @@ jackson:
     write_dates_as_timestamps: false
   deserialization:
     unwrap_root_value: true
+---
+endpoints:
+  info:
+    enabled: true
+    sensitive: false
+  health:
+    enabled: true
+    sensitive: false
+    details-visible: ANONYMOUS
+    jdbc:
+      enabled: true
+    discovery-client:
+      enabled: false
+    disk-space:
+      enabled: false
 
 security:
   jwt:
