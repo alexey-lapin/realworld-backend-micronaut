@@ -1,6 +1,9 @@
+import com.gorylenko.GitPropertiesPluginExtension
+
 plugins {
     application
     id("com.github.johnrengelman.shadow")
+    id("com.gorylenko.gradle-git-properties")
 }
 
 sourceSets {
@@ -83,6 +86,10 @@ dependencies {
 configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+configure<GitPropertiesPluginExtension> {
+    keys = listOf("git.branch", "git.commit.id", "git.commit.id.abbrev", "git.commit.time")
 }
 
 application {
