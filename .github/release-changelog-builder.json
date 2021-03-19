@@ -1,0 +1,4 @@
+{
+  "template": "${{CHANGELOG}}${{UNCATEGORIZED}}",
+  "pr_template": "- ${{TITLE}} @${{AUTHOR}} (#${{NUMBER}})"
+}
