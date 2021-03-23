@@ -40,7 +40,7 @@ jobs:
 
       - name: Run app for testing
         run: |
-          nohup java -jar service/build/libs/service-*-all.jar &
+          nohup java -jar service/build/libs/realworld-backend-micronaut-*.jar &
           sleep 5s
 
       - name: Run postman collection
