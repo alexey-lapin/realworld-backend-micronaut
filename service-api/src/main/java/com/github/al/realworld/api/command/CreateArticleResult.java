@@ -24,12 +24,14 @@
 package com.github.al.realworld.api.command;
 
 import com.github.al.realworld.api.dto.ArticleDto;
+import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Introspected
 @Getter
 public class CreateArticleResult {
 

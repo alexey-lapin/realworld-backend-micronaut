@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.api.dto;
 
+import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +33,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Getter
+@Introspected
 public class UserDto {
 
     private String email;

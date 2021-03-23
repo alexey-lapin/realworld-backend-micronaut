@@ -24,6 +24,7 @@
 package com.github.al.realworld.api.query;
 
 import com.github.al.realworld.api.dto.ArticleDto;
+import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -31,6 +32,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @Getter
+@Introspected
 public class GetFeedResult {
 
     private List<ArticleDto> articles;

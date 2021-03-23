@@ -28,8 +28,6 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "java")
-
     pluginManager.withPlugin("java") {
 
         spotless {
@@ -41,6 +39,11 @@ subprojects {
                 trimTrailingWhitespace()
                 endWithNewline()
             }
+        }
+
+        configure<JavaPluginConvention> {
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
         }
 
         afterEvaluate {
@@ -56,11 +59,6 @@ subprojects {
                 jarTask.finalizedBy(extractJar)
             }
         }
-    }
-
-    configure<JavaPluginConvention> {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     tasks {
@@ -109,8 +107,8 @@ tasks {
             componentSelection {
                 all {
                     val rejected = listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea")
-                            .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-+]*") }
-                            .any { it.matches(candidate.version) }
+                        .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-+]*") }
+                        .any { it.matches(candidate.version) }
                     if (rejected) {
                         reject("Release candidate")
                     }

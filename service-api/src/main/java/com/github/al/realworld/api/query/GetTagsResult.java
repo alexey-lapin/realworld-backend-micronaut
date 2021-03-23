@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.api.query;
 
+import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Introspected
 public class GetTagsResult {
 
     private List<String> tags;

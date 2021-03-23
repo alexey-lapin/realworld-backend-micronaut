@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.api.dto;
 
+import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,6 +36,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Getter
+@Introspected
 public class ArticleDto {
 
     private String slug;
@@ -47,4 +49,5 @@ public class ArticleDto {
     private Boolean favorited;
     private Integer favoritesCount;
     private ProfileDto author;
+
 }

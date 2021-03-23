@@ -24,6 +24,7 @@
 package com.github.al.realworld.api.query;
 
 import com.github.al.realworld.api.dto.ProfileDto;
+import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Introspected
 public class GetProfileResult {
 
     private ProfileDto profile;

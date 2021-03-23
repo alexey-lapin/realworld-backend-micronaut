@@ -4,6 +4,8 @@ pluginManagement {
         id("com.github.ben-manes.versions") version "0.38.0"
         id("com.github.johnrengelman.shadow") version "6.1.0"
         id("com.gorylenko.gradle-git-properties") version "2.2.4"
+        id("io.micronaut.application") version "1.4.2"
+        id("io.micronaut.library") version "1.4.2"
     }
 }
 

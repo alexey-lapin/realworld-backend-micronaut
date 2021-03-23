@@ -1,10 +1,19 @@
+plugins {
+    id("io.micronaut.library")
+}
+
+micronaut {
+    version.set(Versions.mn)
+    processing {
+        annotations("com.github.al.realworld.*")
+    }
+}
+
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
     compileOnly("org.projectlombok:lombok:${Versions.lombok}")
 
-    annotationProcessor(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
-    annotationProcessor("io.micronaut:micronaut-inject-java")
+    annotationProcessor("io.micronaut:micronaut-graal")
 
-    implementation(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
     implementation("io.micronaut:micronaut-inject")
 }

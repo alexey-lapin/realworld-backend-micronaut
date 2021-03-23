@@ -24,11 +24,13 @@
 package com.github.al.realworld.api.query;
 
 import com.github.al.realworld.api.dto.CommentDto;
+import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
+@Introspected
 public class GetCommentResult {
 
     private CommentDto comment;
