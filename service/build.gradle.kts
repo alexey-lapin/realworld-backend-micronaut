@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.gorylenko.GenerateGitPropertiesTask
 import com.gorylenko.GitPropertiesPluginExtension
 
@@ -35,7 +36,6 @@ micronaut {
     version.set(Versions.mn)
     processing {
         annotations("com.github.al.realworld.*")
-//        sourceSets(sourceSets["intTest"])
     }
 }
 
@@ -97,10 +97,6 @@ application {
 }
 
 tasks {
-//    shadowJar {
-//        mergeServiceFiles()
-//    }
-
     register<Test>("integrationTest") {
         description = "Runs the integration tests."
         group = "verification"
@@ -133,12 +129,15 @@ tasks {
         dependsOn("copyOpenApiConfig")
     }
 
+    named<ShadowJar>("shadowJar") {
+        archiveFileName.set("${rootProject.name}-${archiveVersion.get()}.${archiveExtension.get()}")
+    }
+
     withType<NativeImageTask> {
+        val os = OperatingSystem.current()
+        imageName.set("${rootProject.name}-${version}-${os.nativePrefix}${os.executableSuffix}")
         verbose(true)
-//        val main = rootProject.project("service-api").sourceSets.main.get()
-//        println("**** " + main.output.asPath)
-//        classpath(main.output)
-        if (OperatingSystem.current().isWindows) {
+        if (os.isWindows) {
             executable("native-image.cmd")
         }
     }
