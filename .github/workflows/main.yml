@@ -72,9 +72,9 @@ jobs:
   graal-8-windows:
     runs-on: windows-latest
     steps:
-      - uses: crazy-max/ghaction-chocolatey@v1
-        with:
-          args: install visualstudio2017-workload-vctools
+      - run: |
+          choco install chocolatey-visualstudio.extension --version 1.8.1
+          choco install visualstudio2017buildtools --version 15.9.31.0 --params "--no-update" --verbose
 
   graal-8-linux:
     if: "false"
