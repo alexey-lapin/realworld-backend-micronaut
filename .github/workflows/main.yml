@@ -77,7 +77,7 @@ jobs:
           choco install visualstudio2017buildtools --version 15.9.31.0 --params "--no-update" --verbose
 
       - run: |
-          choco install visualstudio2017-workload-vctools --params "--no-update" --verbose
+          dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
 
   graal-8-linux:
     if: "false"
