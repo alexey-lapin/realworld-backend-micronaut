@@ -76,6 +76,9 @@ jobs:
           choco install chocolatey-visualstudio.extension --version 1.8.1
           choco install visualstudio2017buildtools --version 15.9.31.0 --params "--no-update" --verbose
 
+      - run: |
+          choco install visualstudio2017-workload-vctools --params "--no-update" --verbose
+
   graal-8-linux:
     if: "false"
     runs-on: ubuntu-latest
