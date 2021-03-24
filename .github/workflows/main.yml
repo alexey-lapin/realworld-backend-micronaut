@@ -72,12 +72,12 @@ jobs:
   graal-8-windows:
     runs-on: windows-latest
     steps:
-      - run: |
-          choco install chocolatey-visualstudio.extension --version 1.8.1
-          choco install visualstudio2017buildtools --version 15.9.31.0 --params "--no-update" --verbose
+#      - run: |
+#          choco install chocolatey-visualstudio.extension --version 1.8.1
+#          choco install visualstudio2017buildtools --version 15.9.31.0 --params "--no-update" --verbose
 
       - run: |
-          dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
+          dir "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build"
 
   graal-8-linux:
     if: "false"
