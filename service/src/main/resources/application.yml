@@ -94,6 +94,9 @@ endpoints:
       enabled: false
     disk-space:
       enabled: false
+  prometheus:
+    enabled: true
+    sensitive: false
 
 security:
   jwt:
@@ -107,14 +110,3 @@ liquibase:
   datasources:
     default:
       change-log: "classpath:db/database-changelog.xml"
-
-endpoints:
-  info:
-    enabled: true
-    sensitive: false
-  beans:
-    enabled: true
-    sensitive: false
-  routes:
-    enabled: true
-    sensitive: false

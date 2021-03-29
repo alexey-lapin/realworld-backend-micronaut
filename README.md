@@ -27,6 +27,7 @@ Some other highlights:
 - Deployment on [Heroku](https://realworld-backend-micronaut.herokuapp.com/api) is part of CI
 - OpenAPI support with [swagger-ui](https://realworld-backend-micronaut.herokuapp.com/swagger-ui)
 - Micronaut built-in [health](https://realworld-backend-micronaut.herokuapp.com/health) and [info](https://realworld-backend-micronaut.herokuapp.com/info) endpoints
+- Micronaut Prometheus [metrics](https://realworld-backend-micronaut.herokuapp.com/prometheus) endpoint 
 - GraalVM support
 
 # Getting started
