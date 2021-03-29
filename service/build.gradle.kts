@@ -60,6 +60,8 @@ dependencies {
     implementation("io.micronaut:micronaut-validation")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     implementation("io.micronaut.liquibase:micronaut-liquibase")
+    implementation("io.micronaut.micrometer:micronaut-micrometer-core")
+    implementation("io.micronaut.micrometer:micronaut-micrometer-registry-prometheus")
     implementation("io.micronaut.security:micronaut-security")
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
 
