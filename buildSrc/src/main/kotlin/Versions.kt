@@ -1,7 +1,7 @@
 object Versions {
 
     const val lombok = "1.18.20"
-    const val mn = "2.4.2"
+    const val mn = "2.5.0"
     const val jwt = "0.11.2"
     const val logback = "1.2.3"
     const val liquibase = "4.2.2"
