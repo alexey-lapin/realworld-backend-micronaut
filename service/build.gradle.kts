@@ -33,19 +33,19 @@ configurations["intTestRuntimeOnly"].extendsFrom(configurations["testRuntimeOnly
 //}
 
 micronaut {
-    version.set(Versions.mn)
+    version.set(libs.versions.mn.get())
     processing {
         annotations("com.github.al.realworld.*")
     }
 }
 
 configurations.all {
-    resolutionStrategy.force("org.liquibase:liquibase-core:${Versions.liquibase}")
+    resolutionStrategy.force("org.liquibase:liquibase-core:${libs.versions.liquibase.get()}")
 }
 
 dependencies {
-    annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
-    compileOnly("org.projectlombok:lombok:${Versions.lombok}")
+    annotationProcessor("org.projectlombok:lombok:${libs.versions.lombok.get()}")
+    compileOnly("org.projectlombok:lombok:${libs.versions.lombok.get()}")
 
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
 
@@ -65,29 +65,29 @@ dependencies {
     implementation("io.micronaut.security:micronaut-security")
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
 
-    implementation("io.jsonwebtoken:jjwt-api:${Versions.jwt}")
+    implementation("io.jsonwebtoken:jjwt-api:${libs.versions.jwt.get()}")
     implementation("io.swagger.core.v3:swagger-annotations")
     implementation("javax.annotation:javax.annotation-api")
-    implementation("org.slf4j:jul-to-slf4j:${Versions.slf4j}")
+    implementation("org.slf4j:jul-to-slf4j:${libs.versions.slf4j.get()}")
 
-    runtimeOnly("ch.qos.logback:logback-classic:${Versions.logback}")
+    runtimeOnly("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
     runtimeOnly("com.h2database:h2")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:${Versions.jwt}")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${Versions.jwt}")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${libs.versions.jwt.get()}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${libs.versions.jwt.get()}")
 
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")
 
     testImplementation("io.micronaut.test:micronaut-test-junit5")
-    testImplementation("org.assertj:assertj-core:${Versions.assertj}")
-    testImplementation("org.mockito:mockito-core:${Versions.mockito}")
+    testImplementation("org.assertj:assertj-core:${libs.versions.assertj.get()}")
+    testImplementation("org.mockito:mockito-core:${libs.versions.mockito.get()}")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 
-    "intTestAnnotationProcessor"(platform("io.micronaut:micronaut-bom:${Versions.mn}"))
+    "intTestAnnotationProcessor"(platform("io.micronaut:micronaut-bom:${libs.versions.mn.get()}"))
     "intTestAnnotationProcessor"("io.micronaut:micronaut-inject-java")
 
-    "intTestAnnotationProcessor"("org.projectlombok:lombok:${Versions.lombok}")
-    "intTestCompileOnly"("org.projectlombok:lombok:${Versions.lombok}")
+    "intTestAnnotationProcessor"("org.projectlombok:lombok:${libs.versions.lombok.get()}")
+    "intTestCompileOnly"("org.projectlombok:lombok:${libs.versions.lombok.get()}")
 }
 
 configure<GitPropertiesPluginExtension> {
