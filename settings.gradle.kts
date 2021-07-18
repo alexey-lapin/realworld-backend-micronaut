@@ -16,10 +16,9 @@ dependencyResolutionManagement {
         create("libs") {
             version("jwt", "0.11.2")
             version("liquibase", "4.4.2")
-
+            version("logback", "1.2.4")
             version("lombok", "1.18.20")
             version("mn", "2.5.9")
-            version("logback", "1.2.4")
             version("slf4j", "1.7.32")
 
             version("assertj", "3.20.2")

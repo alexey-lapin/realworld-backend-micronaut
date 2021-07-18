@@ -18,7 +18,7 @@ allprojects {
     if (enableJacoco) {
         apply(plugin = "jacoco")
         configure<JacocoPluginExtension> {
-            toolVersion = libs.versions.jacoco.get()
+            toolVersion = rootProject.libs.versions.jacoco.get()
         }
     }
 
@@ -41,7 +41,7 @@ subprojects {
             }
         }
 
-        configure<JavaPluginConvention> {
+        configure<JavaPluginExtension> {
             sourceCompatibility = JavaVersion.VERSION_1_8
             targetCompatibility = JavaVersion.VERSION_1_8
         }
@@ -92,9 +92,9 @@ if (enableJacoco) {
             classDirectories.from(files(jacocoClassesDir))
             executionData(jacocoMerge.get().destinationFile)
             reports {
-                html.isEnabled = true
-                xml.isEnabled = true
-                csv.isEnabled = false
+                html.required.set(true)
+                xml.required.set(true)
+                csv.required.set(false)
             }
         }
     }
