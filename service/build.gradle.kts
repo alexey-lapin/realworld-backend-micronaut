@@ -39,10 +39,6 @@ micronaut {
     }
 }
 
-configurations.all {
-    resolutionStrategy.force("org.liquibase:liquibase-core:${libs.versions.liquibase.get()}")
-}
-
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${libs.versions.lombok.get()}")
     compileOnly("org.projectlombok:lombok:${libs.versions.lombok.get()}")
