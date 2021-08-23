@@ -78,7 +78,7 @@ jobs:
       - name: Setup GraalVM CE
         uses: rinx/setup-graalvm-ce@v0.0.5
         with:
-          graalvm-version: "21.2.0.1"
+          graalvm-version: "21.2.0"
           java-version: "java8"
           native-image: "true"
 
@@ -138,7 +138,7 @@ jobs:
       - uses: ayltai/setup-graalvm@v1
         with:
           java-version: 11
-          graalvm-version: 21.2.0.1
+          graalvm-version: 21.2.0
           native-image: true
 
 #      - uses: actions/setup-node@v1
