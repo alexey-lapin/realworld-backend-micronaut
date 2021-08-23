@@ -1,12 +1,5 @@
 plugins {
-    id("io.micronaut.library")
-}
-
-micronaut {
-    version.set(libs.versions.mn.get())
-    processing {
-        annotations("com.github.al.realworld.*")
-    }
+    id("micronaut-library-conventions")
 }
 
 dependencies {

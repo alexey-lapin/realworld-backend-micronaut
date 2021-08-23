@@ -9,34 +9,7 @@ plugins {
     application
     id("com.github.johnrengelman.shadow")
     id("com.gorylenko.gradle-git-properties")
-    id("io.micronaut.application")
-}
-
-sourceSets {
-    create("intTest") {
-        compileClasspath += sourceSets.main.get().output
-        runtimeClasspath += sourceSets.main.get().output
-    }
-}
-
-configurations["intTestImplementation"].extendsFrom(configurations["implementation"])
-configurations["intTestImplementation"].extendsFrom(configurations["testImplementation"])
-configurations["intTestRuntimeOnly"].extendsFrom(configurations["runtimeOnly"])
-configurations["intTestRuntimeOnly"].extendsFrom(configurations["testRuntimeOnly"])
-
-//idea {
-//    module {
-//        testSourceDirs.addAll(sourceSets["intTest"].java.srcDirs)
-//        testResourceDirs.addAll(sourceSets["intTest"].resources.srcDirs)
-//        scopes["TEST"]!!["plus"]!!.add(configurations["intTestCompile"])
-//    }
-//}
-
-micronaut {
-    version.set(libs.versions.mn.get())
-    processing {
-        annotations("com.github.al.realworld.*")
-    }
+    id("micronaut-application-conventions")
 }
 
 dependencies {
@@ -91,19 +64,10 @@ configure<GitPropertiesPluginExtension> {
 }
 
 application {
-    mainClassName = "com.github.al.realworld.App"
+    mainClass.set("com.github.al.realworld.App")
 }
 
 tasks {
-    register<Test>("integrationTest") {
-        description = "Runs the integration tests."
-        group = "verification"
-
-        testClassesDirs = sourceSets["intTest"].output.classesDirs
-        classpath = sourceSets["intTest"].runtimeClasspath
-        shouldRunAfter("test")
-    }
-
     register<Copy>("copyOpenApiConfig") {
         from(rootProject.file("openapi.properties"))
         destinationDir = rootProject.buildDir
@@ -139,8 +103,6 @@ tasks {
             executable("native-image.cmd")
         }
     }
-
-    named("check") { dependsOn("integrationTest") }
 
     // used by Heroku
     register("stage") {
