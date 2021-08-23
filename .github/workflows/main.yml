@@ -154,7 +154,11 @@ jobs:
             test-${{ runner.os }}-gradle-
 
       - name: Build with Gradle
-        run: ./gradlew build nativeImage -x check
+        run: ./gradlew build -x check
+
+      - name: Build Native Image
+        shell: powershell
+        run: native-image --no-fallback -cp service/build/libs/realworld-backend-micronaut-0.1.1.jar
 
 #      - name: Upload service-native-linux-8
 #        uses: actions/upload-artifact@v2
