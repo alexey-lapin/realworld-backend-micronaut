@@ -119,6 +119,59 @@ jobs:
           --global-var "EMAIL=username@example.com"
           --global-var "PASSWORD=password"
 
+  graal-8-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ilammy/msvc-dev-cmd@v1.5.0
+
+      - uses: microsoft/setup-msbuild@v1
+
+      - name: Setup GraalVM CE
+        uses: rinx/setup-graalvm-ce@v0.0.5
+        with:
+          graalvm-version: "21.2.0.1"
+          java-version: "java8"
+          native-image: "true"
+
+#      - uses: actions/setup-node@v1
+
+      - name: Cache Gradle wrapper and dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches/
+            ~/.gradle/wrapper/dists
+          key: test-${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'gradle/**', 'buildSrc/src/main/**') }}
+          restore-keys: |
+            test-${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build nativeImage -x check
+
+#      - name: Upload service-native-linux-8
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: service-native-linux-8
+#          path: |
+#            service/build/native-image/realworld-backend-micronaut-*
+#
+#      - name: Run app for testing
+#        run: |
+#          nohup ./service/build/native-image/realworld-backend-micronaut-* &
+#          sleep 5s
+#
+#      - name: Run postman collection
+#        run: >
+#          npx newman run
+#          https://raw.githubusercontent.com/gothinkster/realworld/master/api/Conduit.postman_collection.json
+#          --delay-request 200
+#          --global-var "APIURL=http://localhost:8080/api"
+#          --global-var "USERNAME=username"
+#          --global-var "EMAIL=username@example.com"
+#          --global-var "PASSWORD=password"
+
   coverage:
     runs-on: ubuntu-latest
     steps:
