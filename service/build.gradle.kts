@@ -39,6 +39,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:${libs.versions.jwt.get()}")
     implementation("io.swagger.core.v3:swagger-annotations")
     implementation("javax.annotation:javax.annotation-api")
+    implementation("javax.inject:javax.inject:1")
     implementation("org.slf4j:jul-to-slf4j:${libs.versions.slf4j.get()}")
 
     runtimeOnly("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
