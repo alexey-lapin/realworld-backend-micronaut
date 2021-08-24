@@ -3,8 +3,10 @@ plugins {
     id("io.micronaut.library")
 }
 
+val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
 micronaut {
-    version.set("2.5.11")
+    version.set(libs.findVersion("mn").get().displayName)
     processing {
         annotations("com.github.al.realworld.*")
     }

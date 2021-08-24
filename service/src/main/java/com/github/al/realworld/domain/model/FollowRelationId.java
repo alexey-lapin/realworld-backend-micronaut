@@ -23,6 +23,8 @@
  */
 package com.github.al.realworld.domain.model;
 
+import io.micronaut.core.annotation.ReflectiveAccess;
+import io.micronaut.core.annotation.TypeHint;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -36,6 +38,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode
+@TypeHint
+@ReflectiveAccess
 @Embeddable
 public class FollowRelationId implements Serializable {
 

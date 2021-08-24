@@ -23,7 +23,7 @@
  */
 package com.github.al.realworld.api.dto;
 
-import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,7 +36,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Getter
-@Introspected
+@ReflectiveAccess
 public class ArticleDto {
 
     private String slug;

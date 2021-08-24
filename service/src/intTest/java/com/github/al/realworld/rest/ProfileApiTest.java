@@ -29,10 +29,9 @@ import com.github.al.realworld.api.query.GetProfileResult;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import javax.inject.Inject;
 
 import static com.github.al.realworld.rest.auth.AuthSupport.logout;
 import static com.github.al.realworld.rest.auth.AuthSupport.register;

@@ -28,7 +28,7 @@ import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.FollowRelationRepository;
 import lombok.RequiredArgsConstructor;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.UUID;
 

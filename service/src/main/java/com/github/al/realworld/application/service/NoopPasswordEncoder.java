@@ -23,7 +23,7 @@
  */
 package com.github.al.realworld.application.service;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Objects;
 
 @Singleton

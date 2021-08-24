@@ -23,7 +23,7 @@
  */
 package com.github.al.realworld.api.dto;
 
-import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Introspected
+@ReflectiveAccess
 public class ProfileDto {
 
     private String username;

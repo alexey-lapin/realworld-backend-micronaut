@@ -60,7 +60,9 @@ tasks {
         }
     }
 
-    named("build").get().shouldRunAfter("spotlessJava")
+    withType<JavaCompile>().configureEach {
+        shouldRunAfter("spotlessJavaCheck")
+    }
 }
 
 // Do not generate reports for individual projects

@@ -1,0 +1,9 @@
+[versions]
+jwt = "0.11.2"
+logback = "1.2.4"
+lombok = "1.18.20"
+mn = "3.0.0"
+slf4j = "1.7.32"
+assertj = "3.20.2"
+mockito = "3.11.2"
+jacoco = "0.8.5"

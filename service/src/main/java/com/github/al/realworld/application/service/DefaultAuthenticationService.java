@@ -26,7 +26,7 @@ package com.github.al.realworld.application.service;
 import io.micronaut.security.utils.SecurityService;
 import lombok.RequiredArgsConstructor;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @RequiredArgsConstructor
 @Singleton

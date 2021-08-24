@@ -29,7 +29,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.micronaut.context.annotation.Value;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.security.Key;
 
 @Singleton

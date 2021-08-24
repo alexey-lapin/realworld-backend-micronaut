@@ -24,13 +24,13 @@
 package com.github.al.realworld.api.query;
 
 import com.github.al.realworld.api.dto.ArticleDto;
-import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-@Introspected
+@ReflectiveAccess
 public class GetArticleResult {
 
     private ArticleDto article;

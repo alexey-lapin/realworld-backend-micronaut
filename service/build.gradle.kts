@@ -18,6 +18,8 @@ dependencies {
 
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
 
+    compileOnly("com.google.code.findbugs:jsr305")
+
     implementation(project(":service-bus"))
     implementation(project(":service-api"))
 
@@ -37,6 +39,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:${libs.versions.jwt.get()}")
     implementation("io.swagger.core.v3:swagger-annotations")
     implementation("javax.annotation:javax.annotation-api")
+    implementation("javax.inject:javax.inject:1")
     implementation("org.slf4j:jul-to-slf4j:${libs.versions.slf4j.get()}")
 
     runtimeOnly("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
@@ -57,6 +60,8 @@ dependencies {
 
     "intTestAnnotationProcessor"("org.projectlombok:lombok:${libs.versions.lombok.get()}")
     "intTestCompileOnly"("org.projectlombok:lombok:${libs.versions.lombok.get()}")
+
+    "intTestCompileOnly"("com.google.code.findbugs:jsr305")
 }
 
 configure<GitPropertiesPluginExtension> {

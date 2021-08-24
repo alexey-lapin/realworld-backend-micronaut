@@ -8,6 +8,8 @@ dependencies {
 
     annotationProcessor("io.micronaut:micronaut-graal")
 
+    compileOnly("com.google.code.findbugs:jsr305")
+
     implementation(project(":service-bus"))
     implementation("io.micronaut:micronaut-http")
     implementation("com.fasterxml.jackson.core:jackson-annotations")

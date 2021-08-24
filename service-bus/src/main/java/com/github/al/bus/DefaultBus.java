@@ -25,7 +25,7 @@ package com.github.al.bus;
 
 import lombok.RequiredArgsConstructor;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @RequiredArgsConstructor
 @Singleton

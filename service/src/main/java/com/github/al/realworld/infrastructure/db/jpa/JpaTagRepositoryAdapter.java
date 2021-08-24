@@ -27,7 +27,7 @@ import com.github.al.realworld.domain.model.Tag;
 import com.github.al.realworld.domain.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Optional;
 
 @RequiredArgsConstructor
