@@ -24,6 +24,7 @@
 package com.github.al.realworld.api.command;
 
 import com.github.al.realworld.api.dto.CommentDto;
+import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,6 +32,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Introspected
 @ReflectiveAccess
 @Getter
 public class AddCommentResult {

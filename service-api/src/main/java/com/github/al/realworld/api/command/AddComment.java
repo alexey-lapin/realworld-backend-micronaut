@@ -26,7 +26,7 @@ package com.github.al.realworld.api.command;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.github.al.bus.Command;
-import io.micronaut.core.annotation.ReflectiveAccess;;
+import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +38,7 @@ import lombok.With;
 @AllArgsConstructor
 @Builder
 @Getter
+@Introspected
 @ReflectiveAccess
 @JsonRootName("comment")
 public class AddComment implements Command<AddCommentResult> {
