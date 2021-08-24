@@ -24,7 +24,8 @@
 package com.github.al.realworld.api.query;
 
 import com.github.al.realworld.api.dto.CommentDto;
-import io.micronaut.core.annotation.Introspected;\nimport io.micronaut.core.annotation.ReflectiveAccess;;
+import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Introspected
 @ReflectiveAccess
 public class GetCommentsResult {
 
