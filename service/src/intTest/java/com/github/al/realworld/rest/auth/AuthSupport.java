@@ -32,8 +32,8 @@ import io.micronaut.runtime.event.annotation.EventListener;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.UUID;
 
 @Singleton

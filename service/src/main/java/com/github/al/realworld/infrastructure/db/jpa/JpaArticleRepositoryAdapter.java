@@ -30,7 +30,7 @@ import io.micronaut.data.model.Sort;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

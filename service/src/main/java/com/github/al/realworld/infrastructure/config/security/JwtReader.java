@@ -25,7 +25,7 @@ package com.github.al.realworld.infrastructure.config.security;
 
 import io.micronaut.security.token.reader.HttpHeaderTokenReader;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class JwtReader extends HttpHeaderTokenReader {

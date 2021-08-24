@@ -18,6 +18,8 @@ dependencies {
 
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
 
+    compileOnly("com.google.code.findbugs:jsr305")
+
     implementation(project(":service-bus"))
     implementation(project(":service-api"))
 
@@ -57,6 +59,8 @@ dependencies {
 
     "intTestAnnotationProcessor"("org.projectlombok:lombok:${libs.versions.lombok.get()}")
     "intTestCompileOnly"("org.projectlombok:lombok:${libs.versions.lombok.get()}")
+
+    "intTestCompileOnly"("com.google.code.findbugs:jsr305")
 }
 
 configure<GitPropertiesPluginExtension> {

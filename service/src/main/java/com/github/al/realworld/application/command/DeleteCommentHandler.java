@@ -31,7 +31,7 @@ import com.github.al.realworld.domain.model.Comment;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import javax.transaction.Transactional;
 import java.util.Objects;
 import java.util.Set;

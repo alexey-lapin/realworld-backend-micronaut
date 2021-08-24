@@ -23,7 +23,7 @@
  */
 package com.github.al.realworld.application.service;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.text.Normalizer;
 import java.util.Locale;
 import java.util.regex.Pattern;
