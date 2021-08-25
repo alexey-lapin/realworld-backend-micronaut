@@ -158,7 +158,7 @@ jobs:
 
       - name: Build Native Image
         shell: powershell
-        run: native-image --no-fallback -cp service/build/libs/realworld-backend-micronaut-0.1.1.jar -H:Name=realworld -H:Class=com.github.al.realworld.App -H:+ReportExceptionStackTraces
+        run: native-image --no-fallback -jar service/build/libs/realworld-backend-micronaut-0.1.1.jar -H:Name=realworld -H:Class=com.github.al.realworld.App -H:+ReportExceptionStackTraces
 
 #      - name: Upload service-native-linux-8
 #        uses: actions/upload-artifact@v2
