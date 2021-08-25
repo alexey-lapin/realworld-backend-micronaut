@@ -137,7 +137,7 @@ jobs:
 
       - uses: ayltai/setup-graalvm@v1
         with:
-          java-version: 8
+          java-version: 11
           graalvm-version: 21.2.0
           native-image: true
 
