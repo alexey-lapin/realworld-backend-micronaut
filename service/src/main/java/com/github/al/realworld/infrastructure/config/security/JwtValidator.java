@@ -30,10 +30,10 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.authentication.ClientAuthentication;
 import io.micronaut.security.token.validator.TokenValidator;
-import io.reactivex.Flowable;
 import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -50,8 +50,8 @@ public class JwtValidator implements TokenValidator {
         String subject = jwtService.getSubject(token);
         Optional<User> userOptional = userRepository.findByUsername(subject);
         if (userOptional.isPresent()) {
-            return Flowable.just(new ClientAuthentication(subject, Collections.emptyMap()));
+            return Mono.just(new ClientAuthentication(subject, Collections.emptyMap()));
         }
-        return Flowable.empty();
+        return Mono.empty();
     }
 }
