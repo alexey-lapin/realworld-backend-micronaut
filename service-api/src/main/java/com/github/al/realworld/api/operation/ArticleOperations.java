@@ -33,6 +33,7 @@ import com.github.al.realworld.api.command.UpdateArticle;
 import com.github.al.realworld.api.command.UpdateArticleResult;
 import com.github.al.realworld.api.query.GetArticleResult;
 import com.github.al.realworld.api.query.GetArticlesResult;
+import com.github.al.realworld.api.query.GetCommentResult;
 import com.github.al.realworld.api.query.GetCommentsResult;
 import com.github.al.realworld.api.query.GetFeedResult;
 import io.micronaut.core.annotation.Nullable;
@@ -51,19 +52,19 @@ import javax.validation.Valid;
 public interface ArticleOperations {
 
     @Get("/articles{?tag,author,favorited,limit,offset}")
-    GetArticlesResult findByFilters(@QueryValue @Nullable String tag,
-                                    @QueryValue @Nullable String author,
-                                    @QueryValue @Nullable String favorited,
-                                    @QueryValue(defaultValue = "20") Integer limit,
-                                    @QueryValue(defaultValue = "0") Integer offset);
+    GetArticlesResult findByFilters(@QueryValue(value = "tag") @Nullable String tag,
+                                    @QueryValue(value = "author") @Nullable String author,
+                                    @QueryValue(value = "favourited") @Nullable String favorited,
+                                    @QueryValue(value = "limit", defaultValue = "20") Integer limit,
+                                    @QueryValue(value = "offset", defaultValue = "0") Integer offset);
 
     @Status(HttpStatus.CREATED)
     @Post("/articles")
     CreateArticleResult create(@Valid @Body CreateArticle command);
 
     @Get("/articles/feed")
-    GetFeedResult feed(@QueryValue(defaultValue = "20") Integer limit,
-                       @QueryValue(defaultValue = "0") Integer offset);
+    GetFeedResult feed(@QueryValue(value = "limit", defaultValue = "20") Integer limit,
+                       @QueryValue(value = "offset", defaultValue = "0") Integer offset);
 
     @Get("/articles/{slug}")
     GetArticleResult findBySlug(@PathVariable("slug") String slug);
@@ -84,9 +85,13 @@ public interface ArticleOperations {
     @Get("/articles/{slug}/comments")
     GetCommentsResult findAllComments(@PathVariable("slug") String slug);
 
+    @Get("/articles/{slug}/comments/{id}")
+    GetCommentResult findComment(@PathVariable("slug") String slug, @PathVariable("id") Long id);
+
     @Post("/articles/{slug}/comments")
     AddCommentResult addComment(@PathVariable("slug") String slug, @Valid @Body AddComment command);
 
+    @Status(HttpStatus.NO_CONTENT)
     @Delete("/articles/{slug}/comments/{id}")
     void deleteComment(@PathVariable("slug") String slug, @PathVariable("id") Long id);
 

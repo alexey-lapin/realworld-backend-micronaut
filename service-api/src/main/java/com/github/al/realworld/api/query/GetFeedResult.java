@@ -27,9 +27,11 @@ import com.github.al.realworld.api.dto.ArticleDto;
 import io.micronaut.core.annotation.ReflectiveAccess;;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @ReflectiveAccess

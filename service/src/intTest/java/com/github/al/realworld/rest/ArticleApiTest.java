@@ -29,14 +29,21 @@ import com.github.al.realworld.api.command.UpdateArticle;
 import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.api.dto.CommentDto;
 import com.github.al.realworld.api.operation.ArticleClient;
+import com.github.al.realworld.api.operation.ProfileClient;
 import com.github.al.realworld.api.query.GetArticleResult;
+import com.github.al.realworld.api.query.GetArticlesResult;
+import com.github.al.realworld.api.query.GetFeedResult;
+import com.github.al.realworld.infrastructure.db.jpa.DataArticleRepository;
+import com.github.al.realworld.rest.auth.AuthSupport;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,6 +64,9 @@ public class ArticleApiTest {
 
     @Inject
     private ArticleClient articleClient;
+
+    @Inject
+    private DataArticleRepository articleRepository;
 
     @AfterEach
     void afterEach() {
@@ -148,72 +158,195 @@ public class ArticleApiTest {
     }
 
     @Test
-    void shouldReturnCorrectCommentData_whenCreateDeleteComment() {
+    void should_returnCorrectArticleData_when_searchByFilters() {
+        GetArticlesResult r1 = articleClient.findByFilters(null, null, null, null, null);
+        System.out.println(r1.getArticlesCount());
+
+        articleRepository.deleteAll();
+
+        GetArticlesResult r2 = articleClient.findByFilters(null, null, null, null, null);
+        System.out.println(r2.getArticlesCount());
+
         String user = register().login().getUsername();
 
-        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
+        articleClient.create(createArticleCommand().toBuilder()
+                .tagList(Arrays.asList("tag1"))
+                .build());
 
-        AddComment addComment = AddComment.builder().body(TEST_BODY).build();
+        GetArticlesResult result2 = articleClient.findByFilters(null, user, null, null, null);
+        assertThat(result2.getArticlesCount()).isEqualTo(1);
 
-        CommentDto comment = articleClient.addComment(created.getSlug(), addComment).getComment();
+        GetArticlesResult result3 = articleClient.findByFilters(null, UUID.randomUUID().toString(), null, null, null);
+        assertThat(result3.getArticlesCount()).isEqualTo(0);
 
-        assertThat(comment.getId()).isNotNull();
-        assertThat(comment.getAuthor().getUsername()).isEqualTo(user);
-        assertThat(comment.getBody()).isEqualTo(TEST_BODY);
-        assertThat(comment.getCreatedAt()).isNotNull();
-        assertThat(comment.getUpdatedAt()).isNotNull();
+        GetArticlesResult result4 = articleClient.findByFilters("tag1", null, null, null, null);
+        assertThat(result4.getArticlesCount()).isEqualTo(1);
 
-        List<CommentDto> comments = articleClient.findAllComments(created.getSlug()).getComments();
+        GetArticlesResult result5 = articleClient.findByFilters("tag2", null, null, null, null);
+        assertThat(result5.getArticlesCount()).isEqualTo(0);
 
-        assertThat(comments).hasSize(1);
-
-        articleClient.deleteComment(created.getSlug(), comment.getId());
-
-        comments = articleClient.findAllComments(created.getSlug()).getComments();
-
-        assertThat(comments).hasSize(1);
+        GetArticlesResult result6 = articleClient.findByFilters("tag1", user, null, null, null);
+        assertThat(result6.getArticlesCount()).isEqualTo(1);
     }
 
-    @Test
-    void should_throw403_when_commentIsNotOwned() {
-        register().login();
+    @Nested
+    class CommentTest {
 
-        ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
+        @Test
+        void should_returnCorrectCommentData_whenCreateDeleteComment() {
+            String user = register().login().getUsername();
 
-        AddComment addComment = AddComment.builder().body(TEST_BODY).build();
-        CommentDto comment = articleClient.addComment(article.getSlug(), addComment).getComment();
+            ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
 
-        register().login();
+            AddComment addComment = AddComment.builder().body(TEST_BODY).build();
 
-        HttpClientResponseException exception = catchThrowableOfType(
-                () -> articleClient.deleteComment(article.getSlug(), comment.getId()),
-                HttpClientResponseException.class
-        );
+            CommentDto comment = articleClient.addComment(created.getSlug(), addComment).getComment();
 
-        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.FORBIDDEN.getCode());
+            assertThat(comment.getId()).isNotNull();
+            assertThat(comment.getAuthor().getUsername()).isEqualTo(user);
+            assertThat(comment.getBody()).isEqualTo(TEST_BODY);
+            assertThat(comment.getCreatedAt()).isNotNull();
+            assertThat(comment.getUpdatedAt()).isNotNull();
+
+            List<CommentDto> comments = articleClient.findAllComments(created.getSlug()).getComments();
+
+            assertThat(comments).hasSize(1);
+
+            articleClient.deleteComment(created.getSlug(), comment.getId());
+
+            comments = articleClient.findAllComments(created.getSlug()).getComments();
+
+            assertThat(comments).hasSize(1);
+        }
+
+        @Test
+        void should_throw403_when_commentIsNotOwned() {
+            register().login();
+
+            ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
+
+            AddComment addComment = AddComment.builder().body(TEST_BODY).build();
+            CommentDto comment = articleClient.addComment(article.getSlug(), addComment).getComment();
+
+            register().login();
+
+            HttpClientResponseException exception = catchThrowableOfType(
+                    () -> articleClient.deleteComment(article.getSlug(), comment.getId()),
+                    HttpClientResponseException.class
+            );
+
+            assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.FORBIDDEN.getCode());
+        }
+
+        @Test
+        void should_throw404_when_addCommentArticleDoesNotExist() {
+            register().login();
+
+            articleClient.addComment(UUID.randomUUID().toString(), AddComment.builder().body(TEST_BODY).build());
+        }
+
+        @Test
+        void should_throw404_when_deleteCommentArticleDoesNotExist() {
+            register().login();
+
+            articleClient.deleteComment(UUID.randomUUID().toString(), 9999999L);
+        }
+
+        @Test
+        void should_throw404_when_deleteCommentDoesNotExist() {
+            register().login();
+
+            ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
+
+            articleClient.deleteComment(article.getSlug(), 9999999L);
+        }
+
+        @Test
+        void should_returnCorrectCommentData() {
+            register().login();
+            ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
+            CommentDto createdComment = articleClient.addComment(article.getSlug(),
+                            AddComment.builder()
+                                    .body(TEST_BODY)
+                                    .build())
+                    .getComment();
+
+            CommentDto comment = articleClient.findComment(article.getSlug(), createdComment.getId()).getComment();
+
+            assertThat(comment.getId()).isNotNull();
+        }
     }
 
-    @Test
-    void should_throw404_when_addCommentArticleDoesNotExist() {
-        register().login();
+    @Nested
+    class FeetTest {
 
-        articleClient.addComment(UUID.randomUUID().toString(), AddComment.builder().body(TEST_BODY).build());
-    }
+        @Inject
+        private ProfileClient profileClient;
 
-    @Test
-    void should_throw404_when_deleteCommentArticleDoesNotExist() {
-        register().login();
+        @Test
+        void should_returnEmptyFeed_when_userDoesNotFollowAnyone() {
+            register().login();
 
-        articleClient.deleteComment(UUID.randomUUID().toString(), 9999999L);
-    }
+            GetFeedResult feed = articleClient.feed(10, 0);
 
-    @Test
-    void should_throw404_when_deleteCommentDoesNotExist() {
-        register().login();
+            assertThat(feed.getArticlesCount()).isEqualTo(0);
+        }
 
-        ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
+        @Test
+        void should_returnEmptyFeed_when_userHasOwnArticleAndDoesNotFollowAnyone() {
+            register().login();
 
-        articleClient.deleteComment(article.getSlug(), 9999999L);
+            articleClient.create(createArticleCommand());
+
+            GetFeedResult feed = articleClient.feed(10, 0);
+
+            assertThat(feed.getArticlesCount()).isEqualTo(0);
+        }
+
+        @Test
+        void should_returnCorrectFeed_when_userHasOwnArticleAndFollowSomeone() {
+            AuthSupport.RegisteredUser user1 = register().login();
+            articleClient.create(createArticleCommand());
+            GetFeedResult feed1 = articleClient.feed(10, 0);
+            assertThat(feed1.getArticlesCount()).isEqualTo(0);
+            logout();
+
+            AuthSupport.RegisteredUser user2 = register().login();
+            articleClient.create(createArticleCommand());
+            articleClient.create(createArticleCommand());
+            logout();
+
+            user1.login();
+            profileClient.follow(user2.getUsername());
+            GetFeedResult feed2 = articleClient.feed(10, 0);
+            assertThat(feed2.getArticlesCount()).isEqualTo(2);
+        }
+
+        @Test
+        void should_returnCorrectFeed_when_userHasOwnArticleAndFollowSomeOtherUsers() {
+            AuthSupport.RegisteredUser user1 = register().login();
+            articleClient.create(createArticleCommand());
+            GetFeedResult feed1 = articleClient.feed(10, 0);
+            assertThat(feed1.getArticlesCount()).isEqualTo(0);
+            logout();
+
+            AuthSupport.RegisteredUser user2 = register().login();
+            articleClient.create(createArticleCommand());
+            articleClient.create(createArticleCommand());
+            logout();
+
+            AuthSupport.RegisteredUser user3 = register().login();
+            articleClient.create(createArticleCommand());
+            articleClient.create(createArticleCommand());
+            articleClient.create(createArticleCommand());
+            logout();
+
+            user1.login();
+            profileClient.follow(user2.getUsername());
+            profileClient.follow(user3.getUsername());
+            GetFeedResult feed2 = articleClient.feed(4, 0);
+            assertThat(feed2.getArticlesCount()).isEqualTo(4);
+        }
     }
 
     private static CreateArticle createArticleCommand() {
