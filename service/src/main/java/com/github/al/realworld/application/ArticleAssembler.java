@@ -38,7 +38,7 @@ public class ArticleAssembler {
                 .title(article.getTitle())
                 .description(article.getDescription())
                 .body(article.getBody())
-                .tagList(article.getTags().stream().map(Tag::getName).collect(Collectors.toList()))
+                .tagList(article.getTags().stream().sorted().map(Tag::getName).collect(Collectors.toList()))
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())
                 .favorited(currentUser != null && article.getFavoredUsers().contains(currentUser))
