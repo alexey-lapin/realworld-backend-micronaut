@@ -14,26 +14,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          java-version: 1.8
+          distribution: temurin
+          java-version: 8
 
-      - uses: actions/setup-node@v1
-
-      - name: Cache Gradle wrapper and dependencies
-        uses: actions/cache@v2
+      - uses: actions/setup-node@v4
         with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/dists
-          key: test-${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'gradle/**', 'buildSrc/src/main/**') }}
-          restore-keys: |
-            test-${{ runner.os }}-gradle-
+          node-version: 20
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
         run: ./gradlew build
@@ -54,24 +50,24 @@ jobs:
           --global-var "PASSWORD=password"
 
       - name: Upload service-jar
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: service-jar
           path: |
             service/build/libs/realworld-backend-micronaut-*.jar
           retention-days: 7
 
-      - name: Deploy to Heroku
-        env:
-          HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
-          HEROKU_APP_NAME: "realworld-backend-micronaut"
-        if: github.ref == 'refs/heads/master' && job.status == 'success'
-        run: git push https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git HEAD:master -f
+#      - name: Deploy to Heroku
+#        env:
+#          HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
+#          HEROKU_APP_NAME: "realworld-backend-micronaut"
+#        if: github.ref == 'refs/heads/master' && job.status == 'success'
+#        run: git push https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git HEAD:master -f
 
   graal-8-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -82,23 +78,18 @@ jobs:
           java-version: "java8"
           native-image: "true"
 
-      - uses: actions/setup-node@v1
-
-      - name: Cache Gradle wrapper and dependencies
-        uses: actions/cache@v2
+      - uses: actions/setup-node@v4
         with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/dists
-          key: test-${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'gradle/**', 'buildSrc/src/main/**') }}
-          restore-keys: |
-            test-${{ runner.os }}-gradle-
+          node-version: 20
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
         run: ./gradlew build nativeImage -x check
 
       - name: Upload service-native-linux-8
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: service-native-linux-8
           path: |
@@ -122,22 +113,16 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          java-version: 1.8
+          distribution: temurin
+          java-version: 8
 
-      - name: Cache Gradle wrapper and dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/dists
-          key: test-${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'gradle/**', 'buildSrc/src/main/**') }}
-          restore-keys: |
-            test-${{ runner.os }}-gradle-
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: 'Run tests with JaCoCo'
         shell: bash
@@ -145,14 +130,16 @@ jobs:
           ./gradlew --version
           ./gradlew --scan --no-parallel --stacktrace --warning-mode=all jacocoReport
 
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   release-notes:
     runs-on: ubuntu-latest
     needs: [build, graal-8-linux]
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -165,7 +152,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download service-jar
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
 #        with:
 #          name: service-jar
 
