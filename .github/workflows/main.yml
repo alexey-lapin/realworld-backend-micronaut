@@ -21,6 +21,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
+          distribution: temurin
           java-version: 8
 
       - uses: actions/setup-node@v4
@@ -70,12 +71,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup GraalVM CE
-        uses: rinx/setup-graalvm-ce@v0.0.5
+      - name: Setup Java GraalVM
+        uses: graalvm/setup-graalvm@v1
         with:
-          graalvm-version: "21.0.0.2"
-          java-version: "java8"
-          native-image: "true"
+          java-version: 8
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: "true"
 
       - uses: actions/setup-node@v4
         with:
@@ -117,6 +118,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
+          distribution: temurin
           java-version: 8
 
       - name: Setup Gradle
