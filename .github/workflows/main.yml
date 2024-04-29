@@ -74,7 +74,7 @@ jobs:
       - name: Setup Java GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: 8
+          java-version: 11
           distribution: liberica
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: "true"
