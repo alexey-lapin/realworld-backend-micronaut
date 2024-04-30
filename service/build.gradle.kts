@@ -1,3 +1,4 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.gorylenko.GenerateGitPropertiesTask
 import com.gorylenko.GitPropertiesPluginExtension
@@ -99,6 +100,17 @@ tasks {
 
     named<ShadowJar>("shadowJar") {
         archiveFileName.set("${rootProject.name}-${archiveVersion.get()}.${archiveExtension.get()}")
+    }
+
+    named<DockerBuildImage>("dockerBuildNative") {
+        val registry = System.getenv("CR_REGISTRY")!!
+        val namespace = System.getenv("CR_NAMESPACE")!!
+        images.set(
+            listOf(
+                "${registry}/${namespace}/${project.name}:latest",
+                "${registry}/${namespace}/${project.name}:${project.version}"
+            )
+        )
     }
 
     withType<NativeImageTask> {
