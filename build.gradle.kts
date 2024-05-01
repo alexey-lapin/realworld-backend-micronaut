@@ -1,5 +1,6 @@
 plugins {
 //    id("com.github.ben-manes.versions")
+    alias(libs.plugins.release)
     id("jacoco-report-aggregation")
 }
 
