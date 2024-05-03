@@ -7,3 +7,8 @@ slf4j = "1.7.32"
 assertj = "3.21.0"
 mockito = "4.1.0"
 jacoco = "0.8.7"
+
+[plugins]
+shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
+versions = { id = "com.github.ben-manes.versions", version = "0.39.0" }
+git-properties = { id ="com.gorylenko.gradle-git-properties", version = "2.3.1" }
