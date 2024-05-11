@@ -8,10 +8,8 @@ import org.gradle.internal.os.OperatingSystem
 
 plugins {
     application
-//    id("com.github.johnrengelman.shadow")
-//    id("com.gorylenko.gradle-git-properties")
+    id("com.github.johnrengelman.shadow")
     id("micronaut-application-conventions")
-    alias(libs.plugins.shadow)
     alias(libs.plugins.git.properties)
 }
 

@@ -23,7 +23,7 @@
  */
 package com.github.al.realworld.api.dto;
 
-import io.micronaut.core.annotation.ReflectiveAccess;;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
