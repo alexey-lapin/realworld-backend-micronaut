@@ -2,6 +2,7 @@ import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.gorylenko.GenerateGitPropertiesTask
 import com.gorylenko.GitPropertiesPluginExtension
+import org.graalvm.buildtools.gradle.tasks.BuildNativeImageTask
 import org.gradle.internal.os.OperatingSystem
 
 plugins {
@@ -83,8 +84,7 @@ graalvmNative {
     toolchainDetection.set(true)
     binaries {
         named("main") {
-            val os = OperatingSystem.current()
-            imageName.set("${rootProject.name}-${version}-${os.nativePrefix}${os.executableSuffix}")
+            imageName.set(rootProject.name)
             buildArgs.add("--verbose")
         }
     }
@@ -137,6 +137,21 @@ tasks {
 //            executable("native-image.cmd")
 //        }
 //    }
+
+    val writeArtifactFile by registering {
+        doLast {
+            val os = OperatingSystem.current()
+            val outputDirectory = getByName<BuildNativeImageTask>("nativeCompile").outputDirectory
+            outputDirectory.get().asFile.mkdirs()
+            outputDirectory.file("gradle-artifact.txt")
+                .get().asFile
+                .writeText("${rootProject.name}-${project.version}-${os.nativePrefix}")
+        }
+    }
+
+    named("nativeCompile") {
+        finalizedBy(writeArtifactFile)
+    }
 
     // used by Heroku
     register("stage") {
