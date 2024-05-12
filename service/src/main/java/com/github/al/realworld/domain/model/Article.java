@@ -23,21 +23,22 @@
  */
 package com.github.al.realworld.domain.model;
 
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -47,6 +48,7 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @Getter
 @Entity
+@Table(name = "tbl_article")
 public class Article {
 
     @Id
@@ -70,7 +72,7 @@ public class Article {
 
     @Singular
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "article_tags",
+    @JoinTable(name = "tbl_article_tags",
             joinColumns = @JoinColumn(name = "article_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
@@ -78,7 +80,7 @@ public class Article {
 
     @Singular
     @ManyToMany
-    @JoinTable(name = "article_favorites",
+    @JoinTable(name = "tbl_article_favorites",
             joinColumns = @JoinColumn(name = "article_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )

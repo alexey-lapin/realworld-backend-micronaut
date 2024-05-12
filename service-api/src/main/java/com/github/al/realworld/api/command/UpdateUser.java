@@ -34,7 +34,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-import javax.validation.constraints.Email;
+import jakarta.validation.constraints.Email;
 
 @NoArgsConstructor
 @AllArgsConstructor
