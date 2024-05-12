@@ -24,7 +24,7 @@
 package com.github.al.realworld.api.query;
 
 import com.github.al.realworld.api.dto.ArticleDto;
-import io.micronaut.core.annotation.ReflectiveAccess;;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
