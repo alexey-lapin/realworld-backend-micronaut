@@ -23,13 +23,7 @@
  */
 package com.github.al.realworld.domain.model;
 
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Singular;
-
+import io.micronaut.configuration.hibernate.jpa.proxy.GenerateProxy;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -39,6 +33,13 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
+
 import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -47,6 +48,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Getter
+@GenerateProxy
 @Entity
 @Table(name = "tbl_article")
 public class Article {

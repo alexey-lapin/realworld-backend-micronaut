@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.domain.model;
 
+import io.micronaut.configuration.hibernate.jpa.proxy.GenerateProxy;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -43,6 +44,7 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@GenerateProxy
 @Entity
 @Table(name = "tbl_user")
 public class User {

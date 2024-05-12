@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.domain.model;
 
+import io.micronaut.configuration.hibernate.jpa.proxy.GenerateProxy;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,7 @@ import jakarta.persistence.Id;
 
 @NoArgsConstructor
 @Getter
+@GenerateProxy
 @Entity
 @Table(name = "tbl_tag")
 public class Tag {

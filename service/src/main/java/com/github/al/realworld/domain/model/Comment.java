@@ -23,6 +23,13 @@
  */
 package com.github.al.realworld.domain.model;
 
+import io.micronaut.configuration.hibernate.jpa.proxy.GenerateProxy;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,12 +37,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import jakarta.persistence.OneToOne;
 import java.time.ZonedDateTime;
 
 @NoArgsConstructor
@@ -43,6 +44,7 @@ import java.time.ZonedDateTime;
 @Builder
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@GenerateProxy
 @Entity
 @Table(name = "tbl_comment")
 public class Comment {
