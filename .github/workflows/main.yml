@@ -20,24 +20,26 @@ jobs:
   build-jvm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up JDK
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 8
+          java-version: 21
 
-      - uses: actions/setup-node@v4
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build with Gradle
+      - name: Gradle build
         run: ./gradlew build
 
       - name: Run app for testing
@@ -77,40 +79,49 @@ jobs:
           - name: linux
             os: ubuntu-20.04
             artifact: app-native-linux
+          - name: windows
+            os: windows-latest
+            artifact: app-native-windows
+          - name: macos
+            os: macos-latest
+            artifact: app-native-macos
     runs-on: ${{ matrix.os }}
     name: build-native-${{ matrix.name }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup GraalVM CE
-        uses: rinx/setup-graalvm-ce@v0.0.5
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
         with:
-          graalvm-version: "21.0.0.2"
-          java-version: "java8"
-          native-image: "true"
+          java-version: '21'
+          distribution: 'liberica'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
 
-      - uses: actions/setup-node@v4
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build with Gradle
-        run: ./gradlew build nativeImage -x check
+      - name: Gradle nativeCompile
+        run: ./gradlew :service:nativeCompile -x check
 
       - name: Upload app-native
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
           path: |
-            service/build/native-image/realworld-backend-micronaut-*
+            service/build/native/nativeCompile/realworld-backend-micronaut-*
 
       - name: Run app for testing
         run: |
-          nohup ./service/build/native-image/realworld-backend-micronaut-* &
+          nohup ./service/build/native/nativeCompile/realworld-backend-micronaut-* &
           sleep 5s
 
       - name: Run postman collection
@@ -128,22 +139,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 8
+          java-version: 21
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: 'Run tests with JaCoCo'
+      - name: Gradle jacocoReport
         shell: bash
         run: |
           ./gradlew --version
           ./gradlew --scan --no-parallel --stacktrace --warning-mode=all jacocoReport
 
-      - uses: codecov/codecov-action@v4
+      - name: Codecov
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -152,7 +164,8 @@ jobs:
     needs: [build-jvm, build-native]
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -192,11 +205,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 8
+          java-version: 21
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -208,5 +221,5 @@ jobs:
           username: ${{ env.CR_USERNAME }}
           password: ${{ env.CR_PASSWORD }}
 
-      - name: Gradle Push Native Docker Image
+      - name: Gradle dockerPushNative
         run: ./gradlew dockerPushNative
