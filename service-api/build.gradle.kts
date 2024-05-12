@@ -3,15 +3,17 @@ plugins {
 }
 
 dependencies {
-    annotationProcessor("org.projectlombok:lombok:${libs.versions.lombok.get()}")
-    compileOnly("org.projectlombok:lombok:${libs.versions.lombok.get()}")
+    annotationProcessor("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok")
 
     annotationProcessor("io.micronaut:micronaut-graal")
+    annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
 
     compileOnly("com.google.code.findbugs:jsr305")
 
     implementation(project(":service-bus"))
+
     implementation("io.micronaut:micronaut-http")
     implementation("com.fasterxml.jackson.core:jackson-annotations")
-    implementation("javax.validation:validation-api")
+    implementation("jakarta.validation:jakarta.validation-api")
 }

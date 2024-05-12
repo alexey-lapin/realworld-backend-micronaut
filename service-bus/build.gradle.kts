@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    annotationProcessor("org.projectlombok:lombok:${libs.versions.lombok.get()}")
-    compileOnly("org.projectlombok:lombok:${libs.versions.lombok.get()}")
+    annotationProcessor("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok")
 
     annotationProcessor("io.micronaut:micronaut-graal")
 

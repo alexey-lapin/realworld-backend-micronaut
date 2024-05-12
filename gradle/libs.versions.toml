@@ -1,11 +1,7 @@
 [versions]
 jwt = "0.11.2"
-logback = "1.2.7"
-lombok = "1.18.22"
-mn = "3.1.4"
-slf4j = "1.7.32"
-assertj = "3.21.0"
-mockito = "4.1.0"
+lombok = "1.18.32"
+mn = "4.4.1"
 jacoco = "0.8.7"
 
 [plugins]
