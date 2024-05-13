@@ -1,9 +1,17 @@
 plugins {
-    id("com.github.ben-manes.versions")
+    base
+    alias(libs.plugins.versions)
+    alias(libs.plugins.release)
     id("jacoco-aggregation")
 }
 
 description = "Real world backend API built in Micronaut"
+
+scmVersion {
+    tag {
+        prefix.set("v")
+    }
+}
 
 dependencies {
     implementation(project(":service"))

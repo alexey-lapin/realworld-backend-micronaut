@@ -40,13 +40,13 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Singleton
-public class JwtValidator implements TokenValidator {
+public class JwtValidator implements TokenValidator<HttpRequest<?>> {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
     @Override
-    public Publisher<Authentication> validateToken(String token, HttpRequest<?> request) {
+    public Publisher<Authentication> validateToken(String token, HttpRequest request) {
         String subject = jwtService.getSubject(token);
         Optional<User> userOptional = userRepository.findByUsername(subject);
         if (userOptional.isPresent()) {
@@ -54,4 +54,5 @@ public class JwtValidator implements TokenValidator {
         }
         return Mono.empty();
     }
+
 }

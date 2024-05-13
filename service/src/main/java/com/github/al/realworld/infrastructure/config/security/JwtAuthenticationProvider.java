@@ -24,15 +24,12 @@
 package com.github.al.realworld.infrastructure.config.security;
 
 import com.github.al.realworld.domain.repository.UserRepository;
-import io.micronaut.core.annotation.Nullable;
-import io.micronaut.http.HttpRequest;
-import io.micronaut.security.authentication.AuthenticationProvider;
+import io.micronaut.core.annotation.NonNull;
 import io.micronaut.security.authentication.AuthenticationRequest;
 import io.micronaut.security.authentication.AuthenticationResponse;
-import lombok.RequiredArgsConstructor;
-import org.reactivestreams.Publisher;
-
+import io.micronaut.security.authentication.provider.AuthenticationProvider;
 import jakarta.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Singleton
@@ -40,10 +37,15 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
     private final UserRepository userRepository;
 
+//    @Override
+//    public Publisher<AuthenticationResponse> authenticate(@Nullable HttpRequest<?> httpRequest,
+//                                                          AuthenticationRequest<?, ?> authenticationRequest) {
+//        return null;
+//    }
+
     @Override
-    public Publisher<AuthenticationResponse> authenticate(@Nullable HttpRequest<?> httpRequest,
-                                                          AuthenticationRequest<?, ?> authenticationRequest) {
+    @NonNull
+    public AuthenticationResponse authenticate(Object requestContext, @NonNull AuthenticationRequest authRequest) {
         return null;
     }
-
 }

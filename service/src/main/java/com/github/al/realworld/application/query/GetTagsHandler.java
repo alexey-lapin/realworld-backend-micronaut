@@ -31,7 +31,7 @@ import com.github.al.realworld.domain.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 
 import jakarta.inject.Singleton;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
 import java.util.stream.StreamSupport;

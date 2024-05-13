@@ -6,7 +6,7 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="01" author="al">
-        <createTable tableName="user">
+        <createTable tableName="tbl_user">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
@@ -19,7 +19,7 @@
     </changeSet>
 
     <changeSet id="02" author="al">
-        <createTable tableName="article">
+        <createTable tableName="tbl_article">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
@@ -31,14 +31,14 @@
             <column name="body" type="varchar(5000)"/>
             <column name="author_id" type="uuid">
                 <constraints foreignKeyName="fk_article_user"
-                             referencedTableName="user"
+                             referencedTableName="tbl_user"
                              referencedColumnNames="id"/>
             </column>
         </createTable>
     </changeSet>
 
     <changeSet id="03" author="al">
-        <createTable tableName="comment">
+        <createTable tableName="tbl_comment">
             <column name="id" type="number">
                 <constraints primaryKey="true"/>
             </column>
@@ -47,19 +47,19 @@
             <column name="body" type="varchar(5000)"/>
             <column name="author_id" type="uuid">
                 <constraints foreignKeyName="fk_comment_user"
-                             referencedTableName="user"
+                             referencedTableName="tbl_user"
                              referencedColumnNames="id"/>
             </column>
             <column name="article_id" type="uuid">
                 <constraints foreignKeyName="fk_comment_article"
-                             referencedTableName="article"
+                             referencedTableName="tbl_article"
                              referencedColumnNames="id"/>
             </column>
         </createTable>
     </changeSet>
 
     <changeSet id="04" author="al">
-        <createTable tableName="tag">
+        <createTable tableName="tbl_tag">
             <column name="id" type="number">
                 <constraints primaryKey="true"/>
             </column>
@@ -68,57 +68,57 @@
     </changeSet>
 
     <changeSet id="05" author="al">
-        <createTable tableName="article_tags">
+        <createTable tableName="tbl_article_tags">
             <column name="article_id" type="uuid">
                 <constraints nullable="false"
                              foreignKeyName="fk_article_tags_article"
-                             referencedTableName="article"
+                             referencedTableName="tbl_article"
                              referencedColumnNames="id"/>
             </column>
             <column name="tag_id" type="number">
                 <constraints nullable="false"
                              foreignKeyName="fk_article_tags_tag"
-                             referencedTableName="tag"
+                             referencedTableName="tbl_tag"
                              referencedColumnNames="id"/>
             </column>
         </createTable>
-        <addPrimaryKey tableName="article_tags" columnNames="article_id,tag_id"/>
+        <addPrimaryKey tableName="tbl_article_tags" columnNames="article_id,tag_id"/>
     </changeSet>
 
     <changeSet id="06" author="al">
-        <createTable tableName="follow_relation">
+        <createTable tableName="tbl_follow_relation">
             <column name="follower_id" type="uuid">
                 <constraints nullable="false"
                              foreignKeyName="fk_followers_follower"
-                             referencedTableName="user"
+                             referencedTableName="tbl_user"
                              referencedColumnNames="id"/>
             </column>
             <column name="followee_id" type="uuid">
                 <constraints nullable="false"
                              foreignKeyName="fk_followers_followee"
-                             referencedTableName="user"
+                             referencedTableName="tbl_user"
                              referencedColumnNames="id"/>
             </column>
         </createTable>
-        <addPrimaryKey tableName="follow_relation" columnNames="follower_id,followee_id"/>
+        <addPrimaryKey tableName="tbl_follow_relation" columnNames="follower_id,followee_id"/>
     </changeSet>
 
     <changeSet id="07" author="al">
-        <createTable tableName="article_favorites">
+        <createTable tableName="tbl_article_favorites">
             <column name="article_id" type="uuid">
                 <constraints nullable="false"
                              foreignKeyName="fk_article_favorites_article"
-                             referencedTableName="article"
+                             referencedTableName="tbl_article"
                              referencedColumnNames="id"/>
             </column>
             <column name="user_id" type="uuid">
                 <constraints nullable="false"
                              foreignKeyName="fk_article_favorites_user"
-                             referencedTableName="user"
+                             referencedTableName="tbl_user"
                              referencedColumnNames="id"/>
             </column>
         </createTable>
-        <addPrimaryKey tableName="article_favorites" columnNames="article_id,user_id"/>
+        <addPrimaryKey tableName="tbl_article_favorites" columnNames="article_id,user_id"/>
     </changeSet>
 
     <changeSet id="08" author="al">

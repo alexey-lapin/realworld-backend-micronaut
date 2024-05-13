@@ -37,7 +37,7 @@ import com.github.al.realworld.application.service.AuthenticationService;
 import io.micronaut.http.annotation.Controller;
 import lombok.RequiredArgsConstructor;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 @RequiredArgsConstructor
 @Controller("${api.version}")

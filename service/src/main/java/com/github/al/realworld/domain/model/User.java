@@ -23,7 +23,12 @@
  */
 package com.github.al.realworld.domain.model;
 
-import lombok.AccessLevel;
+import io.micronaut.configuration.hibernate.jpa.proxy.GenerateProxy;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -31,19 +36,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import java.util.Set;
 import java.util.UUID;
 
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@GenerateProxy
 @Entity
+@Table(name = "tbl_user")
 public class User {
 
     @EqualsAndHashCode.Include

@@ -60,11 +60,12 @@ datasources:
     driverClassName: org.h2.Driver
     username: sa
     password: ''
-    schema-generate: CREATE_DROP
+    schema-generate: NONE
     dialect: H2
 ---
 jpa:
  default:
+    compile-time-hibernate-proxies: true
     properties:
         hibernate:
             hbm2ddl:

@@ -47,7 +47,7 @@ import io.micronaut.http.annotation.Put;
 import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.annotation.Status;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 public interface ArticleOperations {
 
