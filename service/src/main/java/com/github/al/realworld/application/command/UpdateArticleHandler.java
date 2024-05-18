@@ -26,6 +26,7 @@ package com.github.al.realworld.application.command;
 import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.UpdateArticle;
 import com.github.al.realworld.api.command.UpdateArticleResult;
+import com.github.al.realworld.api.dto.UpdateArticleDto;
 import com.github.al.realworld.application.ArticleAssembler;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
@@ -64,11 +65,12 @@ public class UpdateArticleHandler implements CommandHandler<UpdateArticleResult,
         User currentUser = userRepository.findByUsername(command.getCurrentUsername())
                 .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getCurrentUsername()));
 
+        UpdateArticleDto data = command.getArticle();
         Article alteredArticle = article.toBuilder()
-                .slug(command.getTitle() != null ? slugService.makeSlug(command.getTitle()) : article.getSlug())
-                .title(command.getTitle() != null ? command.getTitle() : article.getTitle())
-                .description(command.getDescription() != null ? command.getDescription() : article.getDescription())
-                .body(command.getBody() != null ? command.getBody() : article.getBody())
+                .slug(data.getTitle() != null ? slugService.makeSlug(data.getTitle()) : article.getSlug())
+                .title(data.getTitle() != null ? data.getTitle() : article.getTitle())
+                .description(data.getDescription() != null ? data.getDescription() : article.getDescription())
+                .body(data.getBody() != null ? data.getBody() : article.getBody())
                 .updatedAt(ZonedDateTime.now())
                 .build();
 

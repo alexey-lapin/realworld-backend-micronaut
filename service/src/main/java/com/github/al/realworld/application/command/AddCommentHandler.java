@@ -60,7 +60,7 @@ public class AddCommentHandler implements CommandHandler<AddCommentResult, AddCo
         ZonedDateTime now = ZonedDateTime.now();
 
         Comment comment = Comment.builder()
-                .body(command.getBody())
+                .body(command.getComment().getBody())
                 .createdAt(now)
                 .updatedAt(now)
                 .author(currentUser)

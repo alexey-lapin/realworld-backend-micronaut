@@ -21,26 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.web;
+package com.github.al.realworld.api.dto;
 
-import com.github.al.bus.Bus;
-import com.github.al.realworld.api.operation.TagOperations;
-import com.github.al.realworld.api.query.GetTags;
-import com.github.al.realworld.api.query.GetTagsResult;
-import io.micronaut.http.annotation.Controller;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+import io.micronaut.core.annotation.ReflectiveAccess;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@RequiredArgsConstructor
-@Tag(name = "Tags")
-@Controller("${api.version}")
-public class TagController implements TagOperations {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
+@ReflectiveAccess
+public class RegisterUserDto {
 
-    private final Bus bus;
+    @Email
+    private String email;
 
-    @Override
-    public GetTagsResult findAll() {
-        return bus.executeQuery(new GetTags());
-    }
+    @NotBlank
+    private String username;
+
+    @NotBlank
+    private String password;
 
 }

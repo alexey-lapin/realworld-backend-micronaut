@@ -23,15 +23,8 @@
  */
 package com.github.al.realworld.api.operation;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import io.micronaut.http.client.annotation.Client;
-import io.micronaut.jackson.annotation.JacksonFeatures;
 
-@JacksonFeatures(
-        enabledSerializationFeatures = SerializationFeature.WRAP_ROOT_VALUE,
-        disabledDeserializationFeatures = DeserializationFeature.UNWRAP_ROOT_VALUE
-)
 @Client("${api.version}")
 public interface ProfileClient extends ProfileOperations {
 }

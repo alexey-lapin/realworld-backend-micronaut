@@ -24,8 +24,8 @@
 package com.github.al.realworld.api.command;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonRootName;
 import com.github.al.bus.Command;
+import com.github.al.realworld.api.dto.UpdateArticleDto;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
@@ -40,7 +40,6 @@ import lombok.With;
 @Getter
 @Introspected
 @ReflectiveAccess
-@JsonRootName("article")
 public class UpdateArticle implements Command<UpdateArticleResult> {
 
     @With
@@ -51,10 +50,6 @@ public class UpdateArticle implements Command<UpdateArticleResult> {
     @JsonIgnore
     private String slug;
 
-    private String title;
-
-    private String description;
-
-    private String body;
+    private UpdateArticleDto article;
 
 }

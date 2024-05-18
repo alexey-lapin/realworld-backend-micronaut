@@ -24,40 +24,26 @@
 package com.github.al.realworld.api.command;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonRootName;
 import com.github.al.bus.Command;
+import com.github.al.realworld.api.dto.UpdateUserDto;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-import jakarta.validation.constraints.Email;
-
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Getter
 @Introspected
 @ReflectiveAccess
-@JsonRootName("user")
 public class UpdateUser implements Command<UpdateUserResult> {
 
     @With
     @JsonIgnore
     private String currentUsername;
 
-    @Email
-    private String email;
-
-    private String username;
-
-    private String password;
-
-    private String image;
-
-    private String bio;
+    private UpdateUserDto user;
 
 }

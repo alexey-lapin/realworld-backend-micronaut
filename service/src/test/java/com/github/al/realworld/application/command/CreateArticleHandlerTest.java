@@ -25,6 +25,7 @@ package com.github.al.realworld.application.command;
 
 import com.github.al.realworld.api.command.CreateArticle;
 import com.github.al.realworld.api.dto.ArticleDto;
+import com.github.al.realworld.api.dto.CreateArticleDto;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.User;
@@ -64,8 +65,11 @@ class CreateArticleHandlerTest {
     void should_throw400_when_articleAlreadyExist() {
         when(articleRepository.findByTitle("test-title")).thenReturn(Optional.of(Article.builder().build()));
 
+        CreateArticleDto data = CreateArticleDto.builder()
+                .title("test-title")
+                .build();
         HttpStatusException exception = catchThrowableOfType(
-                () -> handler.handle(CreateArticle.builder().title("test-title").build()),
+                () -> handler.handle(new CreateArticle(null, data)),
                 HttpStatusException.class
         );
 
@@ -74,8 +78,11 @@ class CreateArticleHandlerTest {
 
     @Test
     void should_throw400_when_currentUsernameDoesNotExist() {
+        CreateArticleDto data = CreateArticleDto.builder()
+                .title("test-title")
+                .build();
         HttpStatusException exception = catchThrowableOfType(
-                () -> handler.handle(CreateArticle.builder().title("test-title").build()),
+                () -> handler.handle(new CreateArticle(null, data)),
                 HttpStatusException.class
         );
 
@@ -91,14 +98,13 @@ class CreateArticleHandlerTest {
 
         when(articleRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        CreateArticle build = CreateArticle.builder()
-                .currentUsername("test-username")
+        CreateArticleDto data = CreateArticleDto.builder()
                 .title("test-title")
                 .description("test-description")
                 .body("test-body")
                 .tagList(Arrays.asList("tag1", "tag2"))
                 .build();
-        ArticleDto result = handler.handle(build).getArticle();
+        ArticleDto result = handler.handle(new CreateArticle("test-username", data)).getArticle();
 
         assertThat(result.getSlug()).isEqualTo("test-title");
         assertThat(result.getTitle()).isEqualTo("test-title");

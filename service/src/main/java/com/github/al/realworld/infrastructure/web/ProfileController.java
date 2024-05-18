@@ -33,9 +33,11 @@ import com.github.al.realworld.api.query.GetProfile;
 import com.github.al.realworld.api.query.GetProfileResult;
 import com.github.al.realworld.application.service.AuthenticationService;
 import io.micronaut.http.annotation.Controller;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+@Tag(name = "Profiles")
 @Controller("${api.version}")
 public class ProfileController implements ProfileOperations {
 

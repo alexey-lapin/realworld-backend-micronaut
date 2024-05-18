@@ -23,29 +23,21 @@
  */
 package com.github.al.realworld.api.command;
 
-import com.fasterxml.jackson.annotation.JsonRootName;
 import com.github.al.bus.Command;
+import com.github.al.realworld.api.dto.LoginUserDto;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Introspected
 @ReflectiveAccess
-@JsonRootName("user")
 public class LoginUser implements Command<LoginUserResult> {
 
-    @Email
-    private String email;
-
-    @NotBlank
-    private String password;
+    private LoginUserDto user;
 
 }
