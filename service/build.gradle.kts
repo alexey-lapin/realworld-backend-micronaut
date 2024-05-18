@@ -4,6 +4,7 @@ import com.gorylenko.GenerateGitPropertiesTask
 import com.gorylenko.GitPropertiesPluginExtension
 import org.graalvm.buildtools.gradle.tasks.BuildNativeImageTask
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.nativeplatform.platform.internal.NativePlatforms
 
 plugins {
     application
@@ -130,23 +131,13 @@ tasks {
         )
     }
 
-//    withType<NativeImageTask> {
-//        val os = OperatingSystem.current()
-//        imageName.set("${rootProject.name}-${version}-${os.nativePrefix}${os.executableSuffix}")
-//        verbose(true)
-//        if (os.isWindows) {
-//            executable("native-image.cmd")
-//        }
-//    }
-
     val writeArtifactFile by registering {
         doLast {
-            val os = OperatingSystem.current()
             val outputDirectory = getByName<BuildNativeImageTask>("nativeCompile").outputDirectory
             outputDirectory.get().asFile.mkdirs()
             outputDirectory.file("gradle-artifact.txt")
                 .get().asFile
-                .writeText("${rootProject.name}-${project.version}-${os.nativePrefix}")
+                .writeText("${rootProject.name}-${project.version}-${platform()}")
         }
     }
 
@@ -154,9 +145,15 @@ tasks {
         finalizedBy(writeArtifactFile)
     }
 
-    // used by Heroku
-    register("stage") {
-        dependsOn("clean", "build")
-        mustRunAfter("clean")
+}
+
+fun platform(): String {
+    val os = OperatingSystem.current()
+    val arc = System.getProperty("os.arch")
+    return when {
+        OperatingSystem.current().isWindows -> "windows-${arc}"
+        OperatingSystem.current().isLinux -> "linux-${arc}"
+        OperatingSystem.current().isMacOsX -> "darwin-${arc}"
+        else -> os.nativePrefix
     }
 }
