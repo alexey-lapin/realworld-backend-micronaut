@@ -26,6 +26,7 @@ package com.github.al.realworld.application.command;
 import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.CreateArticle;
 import com.github.al.realworld.api.command.CreateArticleResult;
+import com.github.al.realworld.api.dto.CreateArticleDto;
 import com.github.al.realworld.application.ArticleAssembler;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
@@ -56,9 +57,10 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
     @Transactional
     @Override
     public CreateArticleResult handle(CreateArticle command) {
-        Optional<Article> articleByTitleOptional = articleRepository.findByTitle(command.getTitle());
+        CreateArticleDto data = command.getArticle();
+        Optional<Article> articleByTitleOptional = articleRepository.findByTitle(data.getTitle());
         if (articleByTitleOptional.isPresent()) {
-            throw badRequest("article [title=%s] already exists", command.getTitle());
+            throw badRequest("article [title=%s] already exists", data.getTitle());
         }
 
         User currentUser = userRepository.findByUsername(command.getCurrentUsername())
@@ -68,16 +70,16 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
 
         Article.ArticleBuilder articleBuilder = Article.builder()
                 .id(UUID.randomUUID())
-                .slug(slugService.makeSlug(command.getTitle()))
-                .title(command.getTitle())
-                .description(command.getDescription())
-                .body(command.getBody())
+                .slug(slugService.makeSlug(data.getTitle()))
+                .title(data.getTitle())
+                .description(data.getDescription())
+                .body(data.getBody())
                 .createdAt(now)
                 .updatedAt(now)
                 .author(currentUser);
 
-        if (command.getTagList() != null) {
-            command.getTagList().stream()
+        if (data.getTagList() != null) {
+            data.getTagList().stream()
                     .map(t -> tagRepository.findByName(t).orElseGet(() -> new Tag(t)))
                     .forEach(articleBuilder::tag);
         }

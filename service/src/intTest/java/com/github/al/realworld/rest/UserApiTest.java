@@ -26,6 +26,9 @@ package com.github.al.realworld.rest;
 import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.RegisterUser;
 import com.github.al.realworld.api.command.UpdateUser;
+import com.github.al.realworld.api.dto.LoginUserDto;
+import com.github.al.realworld.api.dto.RegisterUserDto;
+import com.github.al.realworld.api.dto.UpdateUserDto;
 import com.github.al.realworld.api.dto.UserDto;
 import com.github.al.realworld.api.operation.UserClient;
 import com.github.al.realworld.rest.auth.AuthSupport;
@@ -59,8 +62,8 @@ public class UserApiTest {
 
         UserDto user = userClient.register(command).getUser();
 
-        assertThat(user.getUsername()).isEqualTo(command.getUsername());
-        assertThat(user.getEmail()).isEqualTo(command.getEmail());
+        assertThat(user.getUsername()).isEqualTo(command.getUser().getUsername());
+        assertThat(user.getEmail()).isEqualTo(command.getUser().getEmail());
         assertThat(user.getToken()).isNotBlank();
     }
 
@@ -70,7 +73,8 @@ public class UserApiTest {
 
         userClient.register(command);
 
-        UserDto user = userClient.login(new LoginUser(command.getEmail(), command.getPassword())).getUser();
+        LoginUserDto data = new LoginUserDto(command.getUser().getEmail(), command.getUser().getPassword());
+        UserDto user = userClient.login(new LoginUser(data)).getUser();
 
         assertThat(user.getToken()).isNotBlank();
     }
@@ -81,8 +85,9 @@ public class UserApiTest {
 
         userClient.register(command);
 
+        LoginUserDto data = new LoginUserDto(command.getUser().getEmail(), UUID.randomUUID().toString());
         HttpClientResponseException exception = catchThrowableOfType(
-                () -> userClient.login(new LoginUser(command.getEmail(), UUID.randomUUID().toString())),
+                () -> userClient.login(new LoginUser(data)),
                 HttpClientResponseException.class
         );
 
@@ -93,7 +98,7 @@ public class UserApiTest {
     void should_return400_whenLoginUser() {
         String s = UUID.randomUUID().toString();
         HttpClientResponseException exception = catchThrowableOfType(
-                () -> userClient.login(new LoginUser(s + "@ex.com", s)),
+                () -> userClient.login(new LoginUser(new LoginUserDto(s + "@ex.com", s))),
                 HttpClientResponseException.class
         );
 
@@ -104,7 +109,7 @@ public class UserApiTest {
     void should_returnCorrectData_whenUpdateUser() {
         register().login();
 
-        UpdateUser updateUser = UpdateUser.builder()
+        UpdateUserDto data = UpdateUserDto.builder()
                 .email(ALTERED_EMAIL)
                 .username(ALTERED_USERNAME)
                 .password(ALTERED_PASSWORD)
@@ -112,7 +117,7 @@ public class UserApiTest {
                 .image(ALTERED_IMAGE)
                 .build();
 
-        UserDto user = userClient.update(updateUser).getUser();
+        UserDto user = userClient.update(new UpdateUser(null, data)).getUser();
 
         assertThat(user.getEmail()).isEqualTo(ALTERED_EMAIL);
         assertThat(user.getUsername()).isEqualTo(ALTERED_USERNAME);
@@ -126,12 +131,12 @@ public class UserApiTest {
 
         register().login();
 
-        UpdateUser updateUser = UpdateUser.builder()
+        UpdateUserDto data = UpdateUserDto.builder()
                 .email(registeredUser.getEmail())
                 .build();
 
         HttpClientResponseException exception = catchThrowableOfType(
-                () -> userClient.update(updateUser),
+                () -> userClient.update(new UpdateUser(null, data)),
                 HttpClientResponseException.class
         );
 
@@ -144,12 +149,12 @@ public class UserApiTest {
 
         register().login();
 
-        UpdateUser updateUser = UpdateUser.builder()
+        UpdateUserDto data = UpdateUserDto.builder()
                 .username(registeredUser.getUsername())
                 .build();
 
         HttpClientResponseException exception = catchThrowableOfType(
-                () -> userClient.update(updateUser),
+                () -> userClient.update(new UpdateUser(null, data)),
                 HttpClientResponseException.class
         );
 
@@ -157,11 +162,12 @@ public class UserApiTest {
     }
 
     private static RegisterUser registerCommand() {
-        return RegisterUser.builder()
+        RegisterUserDto data = RegisterUserDto.builder()
                 .username(UUID.randomUUID().toString())
                 .email(UUID.randomUUID().toString() + "@ex.com")
                 .password(UUID.randomUUID().toString())
                 .build();
+        return new RegisterUser(data);
     }
 
 }

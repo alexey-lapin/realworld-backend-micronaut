@@ -24,41 +24,26 @@
 package com.github.al.realworld.api.command;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonRootName;
 import com.github.al.bus.Command;
+import com.github.al.realworld.api.dto.CreateArticleDto;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-import jakarta.validation.constraints.NotBlank;
-import java.util.List;
-
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
 @Getter
 @Introspected
 @ReflectiveAccess
-@JsonRootName("article")
 public class CreateArticle implements Command<CreateArticleResult> {
 
     @With
     @JsonIgnore
     private String currentUsername;
 
-    @NotBlank
-    private String title;
-
-    @NotBlank
-    private String description;
-
-    @NotBlank
-    private String body;
-
-    private List<String> tagList;
+    private CreateArticleDto article;
 
 }

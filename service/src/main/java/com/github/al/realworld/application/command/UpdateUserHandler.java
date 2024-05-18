@@ -26,6 +26,7 @@ package com.github.al.realworld.application.command;
 import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.UpdateUser;
 import com.github.al.realworld.api.command.UpdateUserResult;
+import com.github.al.realworld.api.dto.UpdateUserDto;
 import com.github.al.realworld.application.UserAssembler;
 import com.github.al.realworld.application.service.JwtService;
 import com.github.al.realworld.application.service.PasswordEncoder;
@@ -53,24 +54,25 @@ public class UpdateUserHandler implements CommandHandler<UpdateUserResult, Updat
         User user = userRepository.findByUsername(command.getCurrentUsername())
                 .orElseThrow(() -> notFound("user [name=%s] does not exist", command.getCurrentUsername()));
 
-        if (command.getUsername() != null
-                && !command.getUsername().equals(user.getUsername())
-                && userRepository.findByUsername(command.getUsername()).isPresent()) {
-            throw badRequest("user [name=%s] already exists", command.getUsername());
+        UpdateUserDto data = command.getUser();
+        if (data.getUsername() != null
+                && !data.getUsername().equals(user.getUsername())
+                && userRepository.findByUsername(data.getUsername()).isPresent()) {
+            throw badRequest("user [name=%s] already exists", data.getUsername());
         }
 
-        if (command.getEmail() != null
-                && !command.getEmail().equals(user.getEmail())
-                && userRepository.findByEmail(command.getEmail()).isPresent()) {
-            throw badRequest("user [email=%s] already exists", command.getEmail());
+        if (data.getEmail() != null
+                && !data.getEmail().equals(user.getEmail())
+                && userRepository.findByEmail(data.getEmail()).isPresent()) {
+            throw badRequest("user [email=%s] already exists", data.getEmail());
         }
 
         User alteredUser = user.toBuilder()
-                .email(command.getEmail() != null ? command.getEmail() : user.getEmail())
-                .username(command.getUsername() != null ? command.getUsername() : user.getUsername())
-                .password(command.getPassword() != null ? encoder.encode(command.getPassword()) : user.getPassword())
-                .bio(command.getBio() != null ? command.getBio() : user.getBio())
-                .image(command.getImage() != null ? command.getImage() : user.getImage())
+                .email(data.getEmail() != null ? data.getEmail() : user.getEmail())
+                .username(data.getUsername() != null ? data.getUsername() : user.getUsername())
+                .password(data.getPassword() != null ? encoder.encode(data.getPassword()) : user.getPassword())
+                .bio(data.getBio() != null ? data.getBio() : user.getBio())
+                .image(data.getImage() != null ? data.getImage() : user.getImage())
                 .build();
 
         User savedUser = userRepository.save(alteredUser);

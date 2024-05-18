@@ -78,8 +78,6 @@ jackson:
   serialization:
     fail_on_empty_beans: false
     write_dates_as_timestamps: false
-  deserialization:
-    unwrap_root_value: true
 ---
 endpoints:
   info:
@@ -95,7 +93,13 @@ endpoints:
       enabled: false
     disk-space:
       enabled: false
+  loggers:
+    enabled: true
+    sensitive: false
   prometheus:
+    enabled: true
+    sensitive: false
+  routes:
     enabled: true
     sensitive: false
 

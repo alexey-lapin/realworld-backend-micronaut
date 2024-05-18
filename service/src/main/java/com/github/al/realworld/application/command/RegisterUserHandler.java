@@ -26,6 +26,7 @@ package com.github.al.realworld.application.command;
 import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.RegisterUser;
 import com.github.al.realworld.api.command.RegisterUserResult;
+import com.github.al.realworld.api.dto.RegisterUserDto;
 import com.github.al.realworld.application.UserAssembler;
 import com.github.al.realworld.application.service.JwtService;
 import com.github.al.realworld.application.service.PasswordEncoder;
@@ -51,20 +52,21 @@ public class RegisterUserHandler implements CommandHandler<RegisterUserResult, R
     @Transactional
     @Override
     public RegisterUserResult handle(RegisterUser command) {
-        Optional<User> userByEmailOptional = userRepository.findByEmail(command.getEmail());
+        RegisterUserDto data = command.getUser();
+        Optional<User> userByEmailOptional = userRepository.findByEmail(data.getEmail());
         if (userByEmailOptional.isPresent()) {
-            throw badRequest("user [email=%s] already exists", command.getEmail());
+            throw badRequest("user [email=%s] already exists", data.getEmail());
         }
-        Optional<User> userByUsernameOptional = userRepository.findByUsername(command.getUsername());
+        Optional<User> userByUsernameOptional = userRepository.findByUsername(data.getUsername());
         if (userByUsernameOptional.isPresent()) {
-            throw badRequest("user [name=%s] already exists", command.getUsername());
+            throw badRequest("user [name=%s] already exists", data.getUsername());
         }
 
         User user = User.builder()
                 .id(UUID.randomUUID())
-                .username(command.getUsername())
-                .email(command.getEmail())
-                .password(passwordEncoder.encode(command.getPassword()))
+                .username(data.getUsername())
+                .email(data.getEmail())
+                .password(passwordEncoder.encode(data.getPassword()))
                 .build();
         userRepository.save(user);
 

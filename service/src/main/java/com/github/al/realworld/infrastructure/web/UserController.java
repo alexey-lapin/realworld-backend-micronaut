@@ -35,11 +35,13 @@ import com.github.al.realworld.api.query.GetCurrentUser;
 import com.github.al.realworld.api.query.GetCurrentUserResult;
 import com.github.al.realworld.application.service.AuthenticationService;
 import io.micronaut.http.annotation.Controller;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import jakarta.validation.Valid;
 
 @RequiredArgsConstructor
+@Tag(name = "Users")
 @Controller("${api.version}")
 public class UserController implements UserOperations {
 

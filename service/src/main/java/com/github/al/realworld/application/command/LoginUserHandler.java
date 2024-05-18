@@ -26,6 +26,7 @@ package com.github.al.realworld.application.command;
 import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.LoginUserResult;
+import com.github.al.realworld.api.dto.LoginUserDto;
 import com.github.al.realworld.application.UserAssembler;
 import com.github.al.realworld.application.service.JwtService;
 import com.github.al.realworld.application.service.PasswordEncoder;
@@ -50,11 +51,12 @@ public class LoginUserHandler implements CommandHandler<LoginUserResult, LoginUs
     @Transactional
     @Override
     public LoginUserResult handle(LoginUser command) {
-        User user = userRepository.findByEmail(command.getEmail())
-                .orElseThrow(() -> badRequest("user [email=%s] does not exist", command.getEmail()));
+        LoginUserDto data = command.getUser();
+        User user = userRepository.findByEmail(data.getEmail())
+                .orElseThrow(() -> badRequest("user [email=%s] does not exist", data.getEmail()));
 
-        if (!passwordEncoder.matches(command.getPassword(), user.getPassword())) {
-            throw unauthorized("user [email=%s] password is incorrect", command.getEmail());
+        if (!passwordEncoder.matches(data.getPassword(), user.getPassword())) {
+            throw unauthorized("user [email=%s] password is incorrect", data.getEmail());
         }
 
         return new LoginUserResult(UserAssembler.assemble(user, jwtService));

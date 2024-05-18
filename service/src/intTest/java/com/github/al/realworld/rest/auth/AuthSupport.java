@@ -26,14 +26,16 @@ package com.github.al.realworld.rest.auth;
 import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.LoginUserResult;
 import com.github.al.realworld.api.command.RegisterUser;
+import com.github.al.realworld.api.dto.LoginUserDto;
+import com.github.al.realworld.api.dto.RegisterUserDto;
 import com.github.al.realworld.api.operation.UserClient;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.util.UUID;
 
 @Singleton
@@ -55,11 +57,12 @@ public class AuthSupport {
     }
 
     public static RegisteredUser register(String username, String email, String password) {
-        INSTANCE.userClient.register(RegisterUser.builder()
+        RegisterUserDto data = RegisterUserDto.builder()
                 .username(username)
                 .email(email)
                 .password(password)
-                .build());
+                .build();
+        INSTANCE.userClient.register(new RegisterUser(data));
         return new RegisteredUser(email, username, password);
     }
 
@@ -72,7 +75,7 @@ public class AuthSupport {
     }
 
     public static void login(String email, String password) {
-        LoginUserResult result = INSTANCE.userClient.login(new LoginUser(email, password));
+        LoginUserResult result = INSTANCE.userClient.login(new LoginUser(new LoginUserDto(email, password)));
         TokenHolder.token = result.getUser().getToken();
     }
 

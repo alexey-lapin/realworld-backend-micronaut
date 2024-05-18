@@ -26,6 +26,7 @@ package com.github.al.realworld.application.command;
 import com.github.al.realworld.api.command.UpdateArticle;
 import com.github.al.realworld.api.command.UpdateArticleResult;
 import com.github.al.realworld.api.dto.ArticleDto;
+import com.github.al.realworld.api.dto.UpdateArticleDto;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.User;
@@ -134,13 +135,12 @@ class UpdateArticleHandlerTest {
                 .build();
         when(userRepository.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(user));
 
-        UpdateArticle command = UpdateArticle.builder()
-                .slug(TEST_SLUG)
+        UpdateArticleDto data = UpdateArticleDto.builder()
                 .title(ALTERED_TITLE)
                 .description(ALTERED_DESCRIPTION)
                 .body(ALTERED_BODY)
-                .currentUsername(TEST_USERNAME)
                 .build();
+        UpdateArticle command = new UpdateArticle(TEST_USERNAME, TEST_SLUG, data);
 
         ArticleDto result = handler.handle(command).getArticle();
 
@@ -167,6 +167,7 @@ class UpdateArticleHandlerTest {
         UpdateArticleResult result = handler.handle(UpdateArticle.builder()
                 .slug(TEST_SLUG)
                 .currentUsername(TEST_USERNAME)
+                .article(UpdateArticleDto.builder().build())
                 .build());
 
         assertThat(result.getArticle().getBody()).isEqualTo(TEST_BODY);

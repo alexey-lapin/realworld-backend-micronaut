@@ -26,8 +26,11 @@ package com.github.al.realworld.rest;
 import com.github.al.realworld.api.command.AddComment;
 import com.github.al.realworld.api.command.CreateArticle;
 import com.github.al.realworld.api.command.UpdateArticle;
+import com.github.al.realworld.api.dto.AddCommentDto;
 import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.api.dto.CommentDto;
+import com.github.al.realworld.api.dto.CreateArticleDto;
+import com.github.al.realworld.api.dto.UpdateArticleDto;
 import com.github.al.realworld.api.operation.ArticleClient;
 import com.github.al.realworld.api.operation.ProfileClient;
 import com.github.al.realworld.api.query.GetArticleResult;
@@ -80,10 +83,10 @@ public class ArticleApiTest {
         CreateArticle command = createArticleCommand();
         ArticleDto article = articleClient.create(command).getArticle();
 
-        assertThat(article.getSlug()).isEqualTo(command.getTitle());
-        assertThat(article.getTitle()).isEqualTo(command.getTitle());
-        assertThat(article.getDescription()).isEqualTo(command.getDescription());
-        assertThat(article.getBody()).isEqualTo(command.getBody());
+        assertThat(article.getSlug()).isEqualTo(command.getArticle().getTitle());
+        assertThat(article.getTitle()).isEqualTo(command.getArticle().getTitle());
+        assertThat(article.getDescription()).isEqualTo(command.getArticle().getDescription());
+        assertThat(article.getBody()).isEqualTo(command.getArticle().getBody());
         assertThat(article.getAuthor().getUsername()).isEqualTo(user);
     }
 
@@ -143,13 +146,13 @@ public class ArticleApiTest {
 
         ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
 
-        UpdateArticle updateCommand = UpdateArticle.builder()
+        UpdateArticleDto data = UpdateArticleDto.builder()
                 .title(ALTERED_TITLE)
                 .body(ALTERED_BODY)
                 .description(ALTERED_DESCRIPTION)
                 .build();
-
-        ArticleDto updated = articleClient.updateBySlug(created.getSlug(), updateCommand).getArticle();
+        UpdateArticle updateArticle = new UpdateArticle(null, null, data);
+        ArticleDto updated = articleClient.updateBySlug(created.getSlug(), updateArticle).getArticle();
 
         assertThat(updated.getSlug()).isEqualTo(ALTERED_TITLE);
         assertThat(updated.getTitle()).isEqualTo(ALTERED_TITLE);
@@ -169,9 +172,9 @@ public class ArticleApiTest {
 
         String user = register().login().getUsername();
 
-        articleClient.create(createArticleCommand().toBuilder()
+        articleClient.create(new CreateArticle(null, createArticleCommand().getArticle().toBuilder()
                 .tagList(Arrays.asList("tag1"))
-                .build());
+                .build()));
 
         GetArticlesResult result2 = articleClient.findByFilters(null, user, null, null, null);
         assertThat(result2.getArticlesCount()).isEqualTo(1);
@@ -198,7 +201,7 @@ public class ArticleApiTest {
 
             ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
 
-            AddComment addComment = AddComment.builder().body(TEST_BODY).build();
+            AddComment addComment = new AddComment(null, null, new AddCommentDto(TEST_BODY));
 
             CommentDto comment = articleClient.addComment(created.getSlug(), addComment).getComment();
 
@@ -225,7 +228,7 @@ public class ArticleApiTest {
 
             ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
 
-            AddComment addComment = AddComment.builder().body(TEST_BODY).build();
+            AddComment addComment = new AddComment(null, null, new AddCommentDto(TEST_BODY));
             CommentDto comment = articleClient.addComment(article.getSlug(), addComment).getComment();
 
             register().login();
@@ -242,7 +245,9 @@ public class ArticleApiTest {
         void should_throw404_when_addCommentArticleDoesNotExist() {
             register().login();
 
-            articleClient.addComment(UUID.randomUUID().toString(), AddComment.builder().body(TEST_BODY).build());
+            AddComment addComment = new AddComment(null, null, new AddCommentDto(TEST_BODY));
+
+            articleClient.addComment(UUID.randomUUID().toString(), addComment);
         }
 
         @Test
@@ -265,11 +270,8 @@ public class ArticleApiTest {
         void should_returnCorrectCommentData() {
             register().login();
             ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
-            CommentDto createdComment = articleClient.addComment(article.getSlug(),
-                            AddComment.builder()
-                                    .body(TEST_BODY)
-                                    .build())
-                    .getComment();
+            AddComment addComment = new AddComment(null, null, new AddCommentDto(TEST_BODY));
+            CommentDto createdComment = articleClient.addComment(article.getSlug(), addComment).getComment();
 
             CommentDto comment = articleClient.findComment(article.getSlug(), createdComment.getId()).getComment();
 
@@ -350,11 +352,12 @@ public class ArticleApiTest {
     }
 
     private static CreateArticle createArticleCommand() {
-        return CreateArticle.builder()
+        CreateArticleDto data = CreateArticleDto.builder()
                 .title(UUID.randomUUID().toString())
                 .description(UUID.randomUUID().toString())
                 .body(UUID.randomUUID().toString())
                 .build();
+        return new CreateArticle(null, data);
     }
 
 }

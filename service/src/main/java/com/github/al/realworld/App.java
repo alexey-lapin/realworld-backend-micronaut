@@ -24,28 +24,8 @@
 package com.github.al.realworld;
 
 import io.micronaut.runtime.Micronaut;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Contact;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.info.License;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-@OpenAPIDefinition(
-        info = @Info(
-                title = "${app.name}",
-                version = "${app.version}",
-                description = "${app.description}",
-                license = @License(
-                        name = "${app.license.name}",
-                        url = "${app.license.url}"
-                ),
-                contact = @Contact(
-                        url = "${app.contact.url}",
-                        name = "${app.contact.name}",
-                        email = "${app.contact.email}"
-                )
-        )
-)
 public class App {
 
     public static void main(String[] args) {
