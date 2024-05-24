@@ -27,6 +27,7 @@ import io.micronaut.core.annotation.TypeHint;
 
 @TypeHint(
         typeNames = {
+                "ch.qos.logback.classic.jul.LevelChangePropagator",
                 "java.util.UUID",
                 "io.jsonwebtoken.impl.DefaultJwtBuilder",
                 "io.jsonwebtoken.impl.DefaultJwtParserBuilder"
