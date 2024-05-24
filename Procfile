@@ -1,1 +1,0 @@
-web: java -Dserver.port=${PORT} -jar service/build/libs/realworld-backend-micronaut-*.jar
