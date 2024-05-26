@@ -1,14 +1,16 @@
 plugins {
-    id("micronaut-library-conventions")
+    id("realworld.java-conventions")
+    alias(libs.plugins.micronaut.library)
+}
+
+micronaut {
+    importMicronautPlatform = false
+    processing {
+        annotations("com.github.al.realworld.*")
+    }
 }
 
 dependencies {
-    annotationProcessor("org.projectlombok:lombok")
-    compileOnly("org.projectlombok:lombok")
-
-    annotationProcessor("io.micronaut:micronaut-graal")
-
-    compileOnly("com.google.code.findbugs:jsr305")
-
-    implementation("io.micronaut:micronaut-inject")
+    annotationProcessor(mn.lombok)
+    compileOnly(mn.lombok)
 }

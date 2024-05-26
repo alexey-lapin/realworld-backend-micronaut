@@ -1,7 +1,7 @@
 plugins {
     java
     jacoco
-    id("project-conventions")
+    id("realworld.project-conventions")
 }
 
 // A resolvable configuration to collect source code
