@@ -41,16 +41,13 @@ dependencies {
     implementation(mn.micronaut.management)
     implementation(mn.micronaut.micrometer.registry.prometheus)
     implementation(mn.micronaut.reactor)
-    implementation(mn.micronaut.security)
+    implementation(mn.micronaut.security.jwt)
     implementation(mn.micronaut.validation)
 
-    implementation("io.jsonwebtoken:jjwt-api:${libs.versions.jwt.get()}")
     implementation(mn.slf4j.jul.to.slf4j)
 
     runtimeOnly(mn.logback.classic)
     runtimeOnly(mn.h2)
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:${libs.versions.jwt.get()}")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${libs.versions.jwt.get()}")
 
     testImplementation(mn.micronaut.test.junit5)
     testImplementation(mn.assertj.core)

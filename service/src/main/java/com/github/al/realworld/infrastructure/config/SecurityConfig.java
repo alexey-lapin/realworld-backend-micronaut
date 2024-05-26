@@ -21,22 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.config.security;
+package com.github.al.realworld.infrastructure.config;
 
-import io.micronaut.security.token.reader.HttpHeaderTokenReader;
-
+import io.micronaut.context.annotation.Factory;
+import io.micronaut.security.token.bearer.BearerTokenConfigurationProperties;
+import io.micronaut.security.token.bearer.BearerTokenReader;
 import jakarta.inject.Singleton;
 
-@Singleton
-public class JwtReader extends HttpHeaderTokenReader {
+@Factory
+public class SecurityConfig {
 
-    @Override
-    protected String getPrefix() {
-        return "Token";
+    @Singleton
+    public BearerTokenReader tokenPrefixBearerTokenReader() {
+        var properties = new BearerTokenConfigurationProperties();
+        properties.setPrefix("Token");
+        return new BearerTokenReader(properties);
     }
 
-    @Override
-    protected String getHeaderName() {
-        return "Authorization";
-    }
 }
