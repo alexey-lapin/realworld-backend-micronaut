@@ -4,69 +4,63 @@ import com.gorylenko.GenerateGitPropertiesTask
 import com.gorylenko.GitPropertiesPluginExtension
 import org.graalvm.buildtools.gradle.tasks.BuildNativeImageTask
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.nativeplatform.platform.internal.NativePlatforms
 
 plugins {
-    application
-    id("micronaut-application-conventions")
+    id("realworld.java-conventions")
+    alias(libs.plugins.micronaut.application)
+    alias(libs.plugins.shadow)
     alias(libs.plugins.git.properties)
 }
 
+micronaut {
+    importMicronautPlatform = false
+    runtime("netty")
+    processing {
+        annotations("com.github.al.realworld.*")
+    }
+}
+
+application {
+    mainClass.set("com.github.al.realworld.App")
+}
+
 dependencies {
-    annotationProcessor("org.projectlombok:lombok")
-    compileOnly("org.projectlombok:lombok")
+    annotationProcessor(mn.lombok)
+    compileOnly(mn.lombok)
 
-    annotationProcessor("io.micronaut:micronaut-management")
-    annotationProcessor("io.micronaut.data:micronaut-data-processor")
-    annotationProcessor("io.micronaut.openapi:micronaut-openapi")
-    annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
-
-    compileOnly("com.google.code.findbugs:jsr305")
+    compileOnly(mn.micronaut.openapi.annotations)
 
     implementation(project(":service-bus"))
     implementation(project(":service-api"))
 
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-http-server-netty")
-    implementation("io.micronaut:micronaut-inject")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut:micronaut-management")
-    implementation("io.micronaut:micronaut-runtime")
-
-    implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
-    implementation("io.micronaut.liquibase:micronaut-liquibase")
-    implementation("io.micronaut.micrometer:micronaut-micrometer-core")
-    implementation("io.micronaut.micrometer:micronaut-micrometer-registry-prometheus")
-    implementation("io.micronaut.reactor:micronaut-reactor")
-    implementation("io.micronaut.security:micronaut-security")
-    implementation("io.micronaut.sql:micronaut-hibernate-jpa")
-    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
-    implementation("io.micronaut.validation:micronaut-validation")
+    implementation(mn.micronaut.data.hibernate.jpa)
+    implementation(mn.micronaut.hibernate.jpa)
+    implementation(mn.micronaut.jackson.databind)
+    implementation(mn.micronaut.jdbc.hikari)
+    implementation(mn.micronaut.liquibase)
+    implementation(mn.micronaut.management)
+    implementation(mn.micronaut.micrometer.registry.prometheus)
+    implementation(mn.micronaut.reactor)
+    implementation(mn.micronaut.security)
+    implementation(mn.micronaut.validation)
 
     implementation("io.jsonwebtoken:jjwt-api:${libs.versions.jwt.get()}")
-    implementation("io.swagger.core.v3:swagger-annotations")
-    implementation("org.slf4j:jul-to-slf4j")
+    implementation(mn.slf4j.jul.to.slf4j)
 
-    runtimeOnly("ch.qos.logback:logback-classic")
-    runtimeOnly("com.h2database:h2")
+    runtimeOnly(mn.logback.classic)
+    runtimeOnly(mn.h2)
     runtimeOnly("io.jsonwebtoken:jjwt-impl:${libs.versions.jwt.get()}")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:${libs.versions.jwt.get()}")
 
-    testAnnotationProcessor("io.micronaut:micronaut-inject-java")
+    testImplementation(mn.micronaut.test.junit5)
+    testImplementation(mn.assertj.core)
+    testImplementation(mn.mockito.core)
 
-    testImplementation("io.micronaut.test:micronaut-test-junit5")
-    testImplementation("org.assertj:assertj-core")
-    testImplementation("org.mockito:mockito-core")
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    intTestAnnotationProcessor(mn.lombok)
+    intTestCompileOnly(mn.lombok)
 
-    "intTestAnnotationProcessor"(platform("io.micronaut:micronaut-core-bom:${libs.versions.mn.get()}"))
-    "intTestAnnotationProcessor"("io.micronaut:micronaut-inject-java")
-
-    "intTestAnnotationProcessor"("org.projectlombok:lombok:${libs.versions.lombok.get()}")
-    "intTestCompileOnly"("org.projectlombok:lombok")
-
-    "intTestCompileOnly"("com.google.code.findbugs:jsr305")
+    intTestAnnotationProcessor(mn.micronaut.inject.java)
+    intTestImplementation(mn.micronaut.http.client)
 }
 
 configure<GitPropertiesPluginExtension> {
@@ -76,10 +70,6 @@ configure<GitPropertiesPluginExtension> {
         "git.commit.id.abbrev",
         "git.commit.time"
     )
-}
-
-application {
-    mainClass.set("com.github.al.realworld.App")
 }
 
 graalvmNative {

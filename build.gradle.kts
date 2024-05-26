@@ -1,8 +1,8 @@
 plugins {
     base
     alias(libs.plugins.versions)
-    alias(libs.plugins.release)
-    id("jacoco-aggregation")
+    id("pl.allegro.tech.build.axion-release")
+    id("realworld.jacoco-aggregation")
 }
 
 description = "Real world backend API built in Micronaut"

@@ -2,7 +2,7 @@ plugins {
     java
     jacoco
     id("com.diffplug.spotless")
-    id("project-conventions")
+    id("realworld.project-conventions")
 }
 
 val hasIntTests = layout.projectDirectory.dir("src").dir("intTest").asFile.exists()

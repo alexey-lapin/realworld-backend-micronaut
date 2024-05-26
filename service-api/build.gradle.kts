@@ -1,19 +1,24 @@
 plugins {
-    id("micronaut-library-conventions")
+    id("realworld.java-conventions")
+    alias(libs.plugins.micronaut.library)
+}
+
+micronaut {
+    importMicronautPlatform = false
+    processing {
+        annotations("com.github.al.realworld.*")
+    }
 }
 
 dependencies {
-    annotationProcessor("org.projectlombok:lombok")
-    compileOnly("org.projectlombok:lombok")
+    annotationProcessor(mn.lombok)
+    compileOnly(mn.lombok)
 
-    annotationProcessor("io.micronaut:micronaut-graal")
-    annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
-
-    compileOnly("com.google.code.findbugs:jsr305")
+    annotationProcessor(mn.micronaut.validation.processor)
 
     implementation(project(":service-bus"))
 
-    implementation("io.micronaut:micronaut-http")
-    implementation("com.fasterxml.jackson.core:jackson-annotations")
-    implementation("jakarta.validation:jakarta.validation-api")
+    implementation(mn.micronaut.http)
+    implementation(mn.jackson.annotations)
+    implementation(mn.validation)
 }
