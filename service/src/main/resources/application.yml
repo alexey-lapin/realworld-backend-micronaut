@@ -9,6 +9,17 @@ micronaut:
     thread-selection: AUTO
   security:
     enabled: true
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: MWY1MmQ2NTItODIxNC00ZGM0LWFiODQtOGFiNGZmMjlhZjdj
+              base64: true
+              jws-algorithm: HS256
+      generator:
+        access-token:
+          expiration: 2147483647
     intercept-url-map:
       - pattern: /**
         httpMethod: OPTIONS
@@ -102,10 +113,6 @@ endpoints:
   routes:
     enabled: true
     sensitive: false
-
-security:
-  jwt:
-    secret: MWY1MmQ2NTItODIxNC00ZGM0LWFiODQtOGFiNGZmMjlhZjdj
 
 api:
   version: /api

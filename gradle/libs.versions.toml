@@ -1,6 +1,5 @@
 [versions]
 jacoco = "0.8.7"
-jwt = "0.11.2"
 micronaut = "4.4.2"
 micronaut-gradle-plugin = "4.4.0"
 

@@ -24,39 +24,23 @@
 package com.github.al.realworld.application.service;
 
 import com.github.al.realworld.domain.model.User;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import io.micronaut.context.annotation.Value;
-
+import io.micronaut.security.authentication.ServerAuthentication;
+import io.micronaut.security.token.generator.AccessRefreshTokenGenerator;
+import io.micronaut.security.token.render.AccessRefreshToken;
 import jakarta.inject.Singleton;
-import java.security.Key;
 
 @Singleton
 public class DefaultJwtService implements JwtService {
 
-    private final Key key;
+    private final AccessRefreshTokenGenerator tokenGenerator;
 
-    public DefaultJwtService(@Value("${security.jwt.secret}") String secret) {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    @Override
-    public String getSubject(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    public DefaultJwtService(AccessRefreshTokenGenerator tokenGenerator) {
+        this.tokenGenerator = tokenGenerator;
     }
 
     @Override
     public String getToken(User user) {
-        return Jwts.builder()
-                .setSubject(user.getUsername())
-                .signWith(key)
-                .compact();
+        ServerAuthentication authentication = new ServerAuthentication(user.getUsername(), null, null);
+        return tokenGenerator.generate(authentication).map(AccessRefreshToken::getAccessToken).orElse(null);
     }
 }

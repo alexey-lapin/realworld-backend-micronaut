@@ -34,10 +34,11 @@ Check out the live application on [**Render**](https://render.com/):
   for the database changes management
 - [Micronaut Declarative HTTP Clients](https://docs.micronaut.io/latest/guide/#clientAnnotation)
   for integration tests
+- [Micronaut Security JWT](https://micronaut-projects.github.io/micronaut-security/latest/guide/#jwt)
+  for authentication and authorization
 - [Micronaut Management](https://docs.micronaut.io/latest/guide/#management) built-in endpoints
 - [Micronaut OpenAPI/Swagger](https://micronaut-projects.github.io/micronaut-openapi/latest/guide/)
 - H2 in memory database
-- Json Web Token [jjwt](https://github.com/jwtk/jjwt)
 - GraalVM support
 
 ### CI
