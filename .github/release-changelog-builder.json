@@ -1,4 +1,55 @@
 {
-  "template": "${{CHANGELOG}}${{UNCATEGORIZED}}",
-  "pr_template": "- ${{TITLE}} @${{AUTHOR}} (#${{NUMBER}})"
+  "template": "#{{CHANGELOG}}",
+  "pr_template": "* #{{TITLE}} @#{{AUTHOR}} (##{{NUMBER}})",
+  "categories": [
+    {
+      "title": "## 🚀 Features",
+      "labels": [
+        "feature",
+        "enhancement"
+      ]
+    },
+    {
+      "title": "## 🐛 Fixes",
+      "labels": [
+        "fix",
+        "bug"
+      ]
+    },
+    {
+      "title": "## 📝 Documentation",
+      "labels": [
+        "documentation",
+        "docs"
+      ]
+    },
+    {
+      "title": "## 🏗️ Maintenance",
+      "labels": [
+        "maintenance"
+      ]
+    },
+    {
+      "title": "## 🚧 Chore",
+      "labels": [
+        "chore"
+      ]
+    },
+    {
+      "title": "## 🧰 Refactor",
+      "labels": [
+        "refactor"
+      ]
+    },
+    {
+      "title": "## 🧪 Tests",
+      "labels": [
+        "test"
+      ]
+    },
+    {
+      "title": "## 📦 Uncategorized",
+      "labels": []
+    }
+  ]
 }

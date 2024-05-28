@@ -187,6 +187,7 @@ jobs:
       - name: Build Changelog
         uses: mikepenz/release-changelog-builder-action@v4
         with:
+          outputFile: changelog.txt
           configuration: ".github/release-changelog-builder.json"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -194,7 +195,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          body: ${{ steps.github_release.outputs.changelog }}
+          body_path: changelog.txt
           draft: true
           files: |
             app-jar/*.jar
