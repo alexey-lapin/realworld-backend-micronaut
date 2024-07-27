@@ -185,7 +185,7 @@ jobs:
           zip $(cat gradle-artifact.txt).zip realworld-backend-micronaut.exe
 
       - name: Build Changelog
-        uses: mikepenz/release-changelog-builder-action@v4
+        uses: mikepenz/release-changelog-builder-action@v5
         with:
           outputFile: changelog.txt
           configuration: ".github/release-changelog-builder.json"
