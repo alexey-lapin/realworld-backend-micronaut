@@ -1,6 +1,6 @@
 [versions]
 jacoco = "0.8.7"
-micronaut = "4.6.2"
+micronaut = "4.6.3"
 micronaut-gradle-plugin = "4.4.3"
 
 [libraries]
