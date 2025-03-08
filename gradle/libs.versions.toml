@@ -11,7 +11,7 @@ gradle-plugin-release = { group = "pl.allegro.tech.build", name = "axion-release
 gradle-plugin-spotless = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version = "7.0.2" }
 
 [plugins]
-git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.2" }
+git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.5.0" }
 micronaut-aot = { id = "io.micronaut.aot", version.ref = "micronaut-gradle-plugin" }
 micronaut-application = { id = "io.micronaut.application", version.ref = "micronaut-gradle-plugin" }
 micronaut-library = { id = "io.micronaut.library", version.ref = "micronaut-gradle-plugin" }
