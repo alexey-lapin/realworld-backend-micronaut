@@ -8,7 +8,7 @@ micronaut-gradle-plugin = "4.5.1"
 micronaut-platform = { module = "io.micronaut.platform:micronaut-platform", version.ref = "micronaut" }
 gradle-plugin-micronaut = { group = "io.micronaut.gradle", name = "micronaut-platform-catalog-plugin", version.ref = "micronaut-gradle-plugin" }
 gradle-plugin-release = { group = "pl.allegro.tech.build", name = "axion-release-plugin", version = "1.18.17" }
-gradle-plugin-spotless = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version = "7.0.2" }
+gradle-plugin-spotless = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version = "7.0.3" }
 
 [plugins]
 git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.5.0" }
