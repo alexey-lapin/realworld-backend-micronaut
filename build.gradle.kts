@@ -1,17 +1,12 @@
 plugins {
     base
     alias(libs.plugins.versions)
-    id("pl.allegro.tech.build.axion-release")
+    alias(libs.plugins.release)
     id("realworld.jacoco-aggregation")
 }
 
 description = "Real world backend API built in Micronaut"
-
-scmVersion {
-    tag {
-        prefix.set("v")
-    }
-}
+version = scmVersion.version
 
 dependencies {
     implementation(project(":service"))

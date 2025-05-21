@@ -7,7 +7,6 @@ micronaut-gradle-plugin = "4.5.1"
 # renovate hint
 micronaut-platform = { module = "io.micronaut.platform:micronaut-platform", version.ref = "micronaut" }
 gradle-plugin-micronaut = { group = "io.micronaut.gradle", name = "micronaut-platform-catalog-plugin", version.ref = "micronaut-gradle-plugin" }
-gradle-plugin-release = { group = "pl.allegro.tech.build", name = "axion-release-plugin", version = "1.18.17" }
 gradle-plugin-spotless = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version = "7.0.3" }
 
 [plugins]
@@ -15,5 +14,6 @@ git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.5.0"
 micronaut-aot = { id = "io.micronaut.aot", version.ref = "micronaut-gradle-plugin" }
 micronaut-application = { id = "io.micronaut.application", version.ref = "micronaut-gradle-plugin" }
 micronaut-library = { id = "io.micronaut.library", version.ref = "micronaut-gradle-plugin" }
+release = { id = "pl.allegro.tech.build.axion-release", version = "1.18.18" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 versions = { id = "com.github.ben-manes.versions", version = "0.52.0" }
