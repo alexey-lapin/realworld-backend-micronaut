@@ -24,6 +24,41 @@ application {
     mainClass.set("com.github.al.realworld.App")
 }
 
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+        }
+
+        register<JvmTestSuite>("intTest") {
+            configurations {
+                named(sources.implementationConfigurationName) {
+                    extendsFrom(getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME))
+                }
+            }
+            dependencies {
+                annotationProcessor(mn.lombok)
+                compileOnly(mn.lombok)
+
+                annotationProcessor(mn.micronaut.inject.java)
+
+                implementation(project())
+
+                implementation(mn.micronaut.http.client)
+                implementation(mn.micronaut.test.junit5)
+                implementation(mn.assertj.core)
+            }
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     annotationProcessor(mn.lombok)
     compileOnly(mn.lombok)
@@ -52,12 +87,6 @@ dependencies {
     testImplementation(mn.micronaut.test.junit5)
     testImplementation(mn.assertj.core)
     testImplementation(mn.mockito.core)
-
-    intTestAnnotationProcessor(mn.lombok)
-    intTestCompileOnly(mn.lombok)
-
-    intTestAnnotationProcessor(mn.micronaut.inject.java)
-    intTestImplementation(mn.micronaut.http.client)
 }
 
 configure<GitPropertiesPluginExtension> {
@@ -130,6 +159,10 @@ tasks {
 
     named("nativeCompile") {
         finalizedBy(writeArtifactFile)
+    }
+
+    named("check") {
+        dependsOn(testing.suites.named("intTest"))
     }
 
 }
