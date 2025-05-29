@@ -2,17 +2,34 @@ plugins {
     base
     alias(libs.plugins.versions)
     alias(libs.plugins.release)
-    id("realworld.jacoco-aggregation")
+    id("jacoco-report-aggregation")
 }
 
 description = "Real world backend API built in Micronaut"
 version = scmVersion.version
 
 dependencies {
-    implementation(project(":service"))
+    jacocoAggregation(project(":service"))
+}
+
+reporting {
+    reports {
+        val testJacocoCoverageReport by creating(JacocoCoverageReport::class) {
+            testSuiteName = "test"
+        }
+        val intTestJacocoCoverageReport by creating(JacocoCoverageReport::class) {
+            testSuiteName = "intTest"
+        }
+    }
 }
 
 tasks {
+    register("jacocoReport") {
+        reporting.reports.withType<JacocoCoverageReport>().configureEach {
+            dependsOn(reportTask)
+        }
+    }
+
     dependencyUpdates {
         checkConstraints = true
         resolutionStrategy {
