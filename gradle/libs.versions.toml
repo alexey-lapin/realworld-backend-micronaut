@@ -7,7 +7,7 @@ micronaut-gradle-plugin = "4.5.4"
 # renovate hint
 micronaut-platform = { module = "io.micronaut.platform:micronaut-platform", version.ref = "micronaut" }
 gradle-plugin-micronaut = { group = "io.micronaut.gradle", name = "micronaut-platform-catalog-plugin", version.ref = "micronaut-gradle-plugin" }
-gradle-plugin-spotless = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version = "7.1.0" }
+gradle-plugin-spotless = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version = "7.2.1" }
 
 [plugins]
 git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.5.2" }
