@@ -16,4 +16,4 @@ micronaut-application = { id = "io.micronaut.application", version.ref = "micron
 micronaut-library = { id = "io.micronaut.library", version.ref = "micronaut-gradle-plugin" }
 release = { id = "pl.allegro.tech.build.axion-release", version = "1.20.1" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
-versions = { id = "com.github.ben-manes.versions", version = "0.52.0" }
+versions = { id = "com.github.ben-manes.versions", version = "0.53.0" }
