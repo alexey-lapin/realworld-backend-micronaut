@@ -37,7 +37,7 @@ jobs:
           node-version: 22
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Gradle build
         run: ./gradlew build
@@ -100,7 +100,7 @@ jobs:
           node-version: 22
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Gradle nativeCompile
         run: ./gradlew :service:nativeCompile -x check
@@ -141,7 +141,7 @@ jobs:
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Gradle jacocoReport
         shell: bash
@@ -219,7 +219,7 @@ jobs:
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Login to Container Registry
         uses: docker/login-action@v3
