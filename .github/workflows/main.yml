@@ -32,7 +32,7 @@ jobs:
           java-version: 21
 
       - name: Setup NodeJS
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: 22
 
@@ -95,7 +95,7 @@ jobs:
           native-image-job-reports: 'true'
 
       - name: Setup NodeJS
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: 22
 
