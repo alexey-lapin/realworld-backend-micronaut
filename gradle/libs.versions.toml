@@ -15,5 +15,5 @@ micronaut-aot = { id = "io.micronaut.aot", version.ref = "micronaut-gradle-plugi
 micronaut-application = { id = "io.micronaut.application", version.ref = "micronaut-gradle-plugin" }
 micronaut-library = { id = "io.micronaut.library", version.ref = "micronaut-gradle-plugin" }
 release = { id = "pl.allegro.tech.build.axion-release", version = "1.20.1" }
-shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
+shadow = { id = "com.gradleup.shadow", version = "9.2.2" }
 versions = { id = "com.github.ben-manes.versions", version = "0.53.0" }
