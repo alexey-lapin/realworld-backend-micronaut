@@ -103,6 +103,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Gradle nativeCompile
+        env:
+          GRADLE_OPTS: -Djava.io.tmpdir=${{ runner.temp }}
         run: ./gradlew :service:nativeCompile -x check
 
       - name: Upload app-native
