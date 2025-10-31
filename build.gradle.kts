@@ -1,3 +1,5 @@
+import com.github.benmanes.gradle.versions.updates.resolutionstrategy.ComponentSelectionWithCurrent
+
 plugins {
     base
     alias(libs.plugins.versions)
@@ -34,12 +36,12 @@ tasks {
         checkConstraints = true
         resolutionStrategy {
             componentSelection {
-                all {
+                all { selection: ComponentSelectionWithCurrent ->
                     val rejected = listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea")
                         .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-+]*") }
-                        .any { it.matches(candidate.version) }
+                        .any { it.matches(selection.candidate.version) }
                     if (rejected) {
-                        reject("Release candidate")
+                        selection.reject("Release candidate")
                     }
                 }
             }
