@@ -58,7 +58,7 @@ jobs:
           --global-var "PASSWORD=password"
 
       - name: Upload app-jar
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: app-jar
           path: |
@@ -108,7 +108,7 @@ jobs:
         run: ./gradlew :service:nativeCompile -x check
 
       - name: Upload app-native
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact }}
           path: |
@@ -167,7 +167,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
 
       - name: Prepare Linux Artifacts
         run: |
