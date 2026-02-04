@@ -1,7 +1,7 @@
 [versions]
 jacoco = "0.8.7"
 micronaut = "4.10.7"
-micronaut-gradle-plugin = "4.6.1"
+micronaut-gradle-plugin = "4.6.2"
 
 [libraries]
 # renovate hint
