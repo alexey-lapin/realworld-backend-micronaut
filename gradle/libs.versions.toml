@@ -10,7 +10,7 @@ gradle-plugin-micronaut = { group = "io.micronaut.gradle", name = "micronaut-pla
 gradle-plugin-spotless = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version = "8.2.0" }
 
 [plugins]
-git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.5.4" }
+git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.5.7" }
 micronaut-aot = { id = "io.micronaut.aot", version.ref = "micronaut-gradle-plugin" }
 micronaut-application = { id = "io.micronaut.application", version.ref = "micronaut-gradle-plugin" }
 micronaut-library = { id = "io.micronaut.library", version.ref = "micronaut-gradle-plugin" }
