@@ -24,18 +24,15 @@
 package com.github.al.realworld.application;
 
 import com.github.al.realworld.api.dto.UserDto;
-import com.github.al.realworld.application.service.JwtService;
 import com.github.al.realworld.domain.model.User;
 
-public class UserAssembler {
+public final class UserAssembler {
 
-    public static UserDto assemble(User user, JwtService jwtService) {
-        return new UserDto(
-                user.getEmail(),
-                jwtService.getToken(user),
-                user.getUsername(),
-                user.getBio(),
-                user.getImage());
+    private UserAssembler() {
+    }
+
+    public static UserDto assemble(User user, String token) {
+        return new UserDto(user.email(), token, user.username(), user.bio(), user.image());
     }
 
 }

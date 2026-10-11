@@ -29,9 +29,16 @@ import java.util.Optional;
 
 public interface UserRepository {
 
+    boolean existsByEmail(String email);
+
+    boolean existsByUsername(String username);
+
+    Optional<User> findById(long id);
+
     Optional<User> findByEmail(String email);
 
     Optional<User> findByUsername(String username);
 
     User save(User user);
+
 }

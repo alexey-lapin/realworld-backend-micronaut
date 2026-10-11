@@ -28,7 +28,7 @@ import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
-import java.util.UUID;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
 
 @RequiredArgsConstructor
 @Singleton
@@ -36,12 +36,21 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private final SecurityService securityService;
 
+    /**
+     * Returns the id from the {@code uid} claim, rejecting an authenticated token whose claim is
+     * missing or not a number.
+     */
     @Override
-    public @Nullable UUID getCurrentUserId() {
-        return securityService.getAuthentication()
-                .map(authentication -> authentication.getAttributes().get(JwtService.CLAIM_UID))
-                .map(uid -> UUID.fromString(uid.toString()))
-                .orElse(null);
+    public @Nullable Long getCurrentUserId() {
+        var authentication = securityService.getAuthentication().orElse(null);
+        if (authentication == null) {
+            return null;
+        }
+        var uid = authentication.getAttributes().get(JwtService.CLAIM_UID);
+        if (uid instanceof Number number) {
+            return number.longValue();
+        }
+        throw invalidToken("token has no numeric %s claim", JwtService.CLAIM_UID);
     }
 
     @Override

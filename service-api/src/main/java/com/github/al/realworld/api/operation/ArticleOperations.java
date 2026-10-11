@@ -33,7 +33,6 @@ import com.github.al.realworld.api.command.UpdateArticle;
 import com.github.al.realworld.api.command.UpdateArticleResult;
 import com.github.al.realworld.api.query.GetArticleResult;
 import com.github.al.realworld.api.query.GetArticlesResult;
-import com.github.al.realworld.api.query.GetCommentResult;
 import com.github.al.realworld.api.query.GetCommentsResult;
 import com.github.al.realworld.api.query.GetFeedResult;
 import io.micronaut.http.HttpStatus;
@@ -84,10 +83,6 @@ public interface ArticleOperations {
 
     @Get("/articles/{slug}/comments")
     GetCommentsResult findAllComments(@PathVariable("slug") String slug);
-
-    @Get("/articles/{slug}/comments/{id}")
-    GetCommentResult findComment(@PathVariable("slug") String slug,
-                                 @PathVariable("id") long id);
 
     @Status(HttpStatus.CREATED)
     @Post("/articles/{slug}/comments")

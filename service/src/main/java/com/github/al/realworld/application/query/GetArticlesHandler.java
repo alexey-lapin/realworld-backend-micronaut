@@ -23,19 +23,23 @@
  */
 package com.github.al.realworld.application.query;
 
-import com.github.al.realworld.api.dto.ArticleItemDto;
 import com.github.al.realworld.api.query.GetArticles;
 import com.github.al.realworld.api.query.GetArticlesResult;
 import com.github.al.realworld.application.ArticleAssembler;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.bus.QueryHandler;
+import com.github.al.realworld.domain.model.Tag;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
+import com.github.al.realworld.domain.repository.TagRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 @Singleton
@@ -44,22 +48,48 @@ public class GetArticlesHandler implements QueryHandler<GetArticlesResult, GetAr
     private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
+    private final TagRepository tagRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public GetArticlesResult handle(GetArticles query) {
-        var currentUsername = authenticationService.getCurrentUserName();
-        User currentUser = currentUsername == null
-                ? null
-                : userRepository.findByUsername(currentUsername).orElse(null);
+        var currentUserId = authenticationService.getCurrentUserId();
 
-        List<ArticleItemDto> results = articleRepository
-                .findByFilters(query.tag(), query.author(), query.favorited(), query.limit(), query.offset())
+        // a filter naming an unknown tag or user matches nothing
+        var tagId = resolve(query.tag(), name -> tagRepository.findByName(name).map(Tag::id));
+        var authorId = resolve(query.author(), name -> userRepository.findByUsername(name).map(User::id));
+        var favoritedById = resolve(query.favorited(), name -> userRepository.findByUsername(name).map(User::id));
+        if (tagId.isEmpty() || authorId.isEmpty() || favoritedById.isEmpty()) {
+            return new GetArticlesResult(List.of(), 0L);
+        }
+
+        var results = articleRepository.findAllItemsByFilters(currentUserId,
+                        tagId.get().orElse(null),
+                        authorId.get().orElse(null),
+                        favoritedById.get().orElse(null),
+                        query.limit(),
+                        query.offset())
                 .stream()
-                .map(article -> ArticleAssembler.assembleItem(article, currentUser))
+                .map(ArticleAssembler::assembleItem)
                 .toList();
 
-        return new GetArticlesResult(results, results.size());
+        var count = articleRepository.countByFilters(tagId.get().orElse(null),
+                authorId.get().orElse(null),
+                favoritedById.get().orElse(null));
+
+        return new GetArticlesResult(results, count);
+    }
+
+    /**
+     * Resolves an optional filter: empty when the filter names something unknown, otherwise the
+     * id to filter by, or no id when the filter is absent.
+     */
+    private static Optional<Optional<Long>> resolve(@Nullable String filter,
+                                                    Function<String, Optional<Long>> lookup) {
+        if (filter == null) {
+            return Optional.of(Optional.empty());
+        }
+        return lookup.apply(filter).map(Optional::of);
     }
 
 }

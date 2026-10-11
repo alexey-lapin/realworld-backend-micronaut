@@ -31,13 +31,12 @@ import com.github.al.realworld.application.service.PasswordEncoder;
 import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
 import static com.github.al.realworld.application.exception.UnauthorizedException.invalidCredentials;
-
 
 @RequiredArgsConstructor
 @Singleton
@@ -52,21 +51,21 @@ public class LoginUserHandler implements CommandHandler<LoginUserResult, LoginUs
     @Transactional
     @Override
     public LoginUserResult handle(LoginUser command) {
-        var data = command.user();
+        var userData = command.user();
 
-        var userOptional = userRepository.findByEmail(data.email());
+        var userOptional = userRepository.findByEmail(userData.email());
         if (userOptional.isEmpty()) {
             // spend the same hashing time as a real check, so timing does not reveal unknown emails
-            passwordEncoder.matches(data.password(), dummyHash());
-            throw invalidCredentials("user [email=%s] does not exist", data.email());
+            passwordEncoder.matches(userData.password(), dummyHash());
+            throw invalidCredentials("user [email=%s] does not exist", userData.email());
         }
         User user = userOptional.get();
 
-        if (!passwordEncoder.matches(data.password(), user.getPassword())) {
-            throw invalidCredentials("user [email=%s] password is incorrect", data.email());
+        if (!passwordEncoder.matches(userData.password(), user.password())) {
+            throw invalidCredentials("user [email=%s] password is incorrect", userData.email());
         }
 
-        return new LoginUserResult(UserAssembler.assemble(user, jwtService));
+        return new LoginUserResult(UserAssembler.assemble(user, jwtService.getToken(user)));
     }
 
     private String dummyHash() {

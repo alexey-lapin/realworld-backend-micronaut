@@ -24,23 +24,44 @@
 package com.github.al.realworld.application.service;
 
 import jakarta.inject.Singleton;
+
 import java.text.Normalizer;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
+/**
+ * Builds URL slugs from titles. A random suffix keeps slugs unique, so articles may share a
+ * title; a title with no Latin letters or digits yields the suffix alone.
+ */
 @Singleton
 public class SlugService {
 
-    private static final Pattern NONLATIN = Pattern.compile("[^\\w_-]");
+    private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
+    private static final int RANDOM_LENGTH = 12;
+    private static final Pattern NON_LATIN = Pattern.compile("[^\\w_-]");
     private static final Pattern SEPARATORS = Pattern.compile("[\\s\\p{Punct}&&[^-]]");
 
     public String makeSlug(String input) {
-        String noseparators = SEPARATORS.matcher(input).replaceAll("-");
-        String normalized = Normalizer.normalize(noseparators, Normalizer.Form.NFD);
-        String slug = NONLATIN.matcher(normalized).replaceAll("");
-        return slug.toLowerCase(Locale.ENGLISH)
+        String noSeparators = SEPARATORS.matcher(input).replaceAll("-");
+        String normalized = Normalizer.normalize(noSeparators, Normalizer.Form.NFD);
+        String slug = NON_LATIN.matcher(normalized).replaceAll("");
+        String base = slug.toLowerCase(Locale.ENGLISH)
                 .replaceAll("-{2,}", "-")
                 .replaceAll("^-|-$", "");
+        if (base.isEmpty()) {
+            return randomSuffix();
+        }
+        return base + "-" + randomSuffix();
+    }
+
+    private static String randomSuffix() {
+        StringBuilder suffix = new StringBuilder(RANDOM_LENGTH);
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        for (int i = 0; i < RANDOM_LENGTH; i++) {
+            suffix.append(RANDOM_CHARS.charAt(random.nextInt(RANDOM_CHARS.length())));
+        }
+        return suffix.toString();
     }
 
 }

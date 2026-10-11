@@ -21,21 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.db.jpa;
+package com.github.al.realworld.domain.model;
 
-import com.github.al.realworld.domain.model.User;
-import io.micronaut.core.annotation.Nullable;
-import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.repository.CrudRepository;
-
-import java.util.Optional;
-import java.util.UUID;
-
-@Repository
-public interface DataUserRepository extends CrudRepository<User, UUID> {
-
-    Optional<User> findByEmail(String email);
-
-    Optional<User> findByUsername(@Nullable String username);
+public record ArticleFavorite(
+        long articleId,
+        long userId
+) {
 
 }

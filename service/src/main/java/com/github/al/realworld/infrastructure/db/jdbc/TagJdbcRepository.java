@@ -21,14 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.query;
+package com.github.al.realworld.infrastructure.db.jdbc;
 
-import com.github.al.realworld.api.dto.CommentDto;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.data.jdbc.annotation.JdbcRepository;
+import io.micronaut.data.model.query.builder.sql.Dialect;
+import io.micronaut.data.repository.CrudRepository;
 
-@Serdeable
-public record GetCommentResult(
-        CommentDto comment
-) {
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+@JdbcRepository(dialect = Dialect.H2)
+public interface TagJdbcRepository extends CrudRepository<TagJdbcEntity, Long> {
+
+    Optional<TagJdbcEntity> findByName(String name);
+
+    List<TagJdbcEntity> findByNameIn(Collection<String> names);
+
+    @Override
+    List<TagJdbcEntity> findAll();
 
 }

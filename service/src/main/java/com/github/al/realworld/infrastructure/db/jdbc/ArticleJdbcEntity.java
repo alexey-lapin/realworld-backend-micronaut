@@ -21,17 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.db.jpa;
+package com.github.al.realworld.infrastructure.db.jdbc;
 
-import com.github.al.realworld.domain.model.Tag;
-import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.repository.CrudRepository;
+import io.micronaut.data.annotation.DateCreated;
+import io.micronaut.data.annotation.DateUpdated;
+import io.micronaut.data.annotation.GeneratedValue;
+import io.micronaut.data.annotation.Id;
+import io.micronaut.data.annotation.MappedEntity;
+import org.jspecify.annotations.Nullable;
 
-import java.util.Optional;
+import java.time.Instant;
 
-@Repository
-public interface DataTagRepository extends CrudRepository<Tag, Long> {
-
-    Optional<Tag> findByName(String name);
+/**
+ * An article row. {@code tagList} holds the tag names joined in order, which the read view
+ * exposes without a join; the ordered tag ids live in {@code t_article_tags}.
+ */
+@MappedEntity("t_articles")
+public record ArticleJdbcEntity(
+        @Id @GeneratedValue @Nullable Long id,
+        @DateCreated @Nullable Instant createdAt,
+        @DateUpdated @Nullable Instant updatedAt,
+        long authorId,
+        String slug,
+        String title,
+        String description,
+        String body,
+        @Nullable String tagList,
+        int favoritesCount
+) {
 
 }

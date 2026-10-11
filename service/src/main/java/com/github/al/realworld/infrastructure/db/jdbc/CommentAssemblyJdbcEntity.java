@@ -21,40 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.db.jpa;
+package com.github.al.realworld.infrastructure.db.jdbc;
 
-import com.github.al.realworld.domain.model.FollowRelation;
-import com.github.al.realworld.domain.model.User;
-import com.github.al.realworld.domain.repository.FollowRelationRepository;
-import lombok.RequiredArgsConstructor;
+import io.micronaut.data.annotation.Id;
+import io.micronaut.data.annotation.MappedEntity;
+import org.jspecify.annotations.Nullable;
 
-import jakarta.inject.Singleton;
-import java.util.List;
-import java.util.UUID;
+import java.time.Instant;
 
-@RequiredArgsConstructor
-@Singleton
-public class JpaFollowRelationRepositoryAdapter implements FollowRelationRepository {
+@MappedEntity("v_comments_read")
+public record CommentAssemblyJdbcEntity(
+        @Id long id,
+        Instant createdAt,
+        Instant updatedAt,
+        long articleId,
+        String body,
+        long authorId,
+        String authorUsername,
+        @Nullable String authorBio,
+        @Nullable String authorImage,
+        boolean authorFollowing
+) {
 
-    private final DataFollowRelationRepository repository;
-
-    @Override
-    public FollowRelation save(FollowRelation entity) {
-        return repository.save(entity);
-    }
-
-    @Override
-    public List<FollowRelation> findByFollowerId(UUID followerId) {
-        return repository.findByFollowerId(followerId);
-    }
-
-    @Override
-    public List<FollowRelation> findByFolloweeId(UUID followeeId) {
-        return repository.findByFolloweeId(followeeId);
-    }
-
-    @Override
-    public void deleteByFollowerAndFollowee(User follower, User followee) {
-        repository.deleteByFollowerAndFollowee(follower, followee);
-    }
 }

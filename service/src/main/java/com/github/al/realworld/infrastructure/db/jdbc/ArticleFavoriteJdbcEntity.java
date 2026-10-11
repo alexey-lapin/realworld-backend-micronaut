@@ -21,29 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.domain.model;
+package com.github.al.realworld.infrastructure.db.jdbc;
 
-import io.micronaut.core.annotation.ReflectiveAccess;
-import io.micronaut.core.annotation.TypeHint;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.data.annotation.GeneratedValue;
+import io.micronaut.data.annotation.Id;
+import io.micronaut.data.annotation.MappedEntity;
+import org.jspecify.annotations.Nullable;
 
-import jakarta.persistence.Embeddable;
-import java.io.Serializable;
-import java.util.UUID;
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@EqualsAndHashCode
-@TypeHint
-@ReflectiveAccess
-@Embeddable
-public class FollowRelationId implements Serializable {
-
-    private UUID followerId;
-    private UUID followeeId;
+@MappedEntity("t_favorites")
+public record ArticleFavoriteJdbcEntity(
+        @Id @GeneratedValue @Nullable Long id,
+        long articleId,
+        long userId
+) {
 
 }

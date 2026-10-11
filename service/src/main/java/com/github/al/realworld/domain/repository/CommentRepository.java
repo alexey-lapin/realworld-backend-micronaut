@@ -21,24 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.db.jpa;
+package com.github.al.realworld.domain.repository;
 
-import com.github.al.realworld.domain.model.FollowRelation;
-import com.github.al.realworld.domain.model.FollowRelationId;
-import com.github.al.realworld.domain.model.User;
-import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.repository.CrudRepository;
+import com.github.al.realworld.domain.model.Comment;
+import com.github.al.realworld.domain.model.CommentAssembly;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
-@Repository
-public interface DataFollowRelationRepository extends CrudRepository<FollowRelation, FollowRelationId> {
+public interface CommentRepository {
 
-    List<FollowRelation> findByFollowerId(UUID followerId);
+    Optional<Comment> findById(long id);
 
-    List<FollowRelation> findByFolloweeId(UUID followeeId);
+    Optional<CommentAssembly> findAssemblyById(@Nullable Long userId, long id);
 
-    void deleteByFollowerAndFollowee(User follower, User followee);
+    List<CommentAssembly> findAllAssemblyByArticleId(@Nullable Long userId, long articleId);
+
+    Comment save(Comment comment);
+
+    void deleteById(long id);
+
+    void deleteAllByArticleId(long articleId);
 
 }

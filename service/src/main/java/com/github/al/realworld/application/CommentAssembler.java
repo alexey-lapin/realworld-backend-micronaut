@@ -24,19 +24,22 @@
 package com.github.al.realworld.application;
 
 import com.github.al.realworld.api.dto.CommentDto;
-import com.github.al.realworld.domain.model.Comment;
-import com.github.al.realworld.domain.model.User;
-import org.jspecify.annotations.Nullable;
+import com.github.al.realworld.domain.model.CommentAssembly;
 
-public class CommentAssembler {
+import static com.github.al.realworld.application.ArticleAssembler.zoned;
 
-    public static CommentDto assemble(Comment comment, @Nullable User currentUser) {
+public final class CommentAssembler {
+
+    private CommentAssembler() {
+    }
+
+    public static CommentDto assemble(CommentAssembly comment) {
         return new CommentDto(
-                comment.getId(),
-                comment.getCreatedAt(),
-                comment.getUpdatedAt(),
-                comment.getBody(),
-                ProfileAssembler.assemble(comment.getAuthor(), currentUser));
+                comment.id(),
+                zoned(comment.createdAt()),
+                zoned(comment.updatedAt()),
+                comment.body(),
+                ProfileAssembler.assemble(comment.author()));
     }
 
 }

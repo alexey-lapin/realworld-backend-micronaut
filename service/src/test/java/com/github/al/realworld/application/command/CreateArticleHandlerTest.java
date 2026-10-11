@@ -23,96 +23,74 @@
  */
 package com.github.al.realworld.application.command;
 
-import com.github.al.realworld.application.exception.ConflictException;
-import com.github.al.realworld.application.exception.UnauthorizedException;
-import com.github.al.realworld.application.exception.UnauthorizedException;
 import com.github.al.realworld.api.command.CreateArticle;
-import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
-import com.github.al.realworld.domain.model.User;
+import com.github.al.realworld.domain.model.ArticleAssembly;
+import com.github.al.realworld.domain.model.Profile;
+import com.github.al.realworld.domain.model.Tag;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.TagRepository;
-import com.github.al.realworld.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class CreateArticleHandlerTest {
 
-    private static final String TEST_USERNAME = "test-username";
+    private static final long USER_ID = 7;
 
     private AuthenticationService authenticationService;
     private ArticleRepository articleRepository;
-    private UserRepository userRepository;
+    private TagRepository tagRepository;
     private CreateArticleHandler handler;
 
     @BeforeEach
     void setUp() {
         authenticationService = mock(AuthenticationService.class);
         articleRepository = mock(ArticleRepository.class);
-        userRepository = mock(UserRepository.class);
-        handler = new CreateArticleHandler(authenticationService,
-                articleRepository,
-                mock(TagRepository.class),
-                userRepository,
-                new SlugService());
+        tagRepository = mock(TagRepository.class);
+        handler = new CreateArticleHandler(authenticationService, articleRepository, tagRepository, new SlugService());
     }
 
     @Test
-    void should_throw409_when_articleAlreadyExist() {
-        when(articleRepository.findByTitle("test-title")).thenReturn(Optional.of(Article.builder().build()));
+    void should_saveArticleWithSortedDistinctTags() {
+        when(authenticationService.getRequiredCurrentUserId()).thenReturn(USER_ID);
+        when(tagRepository.findAllByNameIn(anyCollection())).thenReturn(List.of(new Tag(1, "b")));
+        when(tagRepository.saveOrGet(any())).thenAnswer(inv -> new Tag(2, inv.<Tag>getArgument(0).name()));
+        when(articleRepository.save(any())).thenAnswer(inv -> inv.<Article>getArgument(0).toBuilder().id(10).build());
+        when(articleRepository.findAssemblyById(eq(USER_ID), anyLong())).thenReturn(Optional.of(assembly()));
 
-        assertThatThrownBy(() -> handler.handle(command("test-title", null)))
-                .isInstanceOf(ConflictException.class);
-    }
+        handler.handle(command("Hello World", List.of("b", "a", "b")));
 
-    @Test
-    void should_throw401_when_notAuthenticated() {
-        when(authenticationService.getRequiredCurrentUserName()).thenCallRealMethod();
-
-        assertThatThrownBy(() -> handler.handle(command("test-title", null)))
-                .isInstanceOf(UnauthorizedException.class);
-    }
-
-    @Test
-    void should_throw401_when_currentUserDoesNotExist() {
-        when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME);
-
-        assertThatThrownBy(() -> handler.handle(command("test-title", null)))
-                .isInstanceOf(UnauthorizedException.class);
-    }
-
-    @Test
-    void should_returnCorrectArticleData() {
-        when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME);
-        when(userRepository.findByUsername(TEST_USERNAME))
-                .thenReturn(Optional.of(User.builder().username(TEST_USERNAME).build()));
-        when(articleRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        ArticleDto result = handler.handle(command("test-title", List.of("tag1", "tag2"))).article();
-
-        assertThat(result.slug()).isEqualTo("test-title");
-        assertThat(result.title()).isEqualTo("test-title");
-        assertThat(result.description()).isEqualTo("test-description");
-        assertThat(result.body()).isEqualTo("test-body");
-        assertThat(result.author().username()).isEqualTo(TEST_USERNAME);
-        assertThat(result.createdAt()).isNotNull();
-        assertThat(result.updatedAt()).isNotNull();
-        assertThat(result.tagList()).containsExactly("tag1", "tag2");
+        var captor = ArgumentCaptor.forClass(Article.class);
+        verify(articleRepository).save(captor.capture());
+        var saved = captor.getValue();
+        assertThat(saved.authorId()).isEqualTo(USER_ID);
+        assertThat(saved.slug()).startsWith("hello-world-");
+        assertThat(saved.tags()).extracting(Tag::name).containsExactly("a", "b");
     }
 
     private static CreateArticle command(String title, List<String> tagList) {
-        return new CreateArticle(new CreateArticle.Data(title, "test-description", "test-body", tagList));
+        return new CreateArticle(new CreateArticle.Data(title, "description", "body", tagList));
+    }
+
+    private static ArticleAssembly assembly() {
+        return new ArticleAssembly(10, Instant.now(), Instant.now(), USER_ID, "slug", "title", "description", "body",
+                List.of(), 0, false, new Profile("user", null, null, false));
     }
 
 }

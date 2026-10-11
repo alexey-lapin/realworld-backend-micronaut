@@ -25,11 +25,18 @@ package com.github.al.realworld.domain.repository;
 
 import com.github.al.realworld.domain.model.Tag;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface TagRepository {
 
     Optional<Tag> findByName(String name);
 
-    Iterable<Tag> findAll();
+    List<Tag> findAllByNameIn(Collection<String> names);
+
+    List<Tag> findAll();
+
+    Tag saveOrGet(Tag tag);
+
 }

@@ -59,6 +59,7 @@ dependencies {
     annotationProcessor(mn.lombok)
     compileOnly(mn.lombok)
 
+    annotationProcessor(mn.micronaut.data.processor)
     annotationProcessor(mn.micronaut.serde.processor)
 
     compileOnly(mn.micronaut.openapi.annotations)
@@ -68,8 +69,7 @@ dependencies {
 
     implementation(libs.bcrypt)
 
-    implementation(mn.micronaut.data.hibernate.jpa)
-    implementation(mn.micronaut.hibernate.jpa)
+    implementation(mn.micronaut.data.jdbc)
     implementation(mn.micronaut.serde.jackson)
     implementation(mn.micronaut.jdbc.hikari)
     implementation(mn.micronaut.liquibase)

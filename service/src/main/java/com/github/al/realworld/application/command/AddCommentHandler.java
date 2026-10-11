@@ -28,19 +28,14 @@ import com.github.al.realworld.api.command.AddCommentResult;
 import com.github.al.realworld.application.CommentAssembler;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.bus.CommandHandler;
-import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.Comment;
-import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
-import com.github.al.realworld.domain.repository.UserRepository;
+import com.github.al.realworld.domain.repository.CommentRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
-import java.time.ZonedDateTime;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
 import static com.github.al.realworld.application.exception.NotFoundException.notFound;
-
 
 @RequiredArgsConstructor
 @Singleton
@@ -48,38 +43,25 @@ public class AddCommentHandler implements CommandHandler<AddCommentResult, AddCo
 
     private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
-    private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     @Override
     public AddCommentResult handle(AddComment command) {
-        Article article = articleRepository.findBySlug(command.slug())
+        var currentUserId = authenticationService.getRequiredCurrentUserId();
+
+        var articleId = articleRepository.findIdBySlug(command.slug())
                 .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", command.slug()));
 
-        var currentUsername = authenticationService.getRequiredCurrentUserName();
-        User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
-
-        ZonedDateTime now = ZonedDateTime.now();
-
-        Comment comment = Comment.builder()
+        var comment = Comment.builder()
+                .articleId(articleId)
+                .authorId(currentUserId)
                 .body(command.comment().body())
-                .createdAt(now)
-                .updatedAt(now)
-                .author(currentUser)
                 .build();
+        var savedComment = commentRepository.save(comment);
 
-        Article alteredArticle = article.toBuilder().comment(comment).build();
-        Article savedArticle = articleRepository.save(alteredArticle);
-
-        Comment savedComment = savedArticle.getComments().stream()
-                .filter(c -> c.getCreatedAt().equals(comment.getCreatedAt()))
-                .filter(c -> c.getAuthor().equals(comment.getAuthor()))
-                .findFirst()
-                // should never happen
-                .orElseThrow(() -> new IllegalStateException("saved comment not found"));
-
-        return new AddCommentResult(CommentAssembler.assemble(savedComment, currentUser));
+        var commentAssembly = commentRepository.findAssemblyById(currentUserId, savedComment.id()).orElseThrow();
+        return new AddCommentResult(CommentAssembler.assemble(commentAssembly));
     }
 
 }

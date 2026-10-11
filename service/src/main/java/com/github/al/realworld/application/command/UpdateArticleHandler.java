@@ -29,22 +29,15 @@ import com.github.al.realworld.application.ArticleAssembler;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.bus.CommandHandler;
-import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.Tag;
-import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.TagRepository;
-import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
-import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
-
 import static com.github.al.realworld.application.exception.ForbiddenException.forbidden;
-import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
 import static com.github.al.realworld.application.exception.NotFoundException.notFound;
 import static com.github.al.realworld.api.dto.JsonNullable.unwrap;
 import static java.util.Objects.requireNonNullElse;
@@ -56,52 +49,50 @@ public class UpdateArticleHandler implements CommandHandler<UpdateArticleResult,
     private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
     private final TagRepository tagRepository;
-    private final UserRepository userRepository;
     private final SlugService slugService;
 
     @Transactional
     @Override
     public UpdateArticleResult handle(UpdateArticle command) {
-        var currentUsername = authenticationService.getRequiredCurrentUserName();
+        var currentUserId = authenticationService.getRequiredCurrentUserId();
+        var articleData = command.article();
 
-        Article article = articleRepository.findBySlug(command.slug())
+        var article = articleRepository.findBySlug(command.slug())
                 .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", command.slug()));
 
-        if (!Objects.equals(article.getAuthor().getUsername(), currentUsername)) {
-            throw forbidden("article", "article [slug=%s] is not owned by %s", command.slug(), currentUsername);
+        if (article.authorId() != currentUserId) {
+            throw forbidden("article", "article [slug=%s] is not owned by %s",
+                    command.slug(), authenticationService.getCurrentUserName());
         }
 
-        User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
+        var newTitle = unwrap(articleData.title());
+        var newDescription = unwrap(articleData.description());
+        var newBody = unwrap(articleData.body());
+        var newTagNames = unwrap(articleData.tagList());
 
-        var data = command.article();
-        var newTitle = unwrap(data.title());
-        var newDescription = unwrap(data.description());
-        var newBody = unwrap(data.body());
-        var newTagNames = unwrap(data.tagList());
-
-        Article.ArticleBuilder builder = article.toBuilder()
-                .slug(newTitle == null ? article.getSlug() : slugService.makeSlug(newTitle))
-                .title(requireNonNullElse(newTitle, article.getTitle()))
-                .description(requireNonNullElse(newDescription, article.getDescription()))
-                .body(requireNonNullElse(newBody, article.getBody()))
-                .updatedAt(ZonedDateTime.now());
+        var builder = article.toBuilder()
+                .slug(newTitle == null ? article.slug() : slugService.makeSlug(newTitle))
+                .title(requireNonNullElse(newTitle, article.title()))
+                .description(requireNonNullElse(newDescription, article.description()))
+                .body(requireNonNullElse(newBody, article.body()));
 
         // a present tagList replaces the tags; an empty one removes them all
         if (newTagNames != null) {
             builder.clearTags().tags(resolveTags(newTagNames));
         }
 
-        Article alteredArticle = builder.build();
-        articleRepository.save(alteredArticle);
+        articleRepository.save(builder.build());
 
-        return new UpdateArticleResult(ArticleAssembler.assemble(alteredArticle, currentUser));
+        var articleAssembly = articleRepository.findAssemblyById(currentUserId, article.id()).orElseThrow();
+        return new UpdateArticleResult(ArticleAssembler.assemble(articleAssembly));
     }
 
     private List<Tag> resolveTags(List<String> names) {
         return names.stream()
                 .distinct()
-                .map(name -> tagRepository.findByName(name).orElseGet(() -> new Tag(name)))
+                .map(Tag::new)
+                .map(tagRepository::saveOrGet)
+                .sorted()
                 .toList();
     }
 

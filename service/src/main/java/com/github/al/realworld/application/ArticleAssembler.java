@@ -25,48 +25,47 @@ package com.github.al.realworld.application;
 
 import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.api.dto.ArticleItemDto;
-import com.github.al.realworld.domain.model.Article;
-import com.github.al.realworld.domain.model.Tag;
-import com.github.al.realworld.domain.model.User;
-import org.jspecify.annotations.Nullable;
+import com.github.al.realworld.domain.model.ArticleAssembly;
+import com.github.al.realworld.domain.model.ArticleItem;
 
-import java.util.List;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
-public class ArticleAssembler {
+public final class ArticleAssembler {
 
-    public static ArticleDto assemble(Article article, @Nullable User currentUser) {
+    private ArticleAssembler() {
+    }
+
+    public static ArticleDto assemble(ArticleAssembly article) {
         return new ArticleDto(
-                article.getSlug(),
-                article.getTitle(),
-                article.getDescription(),
-                article.getBody(),
-                tagList(article),
-                article.getCreatedAt(),
-                article.getUpdatedAt(),
-                isFavorited(article, currentUser),
-                article.getFavoredUsers().size(),
-                ProfileAssembler.assemble(article.getAuthor(), currentUser));
+                article.slug(),
+                article.title(),
+                article.description(),
+                article.body(),
+                article.tagList(),
+                zoned(article.createdAt()),
+                zoned(article.updatedAt()),
+                article.favorited(),
+                article.favoritesCount(),
+                ProfileAssembler.assemble(article.author()));
     }
 
-    public static ArticleItemDto assembleItem(Article article, @Nullable User currentUser) {
+    public static ArticleItemDto assembleItem(ArticleItem article) {
         return new ArticleItemDto(
-                article.getSlug(),
-                article.getTitle(),
-                article.getDescription(),
-                tagList(article),
-                article.getCreatedAt(),
-                article.getUpdatedAt(),
-                isFavorited(article, currentUser),
-                article.getFavoredUsers().size(),
-                ProfileAssembler.assemble(article.getAuthor(), currentUser));
+                article.slug(),
+                article.title(),
+                article.description(),
+                article.tagList(),
+                zoned(article.createdAt()),
+                zoned(article.updatedAt()),
+                article.favorited(),
+                article.favoritesCount(),
+                ProfileAssembler.assemble(article.author()));
     }
 
-    private static List<String> tagList(Article article) {
-        return article.getTags().stream().map(Tag::getName).sorted().toList();
-    }
-
-    private static boolean isFavorited(Article article, @Nullable User currentUser) {
-        return currentUser != null && article.getFavoredUsers().contains(currentUser);
+    static ZonedDateTime zoned(Instant instant) {
+        return instant.atZone(ZoneId.systemDefault());
     }
 
 }

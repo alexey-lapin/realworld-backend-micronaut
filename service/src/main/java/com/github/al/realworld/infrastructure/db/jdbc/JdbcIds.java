@@ -21,13 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.query;
+package com.github.al.realworld.infrastructure.db.jdbc;
 
-import com.github.al.realworld.bus.Query;
+/**
+ * Domain records use {@code 0} for an id not assigned yet; entities use {@code null}.
+ */
+final class JdbcIds {
 
-public record GetComment(
-        String slug,
-        long id
-) implements Query<GetCommentResult> {
+    private JdbcIds() {
+    }
+
+    static Long toEntityId(long id) {
+        return id == 0 ? null : id;
+    }
+
+    static long toDomainId(Long id) {
+        return id == null ? 0 : id;
+    }
 
 }

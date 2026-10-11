@@ -3,130 +3,247 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="01" author="al">
-        <createTable tableName="tbl_user">
-            <column name="id" type="uuid">
-                <constraints primaryKey="true"/>
+    <changeSet id="001-create-t-users" author="alex">
+        <createTable tableName="t_users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="username" type="varchar(100)"/>
-            <column name="email" type="varchar(100)"/>
-            <column name="password" type="varchar(100)"/>
-            <column name="bio" type="varchar(200)"/>
-            <column name="image" type="varchar(200)"/>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="02" author="al">
-        <createTable tableName="tbl_article">
-            <column name="id" type="uuid">
-                <constraints primaryKey="true"/>
+            <column name="username" type="VARCHAR(64)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_t_users_username"/>
             </column>
-            <column name="slug" type="varchar(100)"/>
-            <column name="title" type="varchar(100)"/>
-            <column name="description" type="varchar(500)"/>
-            <column name="created_at" type="timestamp with time zone"/>
-            <column name="updated_at" type="timestamp with time zone"/>
-            <column name="body" type="varchar(5000)"/>
-            <column name="author_id" type="uuid">
-                <constraints foreignKeyName="fk_article_user"
-                             referencedTableName="tbl_user"
-                             referencedColumnNames="id"/>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_t_users_email"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bio" type="TEXT"/>
+            <column name="image" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="03" author="al">
-        <createTable tableName="tbl_comment">
-            <column name="id" type="number">
-                <constraints primaryKey="true"/>
+    <changeSet id="002-create-t-follows" author="alex">
+        <createTable tableName="t_follows">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="created_at" type="timestamp with time zone"/>
-            <column name="updated_at" type="timestamp with time zone"/>
-            <column name="body" type="varchar(5000)"/>
-            <column name="author_id" type="uuid">
-                <constraints foreignKeyName="fk_comment_user"
-                             referencedTableName="tbl_user"
-                             referencedColumnNames="id"/>
+            <column name="follower_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_t_follows_follower"
+                             referencedTableName="t_users" referencedColumnNames="id"/>
             </column>
-            <column name="article_id" type="uuid">
-                <constraints foreignKeyName="fk_comment_article"
-                             referencedTableName="tbl_article"
-                             referencedColumnNames="id"/>
+            <column name="followee_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_t_follows_followee"
+                             referencedTableName="t_users" referencedColumnNames="id"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="t_follows" columnNames="follower_id,followee_id"
+                             constraintName="ux_t_follows_follower_followee"/>
+
+        <createIndex indexName="ix_t_follows_follower" tableName="t_follows">
+            <column name="follower_id"/>
+        </createIndex>
+
+        <createIndex indexName="ix_t_follows_followee" tableName="t_follows">
+            <column name="followee_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="003-create-t-articles" author="alex">
+        <createTable tableName="t_articles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="slug" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_t_articles_slug"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="body" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_list" type="TEXT"/>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_t_articles_author"
+                             referencedTableName="t_users" referencedColumnNames="id"/>
+            </column>
+            <column name="favorites_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="ix_t_articles_author" tableName="t_articles">
+            <column name="author_id"/>
+        </createIndex>
+
+        <createIndex indexName="ix_t_articles_created_at" tableName="t_articles">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="004-create-t-tags" author="alex">
+        <createTable tableName="t_tags">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(200)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_t_tags_name"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="04" author="al">
-        <createTable tableName="tbl_tag">
-            <column name="id" type="number">
-                <constraints primaryKey="true"/>
+    <changeSet id="005-create-t-article-tags" author="alex">
+        <createTable tableName="t_article_tags">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="varchar(200)"/>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="05" author="al">
-        <createTable tableName="tbl_article_tags">
-            <column name="article_id" type="uuid">
-                <constraints nullable="false"
-                             foreignKeyName="fk_article_tags_article"
-                             referencedTableName="tbl_article"
-                             referencedColumnNames="id"/>
+            <column name="article_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_t_article_tags_article"
+                             referencedTableName="t_articles" referencedColumnNames="id"/>
             </column>
-            <column name="tag_id" type="number">
-                <constraints nullable="false"
-                             foreignKeyName="fk_article_tags_tag"
-                             referencedTableName="tbl_tag"
-                             referencedColumnNames="id"/>
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_t_article_tags_tag"
+                             referencedTableName="t_tags" referencedColumnNames="id"/>
+            </column>
+            <column name="position" type="BIGINT">
+                <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey tableName="tbl_article_tags" columnNames="article_id,tag_id"/>
+
+        <addUniqueConstraint tableName="t_article_tags" columnNames="article_id,tag_id"
+                             constraintName="ux_t_article_tags_article_tag"/>
+
+        <createIndex indexName="ix_t_article_tags_tag" tableName="t_article_tags">
+            <column name="tag_id"/>
+        </createIndex>
+
+        <createIndex indexName="ix_t_article_tags_article" tableName="t_article_tags">
+            <column name="article_id"/>
+        </createIndex>
     </changeSet>
 
-    <changeSet id="06" author="al">
-        <createTable tableName="tbl_follow_relation">
-            <column name="follower_id" type="uuid">
-                <constraints nullable="false"
-                             foreignKeyName="fk_followers_follower"
-                             referencedTableName="tbl_user"
-                             referencedColumnNames="id"/>
+    <changeSet id="006-create-t-favorites" author="alex">
+        <createTable tableName="t_favorites">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="followee_id" type="uuid">
-                <constraints nullable="false"
-                             foreignKeyName="fk_followers_followee"
-                             referencedTableName="tbl_user"
-                             referencedColumnNames="id"/>
+            <column name="article_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_t_favorites_article"
+                             referencedTableName="t_articles" referencedColumnNames="id"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_t_favorites_user"
+                             referencedTableName="t_users" referencedColumnNames="id"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey tableName="tbl_follow_relation" columnNames="follower_id,followee_id"/>
+
+        <addUniqueConstraint tableName="t_favorites" columnNames="article_id,user_id"
+                             constraintName="ux_t_favorites_article_user"/>
+
+        <createIndex indexName="ix_t_favorites_user" tableName="t_favorites">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="ix_t_favorites_article" tableName="t_favorites">
+            <column name="article_id"/>
+        </createIndex>
     </changeSet>
 
-    <changeSet id="07" author="al">
-        <createTable tableName="tbl_article_favorites">
-            <column name="article_id" type="uuid">
-                <constraints nullable="false"
-                             foreignKeyName="fk_article_favorites_article"
-                             referencedTableName="tbl_article"
-                             referencedColumnNames="id"/>
+    <changeSet id="007-create-t-comments" author="alex">
+        <createTable tableName="t_comments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="user_id" type="uuid">
-                <constraints nullable="false"
-                             foreignKeyName="fk_article_favorites_user"
-                             referencedTableName="tbl_user"
-                             referencedColumnNames="id"/>
+            <column name="article_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_t_comments_article"
+                             referencedTableName="t_articles" referencedColumnNames="id"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_t_comments_author"
+                             referencedTableName="t_users" referencedColumnNames="id"/>
+            </column>
+            <column name="body" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey tableName="tbl_article_favorites" columnNames="article_id,user_id"/>
+
+        <createIndex indexName="ix_t_comments_article" tableName="t_comments">
+            <column name="article_id"/>
+        </createIndex>
+
+        <createIndex indexName="ix_t_comments_created_at" tableName="t_comments">
+            <column name="created_at"/>
+        </createIndex>
     </changeSet>
 
-    <changeSet id="08" author="al">
-        <createSequence cycle="false"
-                        incrementBy="1"
-                        ordered="true"
-                        sequenceName="hibernate_sequence"
-                        startValue="0"/>
+    <changeSet id="008-create-v-articles-read" author="alex">
+        <createView viewName="v_articles_read">
+            <![CDATA[
+            select a.id,
+                   a.slug,
+                   a.title,
+                   a.description,
+                   a.body,
+                   a.tag_list,
+                   a.favorites_count,
+                   a.created_at,
+                   a.updated_at,
+                   u.id       as author_id,
+                   u.username as author_username,
+                   u.bio      as author_bio,
+                   u.image    as author_image
+            from t_articles a
+                     join t_users u on a.author_id = u.id
+            ]]>
+        </createView>
+    </changeSet>
+
+    <changeSet id="009-create-v-comments-read" author="alex">
+        <createView viewName="v_comments_read">
+            <![CDATA[
+            select c.id,
+                   c.created_at,
+                   c.updated_at,
+                   c.article_id,
+                   c.body,
+                   u.id       as author_id,
+                   u.username as author_username,
+                   u.bio      as author_bio,
+                   u.image    as author_image
+            from t_comments c
+                     join t_users u on c.author_id = u.id
+            ]]>
+        </createView>
     </changeSet>
 
 </databaseChangeLog>
