@@ -1,14 +1,12 @@
 import com.github.benmanes.gradle.versions.updates.resolutionstrategy.ComponentSelectionWithCurrent
 
 plugins {
-    base
     alias(libs.plugins.versions)
-    alias(libs.plugins.release)
     id("jacoco-report-aggregation")
+    id("realworld.project-conventions")
 }
 
 description = "Real world backend API built in Micronaut"
-version = scmVersion.version
 
 dependencies {
     jacocoAggregation(project(":service"))
@@ -16,22 +14,30 @@ dependencies {
 
 reporting {
     reports {
-        val testJacocoCoverageReport by creating(JacocoCoverageReport::class) {
-            testSuiteName = "test"
-        }
-        val intTestJacocoCoverageReport by creating(JacocoCoverageReport::class) {
-            testSuiteName = "intTest"
-        }
+        // one per suite is all the plugin offers; jacocoReport below merges them
+        create<JacocoCoverageReport>("testCodeCoverageReport") { testSuiteName = "test" }
+        create<JacocoCoverageReport>("integrationTestCodeCoverageReport") { testSuiteName = "integrationTest" }
+    }
+}
+
+tasks.register<JacocoReport>("jacocoReport") {
+    group = "verification"
+    description = "Aggregates coverage from every module and every test suite."
+
+    reporting.reports.withType<JacocoCoverageReport>().forEach { report ->
+        val task = report.reportTask
+        sourceDirectories.from(task.map { it.sourceDirectories })
+        classDirectories.from(task.map { it.classDirectories })
+        executionData.from(task.map { it.executionData })
+    }
+
+    reports {
+        xml.required = true
+        html.required = true
     }
 }
 
 tasks {
-    register("jacocoReport") {
-        reporting.reports.withType<JacocoCoverageReport>().configureEach {
-            dependsOn(reportTask)
-        }
-    }
-
     dependencyUpdates {
         checkConstraints = true
         resolutionStrategy {

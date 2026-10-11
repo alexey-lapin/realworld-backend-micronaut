@@ -26,11 +26,12 @@ application {
 
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
-            useJUnitJupiter()
+        withType<JvmTestSuite>().configureEach {
+            // keep the engine and launcher on the version the Micronaut platform manages
+            useJUnitJupiter(mn.versions.junit5)
         }
 
-        register<JvmTestSuite>("intTest") {
+        register<JvmTestSuite>("integrationTest") {
             configurations {
                 named(sources.implementationConfigurationName) {
                     extendsFrom(getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME))
@@ -48,12 +49,8 @@ testing {
                 implementation(mn.micronaut.test.junit5)
                 implementation(mn.assertj.core)
             }
-            targets {
-                all {
-                    testTask.configure {
-                        shouldRunAfter(test)
-                    }
-                }
+            targets.configureEach {
+                testTask.configure { shouldRunAfter(tasks.test) }
             }
         }
     }
@@ -147,7 +144,7 @@ tasks {
         )
     }
 
-    val writeArtifactFile by registering {
+    val writeArtifactFile = register("writeArtifactFile") {
         doLast {
             val outputDirectory = getByName<BuildNativeImageTask>("nativeCompile").outputDirectory
             outputDirectory.get().asFile.mkdirs()
@@ -162,7 +159,7 @@ tasks {
     }
 
     named("check") {
-        dependsOn(testing.suites.named("intTest"))
+        dependsOn(testing.suites.named("integrationTest"))
     }
 
 }
