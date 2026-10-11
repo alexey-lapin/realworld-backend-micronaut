@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Runs the RealWorld hurl spec file by file and writes a per-file result table to the
-# job summary, so partial conformance stays visible while the suite is not gating.
+# Runs the RealWorld hurl spec file by file, writes a per-file result table to the job
+# summary, and fails when any file fails.
 # Usage: hurl-report.sh <host> <uid>
 set -uo pipefail
 
