@@ -13,14 +13,14 @@ n=0
 {
   echo "### RealWorld API spec"
   echo
-  echo "| file | result | failed asserts |"
+  echo "| file | result | errors |"
   echo "|---|---|---|"
 } >> "$summary"
 
 for file in .realworld-spec/specs/api/hurl/*.hurl; do
   n=$((n + 1))
   # a distinct uid per file keeps usernames and slugs unique across files
-  if output=$(hurl --test --continue-on-error --jobs 1 \
+  if output=$(hurl --test --continue-on-error --no-color --jobs 1 \
     --variable host="$host" \
     --variable uid="${uid}${n}" \
     "$file" 2>&1); then

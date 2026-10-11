@@ -53,10 +53,17 @@ class DefaultBusTest {
     }
 
     @Test
-    void should_failClearly_when_noHandlerIsRegistered() {
+    void should_failClearly_when_noCommandHandlerIsRegistered() {
         assertThatThrownBy(() -> bus.executeCommand(new Unhandled()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining(Unhandled.class.getName());
+    }
+
+    @Test
+    void should_failClearly_when_noQueryHandlerIsRegistered() {
+        assertThatThrownBy(() -> bus.executeQuery(new UnhandledQuery()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(UnhandledQuery.class.getName());
     }
 
     record Greet(String name) implements Command<String> {
@@ -102,6 +109,9 @@ class DefaultBusTest {
     }
 
     record Unhandled() implements Command<String> {
+    }
+
+    record UnhandledQuery() implements Query<String> {
     }
 
 }
