@@ -24,7 +24,6 @@
 package com.github.al.bus;
 
 import io.micronaut.context.ApplicationContext;
-import io.micronaut.core.reflect.GenericTypeUtils;
 import io.micronaut.inject.BeanDefinition;
 
 import jakarta.inject.Singleton;
@@ -48,14 +47,15 @@ public class Registry {
     }
 
     private void registerCommandHandler(ApplicationContext applicationContext, BeanDefinition<CommandHandler> commandHandler) {
-        Class<?>[] handlerTypes = GenericTypeUtils.resolveInterfaceTypeArguments(commandHandler.getBeanType(), CommandHandler.class);
-        Class<? extends Command> commandType = (Class<? extends Command>) handlerTypes[1];
+        // type arguments are recorded at compile time, so no reflection is needed
+        Class<? extends Command> commandType = (Class<? extends Command>) commandHandler
+                .getTypeArguments(CommandHandler.class).get(1).getType();
         commandHandlerProviders.put(commandType, new CommandHandlerProvider(applicationContext, commandHandler.getBeanType()));
     }
 
     private void registerQueryHandler(ApplicationContext applicationContext, BeanDefinition<QueryHandler> queryHandler) {
-        Class<?>[] handlerTypes = GenericTypeUtils.resolveInterfaceTypeArguments(queryHandler.getBeanType(), QueryHandler.class);
-        Class<? extends Query> queryType = (Class<? extends Query>) handlerTypes[1];
+        Class<? extends Query> queryType = (Class<? extends Query>) queryHandler
+                .getTypeArguments(QueryHandler.class).get(1).getType();
         queryHandlerProviders.put(queryType, new QueryHandlerProvider(applicationContext, queryHandler.getBeanType()));
     }
 
