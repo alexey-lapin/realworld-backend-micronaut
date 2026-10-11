@@ -27,10 +27,8 @@ import io.micronaut.core.annotation.TypeHint;
 
 @TypeHint(
         typeNames = {
+                // logback.xml registers it as a context listener
                 "ch.qos.logback.classic.jul.LevelChangePropagator",
-                "java.util.UUID",
-                "io.jsonwebtoken.impl.DefaultJwtBuilder",
-                "io.jsonwebtoken.impl.DefaultJwtParserBuilder",
                 // the XML changelog parser populates these through setters, which the
                 // community liquibase-core metadata doesn't register
                 "liquibase.change.AddColumnConfig",

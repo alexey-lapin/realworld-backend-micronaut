@@ -1,0 +1,4 @@
+# Allowlist: the image needs only the Dockerfile and the linux native binaries CI downloads.
+*
+!Dockerfile.native
+!app-native-linux-*/

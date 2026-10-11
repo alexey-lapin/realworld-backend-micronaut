@@ -1,4 +1,3 @@
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.gorylenko.GenerateGitPropertiesTask
 import com.gorylenko.GitPropertiesPluginExtension
@@ -134,18 +133,6 @@ tasks {
 
     named<ShadowJar>("shadowJar") {
         archiveFileName.set("${rootProject.name}-${archiveVersion.get()}.${archiveExtension.get()}")
-    }
-
-    named<DockerBuildImage>("dockerBuildNative") {
-        // CI sets these; defaults keep configuration from failing elsewhere, e.g. in an IDE sync
-        val registry = System.getenv("CR_REGISTRY") ?: "ghcr.io"
-        val namespace = System.getenv("CR_NAMESPACE") ?: "local"
-        images.set(
-            listOf(
-                "${registry}/${namespace}/${rootProject.name}:latest",
-                "${registry}/${namespace}/${rootProject.name}:${project.version}"
-            )
-        )
     }
 
     named("check") {
