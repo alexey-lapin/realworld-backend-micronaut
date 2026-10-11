@@ -20,11 +20,10 @@ n=0
 for file in .realworld-spec/specs/api/hurl/*.hurl; do
   n=$((n + 1))
   # a distinct uid per file keeps usernames and slugs unique across files
-  output=$(hurl --test --continue-on-error --jobs 1 \
+  if output=$(hurl --test --continue-on-error --jobs 1 \
     --variable host="$host" \
     --variable uid="${uid}${n}" \
-    "$file" 2>&1)
-  if [ $? -eq 0 ]; then
+    "$file" 2>&1); then
     result="pass"
   else
     result="fail"

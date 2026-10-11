@@ -252,6 +252,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: startsWith(github.ref, 'refs/tags/')
+    # never push an image or deploy from a tag whose builds or API checks failed
+    needs: [build-jvm, build-native]
     permissions:
       contents: read
       packages: write

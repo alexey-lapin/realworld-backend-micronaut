@@ -1,7 +1,9 @@
 name: Label PRs
 
+# pull_request_target so fork PRs get a token that can write labels; safe because
+# this workflow never checks out or runs code from the PR
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 jobs:
