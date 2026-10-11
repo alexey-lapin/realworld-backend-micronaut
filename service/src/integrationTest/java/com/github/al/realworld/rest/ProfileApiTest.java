@@ -60,9 +60,9 @@ public class ProfileApiTest {
     void should_returnCorrectData_when_userIsRegistered() {
         register("u1", "u1@example.com", "1234");
 
-        ProfileDto profile = profileClient.findByUsername("u1").getProfile();
+        ProfileDto profile = profileClient.findByUsername("u1").profile();
 
-        assertThat(profile.getUsername()).isEqualTo("u1");
+        assertThat(profile.username()).isEqualTo("u1");
     }
 
     @Test
@@ -78,17 +78,17 @@ public class ProfileApiTest {
     @Test
     void should_returnCorrectProfileData_when_followAndUnfollow() {
         register().login();
-        String user2 = register().getUsername();
+        String user2 = register().username();
 
         profileClient.follow(user2);
 
-        ProfileDto profile1 = profileClient.findByUsername(user2).getProfile();
-        assertThat(profile1.getFollowing()).isTrue();
+        ProfileDto profile1 = profileClient.findByUsername(user2).profile();
+        assertThat(profile1.following()).isTrue();
 
         profileClient.unfollow(user2);
 
-        ProfileDto profile2 = profileClient.findByUsername(user2).getProfile();
-        assertThat(profile2.getFollowing()).isFalse();
+        ProfileDto profile2 = profileClient.findByUsername(user2).profile();
+        assertThat(profile2.following()).isFalse();
     }
 
 }

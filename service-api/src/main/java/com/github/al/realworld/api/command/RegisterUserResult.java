@@ -24,19 +24,11 @@
 package com.github.al.realworld.api.command;
 
 import com.github.al.realworld.api.dto.UserDto;
-import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.serde.annotation.Serdeable;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Introspected
-@ReflectiveAccess
-public class RegisterUserResult {
-
-    private UserDto user;
+@Serdeable
+public record RegisterUserResult(
+        UserDto user
+) {
 
 }

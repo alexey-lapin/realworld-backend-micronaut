@@ -23,16 +23,11 @@
  */
 package com.github.al.realworld.api.command;
 
-import com.github.al.bus.Command;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.github.al.realworld.bus.Command;
 
-@AllArgsConstructor
-@Getter
-public class DeleteComment implements Command<DeleteCommentResult> {
-
-    private String currentUsername;
-    private String slug;
-    private Long id;
+public record DeleteComment(
+        String slug,
+        long id
+) implements Command<DeleteCommentResult> {
 
 }

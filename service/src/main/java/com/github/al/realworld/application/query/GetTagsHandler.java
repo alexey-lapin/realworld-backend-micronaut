@@ -25,16 +25,13 @@ package com.github.al.realworld.application.query;
 
 import com.github.al.realworld.api.query.GetTags;
 import com.github.al.realworld.api.query.GetTagsResult;
-import com.github.al.bus.QueryHandler;
+import com.github.al.realworld.bus.QueryHandler;
 import com.github.al.realworld.domain.model.Tag;
 import com.github.al.realworld.domain.repository.TagRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-
-import java.util.ArrayList;
 import java.util.stream.StreamSupport;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Singleton
@@ -45,13 +42,11 @@ public class GetTagsHandler implements QueryHandler<GetTagsResult, GetTags> {
     @Transactional
     @Override
     public GetTagsResult handle(GetTags query) {
-        GetTagsResult result = new GetTagsResult(new ArrayList<>());
-
-        StreamSupport.stream(tagRepository.findAll().spliterator(), false)
+        var tags = StreamSupport.stream(tagRepository.findAll().spliterator(), false)
                 .map(Tag::getName)
-                .forEach(t -> result.getTags().add(t));
+                .toList();
 
-        return result;
+        return new GetTagsResult(tags);
     }
 
 }

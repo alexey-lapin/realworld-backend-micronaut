@@ -23,16 +23,11 @@
  */
 package com.github.al.realworld.api.query;
 
-import com.github.al.bus.Query;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.github.al.realworld.bus.Query;
 
-@AllArgsConstructor
-@Getter
-public class GetFeed implements Query<GetFeedResult> {
-
-    private String currentUsername;
-    private Integer limit;
-    private Integer offset;
+public record GetFeed(
+        int limit,
+        long offset
+) implements Query<GetFeedResult> {
 
 }

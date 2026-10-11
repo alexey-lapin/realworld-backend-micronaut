@@ -24,17 +24,11 @@
 package com.github.al.realworld.api.query;
 
 import com.github.al.realworld.api.dto.CommentDto;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.serde.annotation.Serdeable;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@ReflectiveAccess
-public class GetCommentResult {
-
-    private CommentDto comment;
+@Serdeable
+public record GetCommentResult(
+        CommentDto comment
+) {
 
 }

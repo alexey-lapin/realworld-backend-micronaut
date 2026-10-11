@@ -21,30 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.dto;
+package com.github.al.realworld.bus;
 
-import io.micronaut.core.annotation.ReflectiveAccess;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.context.ApplicationContext;
+import lombok.RequiredArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-@ReflectiveAccess
-public class RegisterUserDto {
+@RequiredArgsConstructor
+class CommandHandlerProvider<H extends CommandHandler<?, ?>> {
 
-    @Email
-    private String email;
+    private final ApplicationContext applicationContext;
+    private final Class<H> type;
 
-    @NotBlank
-    private String username;
-
-    @NotBlank
-    private String password;
+    H get() {
+        return applicationContext.getBean(type);
+    }
 
 }

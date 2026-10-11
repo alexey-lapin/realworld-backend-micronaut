@@ -23,42 +23,38 @@
  */
 package com.github.al.realworld.application.command;
 
-import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.FollowProfile;
 import com.github.al.realworld.api.command.FollowProfileResult;
 import com.github.al.realworld.application.ProfileAssembler;
+import com.github.al.realworld.application.service.AuthenticationService;
+import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.FollowRelation;
 import com.github.al.realworld.domain.model.FollowRelationId;
 import com.github.al.realworld.domain.model.User;
-import com.github.al.realworld.domain.repository.FollowRelationRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
-/**
- * follower - one who follows someone (current user)
- * followee - one who is followed
- */
 @RequiredArgsConstructor
 @Singleton
 public class FollowProfileHandler implements CommandHandler<FollowProfileResult, FollowProfile> {
 
+    private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
-    private final FollowRelationRepository followRelationRepository;
 
     @Transactional
     @Override
     public FollowProfileResult handle(FollowProfile command) {
-        User currentUser = userRepository.findByUsername(command.getFollower())
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getFollower()));
+        var currentUsername = authenticationService.getRequiredCurrentUserName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
 
-        User followee = userRepository.findByUsername(command.getFollowee())
-                .orElseThrow(() -> notFound("user [name=%s] does not exist", command.getFollowee()));
+        User followee = userRepository.findByUsername(command.followee())
+                .orElseThrow(() -> notFound("user [name=%s] does not exist", command.followee()));
 
         FollowRelation follow = new FollowRelation(
                 new FollowRelationId(currentUser.getId(), followee.getId()),

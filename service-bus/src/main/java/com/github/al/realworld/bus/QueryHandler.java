@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.bus;
+package com.github.al.realworld.bus;
 
 public interface QueryHandler<R, Q extends Query<R>> {
 

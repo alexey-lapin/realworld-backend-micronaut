@@ -23,19 +23,12 @@
  */
 package com.github.al.realworld.api.query;
 
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
+import io.micronaut.serde.annotation.Serdeable;
 import java.util.List;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@ReflectiveAccess
-public class GetTagsResult {
-
-    private List<String> tags;
+@Serdeable
+public record GetTagsResult(
+        List<String> tags
+) {
 
 }

@@ -23,7 +23,6 @@
  */
 package com.github.al.realworld.infrastructure.web;
 
-import com.github.al.bus.Bus;
 import com.github.al.realworld.api.command.AddComment;
 import com.github.al.realworld.api.command.AddCommentResult;
 import com.github.al.realworld.api.command.CreateArticle;
@@ -47,13 +46,12 @@ import com.github.al.realworld.api.query.GetComments;
 import com.github.al.realworld.api.query.GetCommentsResult;
 import com.github.al.realworld.api.query.GetFeed;
 import com.github.al.realworld.api.query.GetFeedResult;
-import com.github.al.realworld.application.service.AuthenticationService;
-import io.micronaut.core.annotation.Nullable;
+import com.github.al.realworld.bus.Bus;
 import io.micronaut.http.annotation.Controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 @Tag(name = "Articles")
@@ -61,70 +59,69 @@ import jakarta.validation.Valid;
 public class ArticleController implements ArticleOperations {
 
     private final Bus bus;
-    private final AuthenticationService auth;
 
     @Override
     public GetArticlesResult findByFilters(@Nullable String tag,
                                            @Nullable String author,
                                            @Nullable String favorited,
-                                           Integer limit,
-                                           Integer offset) {
-        return bus.executeQuery(new GetArticles(auth.currentUsername(), tag, author, favorited, limit, offset));
+                                           int limit,
+                                           long offset) {
+        return bus.executeQuery(new GetArticles(tag, author, favorited, limit, offset));
     }
 
     @Override
     public CreateArticleResult create(@Valid CreateArticle command) {
-        return bus.executeCommand(command.withCurrentUsername(auth.currentUsername()));
+        return bus.executeCommand(command);
     }
 
     @Override
-    public GetFeedResult feed(Integer limit, Integer offset) {
-        return bus.executeQuery(new GetFeed(auth.currentUsername(), limit, offset));
+    public GetFeedResult feed(int limit, long offset) {
+        return bus.executeQuery(new GetFeed(limit, offset));
     }
 
     @Override
     public GetArticleResult findBySlug(String slug) {
-        return bus.executeQuery(new GetArticle(auth.currentUsername(), slug));
+        return bus.executeQuery(new GetArticle(slug));
     }
 
     @Override
     public UpdateArticleResult updateBySlug(String slug, @Valid UpdateArticle command) {
-        return bus.executeCommand(command.withCurrentUsername(auth.currentUsername()).withSlug(slug));
+        return bus.executeCommand(command.withSlug(slug));
     }
 
     @Override
     public void deleteBySlug(String slug) {
-        bus.executeCommand(new DeleteArticle(auth.currentUsername(), slug));
+        bus.executeCommand(new DeleteArticle(slug));
     }
 
     @Override
     public FavoriteArticleResult favorite(String slug) {
-        return bus.executeCommand(new FavoriteArticle(auth.currentUsername(), slug));
+        return bus.executeCommand(new FavoriteArticle(slug));
     }
 
     @Override
     public UnfavoriteArticleResult unfavorite(String slug) {
-        return bus.executeCommand(new UnfavoriteArticle(auth.currentUsername(), slug));
+        return bus.executeCommand(new UnfavoriteArticle(slug));
     }
 
     @Override
     public GetCommentsResult findAllComments(String slug) {
-        return bus.executeQuery(new GetComments(auth.currentUsername(), slug));
+        return bus.executeQuery(new GetComments(slug));
     }
 
     @Override
-    public GetCommentResult findComment(String slug, Long id) {
-        return bus.executeQuery(new GetComment(auth.currentUsername(), slug, id));
+    public GetCommentResult findComment(String slug, long id) {
+        return bus.executeQuery(new GetComment(slug, id));
     }
 
     @Override
     public AddCommentResult addComment(String slug, @Valid AddComment command) {
-        return bus.executeCommand(command.withCurrentUsername(auth.currentUsername()).withSlug(slug));
+        return bus.executeCommand(command.withSlug(slug));
     }
 
     @Override
-    public void deleteComment(String slug, Long id) {
-        bus.executeCommand(new DeleteComment(auth.currentUsername(), slug, id));
+    public void deleteComment(String slug, long id) {
+        bus.executeCommand(new DeleteComment(slug, id));
     }
 
 }

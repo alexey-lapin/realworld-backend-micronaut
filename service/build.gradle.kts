@@ -40,6 +40,7 @@ testing {
                 compileOnly(mn.lombok)
 
                 annotationProcessor(mn.micronaut.inject.java)
+                annotationProcessor(mn.micronaut.serde.processor)
 
                 implementation(project())
 
@@ -58,6 +59,8 @@ dependencies {
     annotationProcessor(mn.lombok)
     compileOnly(mn.lombok)
 
+    annotationProcessor(mn.micronaut.serde.processor)
+
     compileOnly(mn.micronaut.openapi.annotations)
 
     implementation(project(":service-bus"))
@@ -65,7 +68,7 @@ dependencies {
 
     implementation(mn.micronaut.data.hibernate.jpa)
     implementation(mn.micronaut.hibernate.jpa)
-    implementation(mn.micronaut.jackson.databind)
+    implementation(mn.micronaut.serde.jackson)
     implementation(mn.micronaut.jdbc.hikari)
     implementation(mn.micronaut.liquibase)
     implementation(mn.micronaut.management)

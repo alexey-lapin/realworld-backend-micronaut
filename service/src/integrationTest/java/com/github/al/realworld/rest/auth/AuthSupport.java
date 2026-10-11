@@ -26,15 +26,11 @@ package com.github.al.realworld.rest.auth;
 import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.LoginUserResult;
 import com.github.al.realworld.api.command.RegisterUser;
-import com.github.al.realworld.api.dto.LoginUserDto;
-import com.github.al.realworld.api.dto.RegisterUserDto;
 import com.github.al.realworld.api.operation.UserClient;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import java.util.UUID;
 
@@ -57,12 +53,7 @@ public class AuthSupport {
     }
 
     public static RegisteredUser register(String username, String email, String password) {
-        RegisterUserDto data = RegisterUserDto.builder()
-                .username(username)
-                .email(email)
-                .password(password)
-                .build();
-        INSTANCE.userClient.register(new RegisterUser(data));
+        INSTANCE.userClient.register(new RegisterUser(new RegisterUser.Data(email, username, password)));
         return new RegisteredUser(email, username, password);
     }
 
@@ -75,8 +66,8 @@ public class AuthSupport {
     }
 
     public static void login(String email, String password) {
-        LoginUserResult result = INSTANCE.userClient.login(new LoginUser(new LoginUserDto(email, password)));
-        TokenHolder.token = result.getUser().getToken();
+        LoginUserResult result = INSTANCE.userClient.login(new LoginUser(new LoginUser.Data(email, password)));
+        TokenHolder.token = result.user().token();
     }
 
     public static void logout() {
@@ -87,12 +78,7 @@ public class AuthSupport {
         public static String token;
     }
 
-    @AllArgsConstructor
-    @Getter
-    public static class RegisteredUser {
-        private String email;
-        private String username;
-        private String password;
+    public record RegisteredUser(String email, String username, String password) {
 
         public RegisteredUser login() {
             AuthSupport.login(email, password);

@@ -23,25 +23,21 @@
  */
 package com.github.al.realworld.application.query;
 
-import com.github.al.bus.QueryHandler;
-import com.github.al.realworld.api.dto.ArticleDto;
+import com.github.al.realworld.api.dto.ArticleItemDto;
 import com.github.al.realworld.api.query.GetFeed;
 import com.github.al.realworld.api.query.GetFeedResult;
 import com.github.al.realworld.application.ArticleAssembler;
-import com.github.al.realworld.domain.model.Article;
-import com.github.al.realworld.domain.model.FollowRelation;
+import com.github.al.realworld.application.service.AuthenticationService;
+import com.github.al.realworld.bus.QueryHandler;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.FollowRelationRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 
@@ -49,6 +45,7 @@ import static com.github.al.realworld.application.exception.Exceptions.badReques
 @Singleton
 public class GetFeedHandler implements QueryHandler<GetFeedResult, GetFeed> {
 
+    private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
     private final FollowRelationRepository followRelationRepository;
@@ -56,21 +53,19 @@ public class GetFeedHandler implements QueryHandler<GetFeedResult, GetFeed> {
     @Transactional
     @Override
     public GetFeedResult handle(GetFeed query) {
-        User currentUser = userRepository.findByUsername(query.getCurrentUsername())
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", query.getCurrentUsername()));
+        var currentUsername = authenticationService.getRequiredCurrentUserName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
 
-        List<FollowRelation> relations = followRelationRepository.findByFollowerId(currentUser.getId());
-
-        List<UUID> followeesUsernames = relations.stream()
+        List<UUID> followeeIds = followRelationRepository.findByFollowerId(currentUser.getId()).stream()
                 .map(followRelation -> followRelation.getFollowee().getId())
-                .collect(Collectors.toList());
+                .toList();
 
-        List<Article> articles = articleRepository
-                .findByFollowees(followeesUsernames, query.getLimit(), query.getOffset());
-
-        ArrayList<ArticleDto> results = new ArrayList<>();
-
-        articles.forEach(article -> results.add(ArticleAssembler.assemble(article, currentUser)));
+        List<ArticleItemDto> results = articleRepository
+                .findByFollowees(followeeIds, query.limit(), query.offset())
+                .stream()
+                .map(article -> ArticleAssembler.assembleItem(article, currentUser))
+                .toList();
 
         return new GetFeedResult(results, results.size());
     }

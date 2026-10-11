@@ -23,20 +23,15 @@
  */
 package com.github.al.realworld.api.dto;
 
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.serde.annotation.Serdeable;
+import org.jspecify.annotations.Nullable;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@ReflectiveAccess
-public class ProfileDto {
-
-    private String username;
-    private String bio;
-    private String image;
-    private Boolean following;
+@Serdeable
+public record ProfileDto(
+        String username,
+        @Nullable String bio,
+        @Nullable String image,
+        boolean following
+) {
 
 }

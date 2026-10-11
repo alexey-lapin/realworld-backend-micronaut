@@ -31,6 +31,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import jakarta.inject.Singleton;
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,13 +54,13 @@ public class JpaArticleRepositoryAdapter implements ArticleRepository {
     }
 
     @Override
-    public List<Article> findByFilters(String tag, String author, String favorited, Integer limit, Integer offset) {
+    public List<Article> findByFilters(@Nullable String tag, @Nullable String author, @Nullable String favorited, int limit, long offset) {
         OffsetBasedPageable pageable = new OffsetBasedPageable(limit, offset, Sort.of(Sort.Order.desc("createdAt")));
         return repository.findByFilters(tag, author, favorited, pageable);
     }
 
     @Override
-    public List<Article> findByFollowees(List<UUID> followees, Integer limit, Integer offset) {
+    public List<Article> findByFollowees(List<UUID> followees, int limit, long offset) {
         OffsetBasedPageable pageable = new OffsetBasedPageable(limit, offset, Sort.of(Sort.Order.desc("createdAt")));
         return repository.findByFollowees(followees, pageable);
     }

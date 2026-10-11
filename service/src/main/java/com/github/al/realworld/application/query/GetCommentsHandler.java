@@ -27,17 +27,16 @@ import com.github.al.realworld.api.dto.CommentDto;
 import com.github.al.realworld.api.query.GetComments;
 import com.github.al.realworld.api.query.GetCommentsResult;
 import com.github.al.realworld.application.CommentAssembler;
-import com.github.al.bus.QueryHandler;
+import com.github.al.realworld.application.service.AuthenticationService;
+import com.github.al.realworld.bus.QueryHandler;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-
-import java.util.ArrayList;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
@@ -45,23 +44,26 @@ import static com.github.al.realworld.application.exception.Exceptions.notFound;
 @Singleton
 public class GetCommentsHandler implements QueryHandler<GetCommentsResult, GetComments> {
 
+    private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
 
     @Transactional
     @Override
     public GetCommentsResult handle(GetComments query) {
-        Article article = articleRepository.findBySlug(query.getSlug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exists", query.getSlug()));
+        Article article = articleRepository.findBySlug(query.slug())
+                .orElseThrow(() -> notFound("article [slug=%s] does not exist", query.slug()));
 
-        User currentUser = userRepository.findByUsername(query.getCurrentUsername())
-                .orElse(null);
+        var currentUsername = authenticationService.getCurrentUserName();
+        User currentUser = currentUsername == null
+                ? null
+                : userRepository.findByUsername(currentUsername).orElse(null);
 
-        ArrayList<CommentDto> result = new ArrayList<>();
+        List<CommentDto> results = article.getComments().stream()
+                .map(comment -> CommentAssembler.assemble(comment, currentUser))
+                .toList();
 
-        article.getComments().forEach(comment -> result.add(CommentAssembler.assemble(comment, currentUser)));
-
-        return new GetCommentsResult(result);
+        return new GetCommentsResult(results);
     }
 
 }

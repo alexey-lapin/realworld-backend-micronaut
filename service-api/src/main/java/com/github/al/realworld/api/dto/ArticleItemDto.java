@@ -23,23 +23,24 @@
  */
 package com.github.al.realworld.api.dto;
 
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.serde.annotation.Serdeable;
+import java.time.ZonedDateTime;
+import java.util.List;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-@ReflectiveAccess
-public class UpdateArticleDto {
-
-    private String title;
-
-    private String description;
-
-    private String body;
+/**
+ * An article as listed by the multi-article endpoints, which omit the body.
+ */
+@Serdeable
+public record ArticleItemDto(
+        String slug,
+        String title,
+        String description,
+        List<String> tagList,
+        ZonedDateTime createdAt,
+        ZonedDateTime updatedAt,
+        boolean favorited,
+        int favoritesCount,
+        ProfileDto author
+) {
 
 }

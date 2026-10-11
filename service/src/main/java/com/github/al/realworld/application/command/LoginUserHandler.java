@@ -23,19 +23,17 @@
  */
 package com.github.al.realworld.application.command;
 
-import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.LoginUserResult;
-import com.github.al.realworld.api.dto.LoginUserDto;
 import com.github.al.realworld.application.UserAssembler;
 import com.github.al.realworld.application.service.JwtService;
 import com.github.al.realworld.application.service.PasswordEncoder;
+import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 import static com.github.al.realworld.application.exception.Exceptions.unauthorized;
@@ -51,12 +49,13 @@ public class LoginUserHandler implements CommandHandler<LoginUserResult, LoginUs
     @Transactional
     @Override
     public LoginUserResult handle(LoginUser command) {
-        LoginUserDto data = command.getUser();
-        User user = userRepository.findByEmail(data.getEmail())
-                .orElseThrow(() -> badRequest("user [email=%s] does not exist", data.getEmail()));
+        var data = command.user();
 
-        if (!passwordEncoder.matches(data.getPassword(), user.getPassword())) {
-            throw unauthorized("user [email=%s] password is incorrect", data.getEmail());
+        User user = userRepository.findByEmail(data.email())
+                .orElseThrow(() -> badRequest("user [email=%s] does not exist", data.email()));
+
+        if (!passwordEncoder.matches(data.password(), user.getPassword())) {
+            throw unauthorized("user [email=%s] password is incorrect", data.email());
         }
 
         return new LoginUserResult(UserAssembler.assemble(user, jwtService));

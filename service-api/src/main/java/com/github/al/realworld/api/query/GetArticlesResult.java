@@ -23,21 +23,14 @@
  */
 package com.github.al.realworld.api.query;
 
-import com.github.al.realworld.api.dto.ArticleDto;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
+import com.github.al.realworld.api.dto.ArticleItemDto;
+import io.micronaut.serde.annotation.Serdeable;
 import java.util.List;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@ReflectiveAccess
-public class GetArticlesResult {
-
-    private List<ArticleDto> articles;
-    private Integer articlesCount;
+@Serdeable
+public record GetArticlesResult(
+        List<ArticleItemDto> articles,
+        long articlesCount
+) {
 
 }

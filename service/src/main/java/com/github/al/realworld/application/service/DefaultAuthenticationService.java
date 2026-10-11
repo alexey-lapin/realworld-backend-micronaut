@@ -24,9 +24,9 @@
 package com.github.al.realworld.application.service;
 
 import io.micronaut.security.utils.SecurityService;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 @Singleton
@@ -35,7 +35,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     private final SecurityService securityService;
 
     @Override
-    public String currentUsername() {
+    public @Nullable String getCurrentUserName() {
         return securityService.username().orElse(null);
     }
 

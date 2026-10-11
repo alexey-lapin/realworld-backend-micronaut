@@ -24,15 +24,11 @@
 package com.github.al.realworld.api.query;
 
 import com.github.al.realworld.api.dto.UserDto;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import io.micronaut.serde.annotation.Serdeable;
 
-@AllArgsConstructor
-@Getter
-@ReflectiveAccess
-public class GetCurrentUserResult {
-
-    private UserDto user;
+@Serdeable
+public record GetCurrentUserResult(
+        UserDto user
+) {
 
 }

@@ -23,16 +23,11 @@
  */
 package com.github.al.realworld.api.query;
 
-import com.github.al.bus.Query;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.github.al.realworld.bus.Query;
 
-@AllArgsConstructor
-@Getter
-public class GetComment implements Query<GetCommentResult> {
-
-    private String currentUsername;
-    private String slug;
-    private Long id;
+public record GetComment(
+        String slug,
+        long id
+) implements Query<GetCommentResult> {
 
 }

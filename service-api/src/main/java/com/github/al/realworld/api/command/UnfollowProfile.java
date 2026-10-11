@@ -23,15 +23,10 @@
  */
 package com.github.al.realworld.api.command;
 
-import com.github.al.bus.Command;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.github.al.realworld.bus.Command;
 
-@AllArgsConstructor
-@Getter
-public class UnfollowProfile implements Command<UnfollowProfileResult> {
-
-    private String follower;
-    private String followee;
+public record UnfollowProfile(
+        String followee
+) implements Command<UnfollowProfileResult> {
 
 }

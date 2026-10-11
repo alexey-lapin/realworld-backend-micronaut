@@ -26,11 +26,9 @@ package com.github.al.realworld.rest;
 import com.github.al.realworld.api.command.AddComment;
 import com.github.al.realworld.api.command.CreateArticle;
 import com.github.al.realworld.api.command.UpdateArticle;
-import com.github.al.realworld.api.dto.AddCommentDto;
 import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.api.dto.CommentDto;
-import com.github.al.realworld.api.dto.CreateArticleDto;
-import com.github.al.realworld.api.dto.UpdateArticleDto;
+import com.github.al.realworld.api.dto.JsonNullable;
 import com.github.al.realworld.api.operation.ArticleClient;
 import com.github.al.realworld.api.operation.ProfileClient;
 import com.github.al.realworld.api.query.GetArticleResult;
@@ -46,7 +44,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,42 +75,42 @@ public class ArticleApiTest {
 
     @Test
     void should_returnCorrectArticleData() {
-        String user = register().login().getUsername();
+        String user = register().login().username();
 
         CreateArticle command = createArticleCommand();
-        ArticleDto article = articleClient.create(command).getArticle();
+        ArticleDto article = articleClient.create(command).article();
 
-        assertThat(article.getSlug()).isEqualTo(command.getArticle().getTitle());
-        assertThat(article.getTitle()).isEqualTo(command.getArticle().getTitle());
-        assertThat(article.getDescription()).isEqualTo(command.getArticle().getDescription());
-        assertThat(article.getBody()).isEqualTo(command.getArticle().getBody());
-        assertThat(article.getAuthor().getUsername()).isEqualTo(user);
+        assertThat(article.slug()).isEqualTo(command.article().title());
+        assertThat(article.title()).isEqualTo(command.article().title());
+        assertThat(article.description()).isEqualTo(command.article().description());
+        assertThat(article.body()).isEqualTo(command.article().body());
+        assertThat(article.author().username()).isEqualTo(user);
     }
 
     @Test
     void should_returnCorrectArticleData_when_favoriteAndUnfavorite() {
-        String user = register().login().getUsername();
+        String user = register().login().username();
 
-        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
+        ArticleDto created = articleClient.create(createArticleCommand()).article();
 
-        ArticleDto favoritedArticle = articleClient.favorite(created.getSlug()).getArticle();
-        assertThat(favoritedArticle.getFavorited()).isTrue();
-        assertThat(favoritedArticle.getFavoritesCount()).isEqualTo(1);
+        ArticleDto favoritedArticle = articleClient.favorite(created.slug()).article();
+        assertThat(favoritedArticle.favorited()).isTrue();
+        assertThat(favoritedArticle.favoritesCount()).isEqualTo(1);
 
-        ArticleDto unfavoritedArticle = articleClient.unfavorite(created.getSlug()).getArticle();
-        assertThat(unfavoritedArticle.getFavorited()).isFalse();
-        assertThat(unfavoritedArticle.getFavoritesCount()).isEqualTo(0);
+        ArticleDto unfavoritedArticle = articleClient.unfavorite(created.slug()).article();
+        assertThat(unfavoritedArticle.favorited()).isFalse();
+        assertThat(unfavoritedArticle.favoritesCount()).isEqualTo(0);
     }
 
     @Test
     void should_returnCorrectArticleData_when_delete() {
-        String user = register().login().getUsername();
+        String user = register().login().username();
 
-        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
+        ArticleDto created = articleClient.create(createArticleCommand()).article();
 
-        articleClient.deleteBySlug(created.getSlug());
+        articleClient.deleteBySlug(created.slug());
 
-        GetArticleResult found = articleClient.findBySlug(created.getSlug());
+        GetArticleResult found = articleClient.findBySlug(created.slug());
         assertThat(found).isNull();
     }
 
@@ -121,12 +118,12 @@ public class ArticleApiTest {
     void should_throw403_when_deleteNotOwned() {
         register().login();
 
-        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
+        ArticleDto created = articleClient.create(createArticleCommand()).article();
 
         register().login();
 
         HttpClientResponseException exception = catchThrowableOfType(
-                () -> articleClient.deleteBySlug(created.getSlug()),
+                () -> articleClient.deleteBySlug(created.slug()),
                 HttpClientResponseException.class
         );
 
@@ -144,52 +141,50 @@ public class ArticleApiTest {
     void should_returnCorrectArticleData_when_update() {
         register().login();
 
-        ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
+        ArticleDto created = articleClient.create(createArticleCommand()).article();
 
-        UpdateArticleDto data = UpdateArticleDto.builder()
-                .title(ALTERED_TITLE)
-                .body(ALTERED_BODY)
-                .description(ALTERED_DESCRIPTION)
-                .build();
-        UpdateArticle updateArticle = new UpdateArticle(null, null, data);
-        ArticleDto updated = articleClient.updateBySlug(created.getSlug(), updateArticle).getArticle();
+        var data = new UpdateArticle.Data(
+                new JsonNullable<>(ALTERED_TITLE),
+                new JsonNullable<>(ALTERED_DESCRIPTION),
+                new JsonNullable<>(ALTERED_BODY),
+                null);
+        UpdateArticle updateArticle = new UpdateArticle(null, data);
+        ArticleDto updated = articleClient.updateBySlug(created.slug(), updateArticle).article();
 
-        assertThat(updated.getSlug()).isEqualTo(ALTERED_TITLE);
-        assertThat(updated.getTitle()).isEqualTo(ALTERED_TITLE);
-        assertThat(updated.getDescription()).isEqualTo(ALTERED_DESCRIPTION);
-        assertThat(updated.getBody()).isEqualTo(ALTERED_BODY);
+        assertThat(updated.slug()).isEqualTo(ALTERED_TITLE);
+        assertThat(updated.title()).isEqualTo(ALTERED_TITLE);
+        assertThat(updated.description()).isEqualTo(ALTERED_DESCRIPTION);
+        assertThat(updated.body()).isEqualTo(ALTERED_BODY);
     }
 
     @Test
     void should_returnCorrectArticleData_when_searchByFilters() {
-        GetArticlesResult r1 = articleClient.findByFilters(null, null, null, null, null);
-        System.out.println(r1.getArticlesCount());
+        GetArticlesResult r1 = articleClient.findByFilters(null, null, null, 20, 0);
+        System.out.println(r1.articlesCount());
 
         articleRepository.deleteAll();
 
-        GetArticlesResult r2 = articleClient.findByFilters(null, null, null, null, null);
-        System.out.println(r2.getArticlesCount());
+        GetArticlesResult r2 = articleClient.findByFilters(null, null, null, 20, 0);
+        System.out.println(r2.articlesCount());
 
-        String user = register().login().getUsername();
+        String user = register().login().username();
 
-        articleClient.create(new CreateArticle(null, createArticleCommand().getArticle().toBuilder()
-                .tagList(Arrays.asList("tag1"))
-                .build()));
+        articleClient.create(createArticleCommand(List.of("tag1")));
 
-        GetArticlesResult result2 = articleClient.findByFilters(null, user, null, null, null);
-        assertThat(result2.getArticlesCount()).isEqualTo(1);
+        GetArticlesResult result2 = articleClient.findByFilters(null, user, null, 20, 0);
+        assertThat(result2.articlesCount()).isEqualTo(1);
 
-        GetArticlesResult result3 = articleClient.findByFilters(null, UUID.randomUUID().toString(), null, null, null);
-        assertThat(result3.getArticlesCount()).isEqualTo(0);
+        GetArticlesResult result3 = articleClient.findByFilters(null, UUID.randomUUID().toString(), null, 20, 0);
+        assertThat(result3.articlesCount()).isEqualTo(0);
 
-        GetArticlesResult result4 = articleClient.findByFilters("tag1", null, null, null, null);
-        assertThat(result4.getArticlesCount()).isEqualTo(1);
+        GetArticlesResult result4 = articleClient.findByFilters("tag1", null, null, 20, 0);
+        assertThat(result4.articlesCount()).isEqualTo(1);
 
-        GetArticlesResult result5 = articleClient.findByFilters("tag2", null, null, null, null);
-        assertThat(result5.getArticlesCount()).isEqualTo(0);
+        GetArticlesResult result5 = articleClient.findByFilters("tag2", null, null, 20, 0);
+        assertThat(result5.articlesCount()).isEqualTo(0);
 
-        GetArticlesResult result6 = articleClient.findByFilters("tag1", user, null, null, null);
-        assertThat(result6.getArticlesCount()).isEqualTo(1);
+        GetArticlesResult result6 = articleClient.findByFilters("tag1", user, null, 20, 0);
+        assertThat(result6.articlesCount()).isEqualTo(1);
     }
 
     @Nested
@@ -197,44 +192,44 @@ public class ArticleApiTest {
 
         @Test
         void should_returnCorrectCommentData_whenCreateDeleteComment() {
-            String user = register().login().getUsername();
+            String user = register().login().username();
 
-            ArticleDto created = articleClient.create(createArticleCommand()).getArticle();
+            ArticleDto created = articleClient.create(createArticleCommand()).article();
 
-            AddComment addComment = new AddComment(null, null, new AddCommentDto(TEST_BODY));
+            AddComment addComment = new AddComment(null, new AddComment.Data(TEST_BODY));
 
-            CommentDto comment = articleClient.addComment(created.getSlug(), addComment).getComment();
+            CommentDto comment = articleClient.addComment(created.slug(), addComment).comment();
 
-            assertThat(comment.getId()).isNotNull();
-            assertThat(comment.getAuthor().getUsername()).isEqualTo(user);
-            assertThat(comment.getBody()).isEqualTo(TEST_BODY);
-            assertThat(comment.getCreatedAt()).isNotNull();
-            assertThat(comment.getUpdatedAt()).isNotNull();
+            assertThat(comment.id()).isPositive();
+            assertThat(comment.author().username()).isEqualTo(user);
+            assertThat(comment.body()).isEqualTo(TEST_BODY);
+            assertThat(comment.createdAt()).isNotNull();
+            assertThat(comment.updatedAt()).isNotNull();
 
-            List<CommentDto> comments = articleClient.findAllComments(created.getSlug()).getComments();
-
-            assertThat(comments).hasSize(1);
-
-            articleClient.deleteComment(created.getSlug(), comment.getId());
-
-            comments = articleClient.findAllComments(created.getSlug()).getComments();
+            List<CommentDto> comments = articleClient.findAllComments(created.slug()).comments();
 
             assertThat(comments).hasSize(1);
+
+            articleClient.deleteComment(created.slug(), comment.id());
+
+            comments = articleClient.findAllComments(created.slug()).comments();
+
+            assertThat(comments).isEmpty();
         }
 
         @Test
         void should_throw403_when_commentIsNotOwned() {
             register().login();
 
-            ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
+            ArticleDto article = articleClient.create(createArticleCommand()).article();
 
-            AddComment addComment = new AddComment(null, null, new AddCommentDto(TEST_BODY));
-            CommentDto comment = articleClient.addComment(article.getSlug(), addComment).getComment();
+            AddComment addComment = new AddComment(null, new AddComment.Data(TEST_BODY));
+            CommentDto comment = articleClient.addComment(article.slug(), addComment).comment();
 
             register().login();
 
             HttpClientResponseException exception = catchThrowableOfType(
-                    () -> articleClient.deleteComment(article.getSlug(), comment.getId()),
+                    () -> articleClient.deleteComment(article.slug(), comment.id()),
                     HttpClientResponseException.class
             );
 
@@ -245,7 +240,7 @@ public class ArticleApiTest {
         void should_throw404_when_addCommentArticleDoesNotExist() {
             register().login();
 
-            AddComment addComment = new AddComment(null, null, new AddCommentDto(TEST_BODY));
+            AddComment addComment = new AddComment(null, new AddComment.Data(TEST_BODY));
 
             articleClient.addComment(UUID.randomUUID().toString(), addComment);
         }
@@ -261,21 +256,21 @@ public class ArticleApiTest {
         void should_throw404_when_deleteCommentDoesNotExist() {
             register().login();
 
-            ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
+            ArticleDto article = articleClient.create(createArticleCommand()).article();
 
-            articleClient.deleteComment(article.getSlug(), 9999999L);
+            articleClient.deleteComment(article.slug(), 9999999L);
         }
 
         @Test
         void should_returnCorrectCommentData() {
             register().login();
-            ArticleDto article = articleClient.create(createArticleCommand()).getArticle();
-            AddComment addComment = new AddComment(null, null, new AddCommentDto(TEST_BODY));
-            CommentDto createdComment = articleClient.addComment(article.getSlug(), addComment).getComment();
+            ArticleDto article = articleClient.create(createArticleCommand()).article();
+            AddComment addComment = new AddComment(null, new AddComment.Data(TEST_BODY));
+            CommentDto createdComment = articleClient.addComment(article.slug(), addComment).comment();
 
-            CommentDto comment = articleClient.findComment(article.getSlug(), createdComment.getId()).getComment();
+            CommentDto comment = articleClient.findComment(article.slug(), createdComment.id()).comment();
 
-            assertThat(comment.getId()).isNotNull();
+            assertThat(comment.id()).isPositive();
         }
     }
 
@@ -291,7 +286,7 @@ public class ArticleApiTest {
 
             GetFeedResult feed = articleClient.feed(10, 0);
 
-            assertThat(feed.getArticlesCount()).isEqualTo(0);
+            assertThat(feed.articlesCount()).isEqualTo(0);
         }
 
         @Test
@@ -302,7 +297,7 @@ public class ArticleApiTest {
 
             GetFeedResult feed = articleClient.feed(10, 0);
 
-            assertThat(feed.getArticlesCount()).isEqualTo(0);
+            assertThat(feed.articlesCount()).isEqualTo(0);
         }
 
         @Test
@@ -310,7 +305,7 @@ public class ArticleApiTest {
             AuthSupport.RegisteredUser user1 = register().login();
             articleClient.create(createArticleCommand());
             GetFeedResult feed1 = articleClient.feed(10, 0);
-            assertThat(feed1.getArticlesCount()).isEqualTo(0);
+            assertThat(feed1.articlesCount()).isEqualTo(0);
             logout();
 
             AuthSupport.RegisteredUser user2 = register().login();
@@ -319,9 +314,9 @@ public class ArticleApiTest {
             logout();
 
             user1.login();
-            profileClient.follow(user2.getUsername());
+            profileClient.follow(user2.username());
             GetFeedResult feed2 = articleClient.feed(10, 0);
-            assertThat(feed2.getArticlesCount()).isEqualTo(2);
+            assertThat(feed2.articlesCount()).isEqualTo(2);
         }
 
         @Test
@@ -329,7 +324,7 @@ public class ArticleApiTest {
             AuthSupport.RegisteredUser user1 = register().login();
             articleClient.create(createArticleCommand());
             GetFeedResult feed1 = articleClient.feed(10, 0);
-            assertThat(feed1.getArticlesCount()).isEqualTo(0);
+            assertThat(feed1.articlesCount()).isEqualTo(0);
             logout();
 
             AuthSupport.RegisteredUser user2 = register().login();
@@ -344,20 +339,24 @@ public class ArticleApiTest {
             logout();
 
             user1.login();
-            profileClient.follow(user2.getUsername());
-            profileClient.follow(user3.getUsername());
+            profileClient.follow(user2.username());
+            profileClient.follow(user3.username());
             GetFeedResult feed2 = articleClient.feed(4, 0);
-            assertThat(feed2.getArticlesCount()).isEqualTo(4);
+            assertThat(feed2.articlesCount()).isEqualTo(4);
         }
     }
 
     private static CreateArticle createArticleCommand() {
-        CreateArticleDto data = CreateArticleDto.builder()
-                .title(UUID.randomUUID().toString())
-                .description(UUID.randomUUID().toString())
-                .body(UUID.randomUUID().toString())
-                .build();
-        return new CreateArticle(null, data);
+        return createArticleCommand(null);
+    }
+
+    private static CreateArticle createArticleCommand(List<String> tagList) {
+        var data = new CreateArticle.Data(
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
+                tagList);
+        return new CreateArticle(data);
     }
 
 }

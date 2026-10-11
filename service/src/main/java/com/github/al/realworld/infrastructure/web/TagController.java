@@ -23,7 +23,7 @@
  */
 package com.github.al.realworld.infrastructure.web;
 
-import com.github.al.bus.Bus;
+import com.github.al.realworld.bus.Bus;
 import com.github.al.realworld.api.operation.TagOperations;
 import com.github.al.realworld.api.query.GetTags;
 import com.github.al.realworld.api.query.GetTagsResult;

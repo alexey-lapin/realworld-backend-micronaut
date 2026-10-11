@@ -23,27 +23,32 @@
  */
 package com.github.al.realworld.application.command;
 
-import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.UpdateUser;
 import com.github.al.realworld.api.command.UpdateUserResult;
-import com.github.al.realworld.api.dto.UpdateUserDto;
+import com.github.al.realworld.api.dto.JsonNullable;
 import com.github.al.realworld.application.UserAssembler;
+import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.JwtService;
 import com.github.al.realworld.application.service.PasswordEncoder;
+import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 import static com.github.al.realworld.application.exception.Exceptions.notFound;
+
+import static com.github.al.realworld.api.dto.JsonNullable.unwrap;
+import static java.util.Objects.requireNonNullElse;
 
 @RequiredArgsConstructor
 @Singleton
 public class UpdateUserHandler implements CommandHandler<UpdateUserResult, UpdateUser> {
 
+    private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder encoder;
@@ -51,33 +56,56 @@ public class UpdateUserHandler implements CommandHandler<UpdateUserResult, Updat
     @Transactional
     @Override
     public UpdateUserResult handle(UpdateUser command) {
-        User user = userRepository.findByUsername(command.getCurrentUsername())
-                .orElseThrow(() -> notFound("user [name=%s] does not exist", command.getCurrentUsername()));
+        var currentUsername = authenticationService.getRequiredCurrentUserName();
 
-        UpdateUserDto data = command.getUser();
-        if (data.getUsername() != null
-                && !data.getUsername().equals(user.getUsername())
-                && userRepository.findByUsername(data.getUsername()).isPresent()) {
-            throw badRequest("user [name=%s] already exists", data.getUsername());
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> notFound("user [name=%s] does not exist", currentUsername));
+
+        var data = command.user();
+        if (data.isEmpty()) {
+            throw badRequest("update payload contains no fields");
         }
 
-        if (data.getEmail() != null
-                && !data.getEmail().equals(user.getEmail())
-                && userRepository.findByEmail(data.getEmail()).isPresent()) {
-            throw badRequest("user [email=%s] already exists", data.getEmail());
+        var newUsername = unwrap(data.username());
+        if (newUsername != null
+            && !newUsername.equals(user.getUsername())
+            && userRepository.findByUsername(newUsername).isPresent()) {
+            throw badRequest("user [name=%s] already exists", newUsername);
         }
+
+        var newEmail = unwrap(data.email());
+        if (newEmail != null
+            && !newEmail.equals(user.getEmail())
+            && userRepository.findByEmail(newEmail).isPresent()) {
+            throw badRequest("user [email=%s] already exists", newEmail);
+        }
+
+        var newPassword = unwrap(data.password());
 
         User alteredUser = user.toBuilder()
-                .email(data.getEmail() != null ? data.getEmail() : user.getEmail())
-                .username(data.getUsername() != null ? data.getUsername() : user.getUsername())
-                .password(data.getPassword() != null ? encoder.encode(data.getPassword()) : user.getPassword())
-                .bio(data.getBio() != null ? data.getBio() : user.getBio())
-                .image(data.getImage() != null ? data.getImage() : user.getImage())
+                .email(requireNonNullElse(newEmail, user.getEmail()))
+                .username(requireNonNullElse(newUsername, user.getUsername()))
+                .password(newPassword == null ? user.getPassword() : encoder.encode(newPassword))
+                .bio(normalized(data.bio(), user.getBio()))
+                .image(normalized(data.image(), user.getImage()))
                 .build();
 
         User savedUser = userRepository.save(alteredUser);
 
         return new UpdateUserResult(UserAssembler.assemble(savedUser, jwtService));
+    }
+
+    /**
+     * Returns the new value of a nullable field, treating an empty string as {@code null} and an
+     * absent field as {@code current}.
+     */
+    private static @Nullable String normalized(@Nullable JsonNullable<String> field,
+                                               @Nullable String current) {
+        if (field == null) {
+            return current;
+        }
+        var value = field.value();
+        return value == null || value.isEmpty() ? null : value;
     }
 
 }

@@ -24,19 +24,22 @@
 package com.github.al.realworld.application.command;
 
 import com.github.al.realworld.api.command.UpdateArticle;
-import com.github.al.realworld.api.command.UpdateArticleResult;
 import com.github.al.realworld.api.dto.ArticleDto;
-import com.github.al.realworld.api.dto.UpdateArticleDto;
+import com.github.al.realworld.api.dto.JsonNullable;
+import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
+import com.github.al.realworld.domain.model.Tag;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
+import com.github.al.realworld.domain.repository.TagRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,54 +49,50 @@ import static org.mockito.Mockito.when;
 
 class UpdateArticleHandlerTest {
 
-    public static final String TEST_SLUG = "test-slug";
-    public static final String TEST_USERNAME = "test-username";
-    public static final String TEST_USERNAME_2 = "test-username-2";
-    public static final String TEST_BODY = "test-body";
-    public static final String ALTERED_TITLE = "altered-title";
-    public static final String ALTERED_DESCRIPTION = "altered-description";
-    public static final String ALTERED_BODY = "altered-body";
+    private static final String TEST_SLUG = "test-slug";
+    private static final String TEST_USERNAME = "test-username";
+    private static final String TEST_USERNAME_2 = "test-username-2";
+    private static final String TEST_BODY = "test-body";
+    private static final String ALTERED_TITLE = "altered-title";
+    private static final String ALTERED_DESCRIPTION = "altered-description";
+    private static final String ALTERED_BODY = "altered-body";
 
+    private AuthenticationService authenticationService;
     private ArticleRepository articleRepository;
     private UserRepository userRepository;
     private UpdateArticleHandler handler;
 
     @BeforeEach
     void setUp() {
+        authenticationService = mock(AuthenticationService.class);
         articleRepository = mock(ArticleRepository.class);
         userRepository = mock(UserRepository.class);
-        handler = new UpdateArticleHandler(articleRepository, userRepository, new SlugService());
+        handler = new UpdateArticleHandler(authenticationService,
+                articleRepository,
+                mock(TagRepository.class),
+                userRepository,
+                new SlugService());
+        when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME);
     }
 
     @Test
     void should_throw404_when_articleDoesNotExist() {
-        UpdateArticle command = UpdateArticle.builder().slug(TEST_SLUG).build();
-
         HttpStatusException throwable = catchThrowableOfType(
-                () -> handler.handle(command),
-                HttpStatusException.class
+                HttpStatusException.class,
+                () -> handler.handle(command(emptyData()))
         );
 
         assertThat(throwable.getStatus().getCode()).isEqualTo(HttpStatus.NOT_FOUND.getCode());
     }
 
     @Test
-    void should_throw400_when_articleDoesNotOwnedByCurrentUser() {
-        Article article = Article.builder()
-                .slug(TEST_SLUG)
-                .author(User.builder().username(TEST_USERNAME).build())
-                .body(TEST_BODY)
-                .build();
-        when(articleRepository.findBySlug(TEST_SLUG)).thenReturn(Optional.of(article));
-
-        UpdateArticle command = UpdateArticle.builder()
-                .slug(TEST_SLUG)
-                .currentUsername(TEST_USERNAME_2)
-                .build();
+    void should_throw403_when_articleIsNotOwnedByCurrentUser() {
+        givenArticle();
+        when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME_2);
 
         HttpStatusException throwable = catchThrowableOfType(
-                () -> handler.handle(command),
-                HttpStatusException.class
+                HttpStatusException.class,
+                () -> handler.handle(command(emptyData()))
         );
 
         assertThat(throwable.getStatus().getCode()).isEqualTo(HttpStatus.FORBIDDEN.getCode());
@@ -101,21 +100,11 @@ class UpdateArticleHandlerTest {
 
     @Test
     void should_throw400_when_currentUserDoesNotExist() {
-        Article article = Article.builder()
-                .slug(TEST_SLUG)
-                .author(User.builder().username(TEST_USERNAME).build())
-                .body(TEST_BODY)
-                .build();
-        when(articleRepository.findBySlug(TEST_SLUG)).thenReturn(Optional.of(article));
-
-        UpdateArticle command = UpdateArticle.builder()
-                .slug(TEST_SLUG)
-                .currentUsername(TEST_USERNAME)
-                .build();
+        givenArticle();
 
         HttpStatusException throwable = catchThrowableOfType(
-                () -> handler.handle(command),
-                HttpStatusException.class
+                HttpStatusException.class,
+                () -> handler.handle(command(emptyData()))
         );
 
         assertThat(throwable.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
@@ -123,53 +112,69 @@ class UpdateArticleHandlerTest {
 
     @Test
     void should_returnCorrectArticleData_when_commandHasAllProperties() {
-        Article article = Article.builder()
-                .slug(TEST_SLUG)
-                .author(User.builder().username(TEST_USERNAME).build())
-                .body(TEST_BODY)
-                .build();
-        when(articleRepository.findBySlug(TEST_SLUG)).thenReturn(Optional.of(article));
+        givenArticle();
+        givenCurrentUser();
 
-        User user = User.builder()
-                .username(TEST_USERNAME)
-                .build();
-        when(userRepository.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(user));
+        var data = new UpdateArticle.Data(
+                new JsonNullable<>(ALTERED_TITLE),
+                new JsonNullable<>(ALTERED_DESCRIPTION),
+                new JsonNullable<>(ALTERED_BODY),
+                new JsonNullable<>(List.of("tag2")));
+        ArticleDto result = handler.handle(command(data)).article();
 
-        UpdateArticleDto data = UpdateArticleDto.builder()
-                .title(ALTERED_TITLE)
-                .description(ALTERED_DESCRIPTION)
-                .body(ALTERED_BODY)
-                .build();
-        UpdateArticle command = new UpdateArticle(TEST_USERNAME, TEST_SLUG, data);
-
-        ArticleDto result = handler.handle(command).getArticle();
-
-        assertThat(result.getBody()).isEqualTo(ALTERED_BODY);
-        assertThat(result.getTitle()).isEqualTo(ALTERED_TITLE);
-        assertThat(result.getDescription()).isEqualTo(ALTERED_DESCRIPTION);
-        assertThat(result.getSlug()).isEqualTo(ALTERED_TITLE);
+        assertThat(result.body()).isEqualTo(ALTERED_BODY);
+        assertThat(result.title()).isEqualTo(ALTERED_TITLE);
+        assertThat(result.description()).isEqualTo(ALTERED_DESCRIPTION);
+        assertThat(result.slug()).isEqualTo(ALTERED_TITLE);
+        assertThat(result.tagList()).containsExactly("tag2");
     }
 
     @Test
-    void should_returnCorrectArticleData_when_commandDoesNotHaveAllProperties() {
+    void should_keepCurrentValues_when_commandHasNoProperties() {
+        givenArticle();
+        givenCurrentUser();
+
+        ArticleDto result = handler.handle(command(emptyData())).article();
+
+        assertThat(result.slug()).isEqualTo(TEST_SLUG);
+        assertThat(result.body()).isEqualTo(TEST_BODY);
+        assertThat(result.tagList()).containsExactly("tag1");
+    }
+
+    @Test
+    void should_removeAllTags_when_tagListIsEmpty() {
+        givenArticle();
+        givenCurrentUser();
+
+        var data = new UpdateArticle.Data(null, null, null, new JsonNullable<>(List.of()));
+        ArticleDto result = handler.handle(command(data)).article();
+
+        assertThat(result.tagList()).isEmpty();
+    }
+
+    private void givenArticle() {
         Article article = Article.builder()
                 .slug(TEST_SLUG)
+                .title("test-title")
+                .description("test-description")
                 .author(User.builder().username(TEST_USERNAME).build())
                 .body(TEST_BODY)
+                .tag(new Tag("tag1"))
                 .build();
         when(articleRepository.findBySlug(TEST_SLUG)).thenReturn(Optional.of(article));
-
-        User user = User.builder()
-                .username(TEST_USERNAME)
-                .build();
-        when(userRepository.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(user));
-
-        UpdateArticleResult result = handler.handle(UpdateArticle.builder()
-                .slug(TEST_SLUG)
-                .currentUsername(TEST_USERNAME)
-                .article(UpdateArticleDto.builder().build())
-                .build());
-
-        assertThat(result.getArticle().getBody()).isEqualTo(TEST_BODY);
     }
+
+    private void givenCurrentUser() {
+        when(userRepository.findByUsername(TEST_USERNAME))
+                .thenReturn(Optional.of(User.builder().username(TEST_USERNAME).build()));
+    }
+
+    private static UpdateArticle.Data emptyData() {
+        return new UpdateArticle.Data(null, null, null, null);
+    }
+
+    private static UpdateArticle command(UpdateArticle.Data data) {
+        return new UpdateArticle(TEST_SLUG, data);
+    }
+
 }

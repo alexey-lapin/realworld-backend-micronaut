@@ -26,13 +26,13 @@ package com.github.al.realworld.application.query;
 import com.github.al.realworld.api.query.GetProfile;
 import com.github.al.realworld.api.query.GetProfileResult;
 import com.github.al.realworld.application.ProfileAssembler;
-import com.github.al.bus.QueryHandler;
+import com.github.al.realworld.application.service.AuthenticationService;
+import com.github.al.realworld.bus.QueryHandler;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
@@ -40,17 +40,21 @@ import static com.github.al.realworld.application.exception.Exceptions.notFound;
 @Singleton
 public class GetProfileHandler implements QueryHandler<GetProfileResult, GetProfile> {
 
+    private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
 
     @Transactional
     @Override
     public GetProfileResult handle(GetProfile query) {
-        User currentUser = userRepository.findByUsername(query.getCurrentUsername())
-                .orElse(null);
+        var currentUsername = authenticationService.getCurrentUserName();
+        User currentUser = currentUsername == null
+                ? null
+                : userRepository.findByUsername(currentUsername).orElse(null);
 
-        User user = userRepository.findByUsername(query.getUsername())
-                .orElseThrow(() -> notFound("user [name=%s] does not exist", query.getUsername()));
+        User user = userRepository.findByUsername(query.username())
+                .orElseThrow(() -> notFound("user [name=%s] does not exist", query.username()));
 
         return new GetProfileResult(ProfileAssembler.assemble(user, currentUser));
     }
+
 }

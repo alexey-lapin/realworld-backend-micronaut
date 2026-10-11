@@ -23,21 +23,18 @@
  */
 package com.github.al.realworld.application.command;
 
-import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.RegisterUser;
 import com.github.al.realworld.api.command.RegisterUserResult;
-import com.github.al.realworld.api.dto.RegisterUserDto;
 import com.github.al.realworld.application.UserAssembler;
 import com.github.al.realworld.application.service.JwtService;
 import com.github.al.realworld.application.service.PasswordEncoder;
+import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-import java.util.Optional;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 
@@ -52,21 +49,21 @@ public class RegisterUserHandler implements CommandHandler<RegisterUserResult, R
     @Transactional
     @Override
     public RegisterUserResult handle(RegisterUser command) {
-        RegisterUserDto data = command.getUser();
-        Optional<User> userByEmailOptional = userRepository.findByEmail(data.getEmail());
-        if (userByEmailOptional.isPresent()) {
-            throw badRequest("user [email=%s] already exists", data.getEmail());
+        var data = command.user();
+
+        if (userRepository.findByEmail(data.email()).isPresent()) {
+            throw badRequest("user [email=%s] already exists", data.email());
         }
-        Optional<User> userByUsernameOptional = userRepository.findByUsername(data.getUsername());
-        if (userByUsernameOptional.isPresent()) {
-            throw badRequest("user [name=%s] already exists", data.getUsername());
+
+        if (userRepository.findByUsername(data.username()).isPresent()) {
+            throw badRequest("user [name=%s] already exists", data.username());
         }
 
         User user = User.builder()
                 .id(UUID.randomUUID())
-                .username(data.getUsername())
-                .email(data.getEmail())
-                .password(passwordEncoder.encode(data.getPassword()))
+                .username(data.username())
+                .email(data.email())
+                .password(passwordEncoder.encode(data.password()))
                 .build();
         userRepository.save(user);
 

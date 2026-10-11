@@ -25,7 +25,7 @@ package com.github.al.realworld.application.command;
 
 import com.github.al.realworld.api.command.CreateArticle;
 import com.github.al.realworld.api.dto.ArticleDto;
-import com.github.al.realworld.api.dto.CreateArticleDto;
+import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.User;
@@ -37,7 +37,7 @@ import io.micronaut.http.exceptions.HttpStatusException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,42 +48,56 @@ import static org.mockito.Mockito.when;
 
 class CreateArticleHandlerTest {
 
+    private static final String TEST_USERNAME = "test-username";
+
+    private AuthenticationService authenticationService;
     private ArticleRepository articleRepository;
-    private TagRepository tagRepository;
     private UserRepository userRepository;
     private CreateArticleHandler handler;
 
     @BeforeEach
     void setUp() {
+        authenticationService = mock(AuthenticationService.class);
         articleRepository = mock(ArticleRepository.class);
-        tagRepository = mock(TagRepository.class);
         userRepository = mock(UserRepository.class);
-        handler = new CreateArticleHandler(articleRepository, tagRepository, userRepository, new SlugService());
+        handler = new CreateArticleHandler(authenticationService,
+                articleRepository,
+                mock(TagRepository.class),
+                userRepository,
+                new SlugService());
     }
 
     @Test
     void should_throw400_when_articleAlreadyExist() {
         when(articleRepository.findByTitle("test-title")).thenReturn(Optional.of(Article.builder().build()));
 
-        CreateArticleDto data = CreateArticleDto.builder()
-                .title("test-title")
-                .build();
         HttpStatusException exception = catchThrowableOfType(
-                () -> handler.handle(new CreateArticle(null, data)),
-                HttpStatusException.class
+                HttpStatusException.class,
+                () -> handler.handle(command("test-title", null))
         );
 
         assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
     }
 
     @Test
-    void should_throw400_when_currentUsernameDoesNotExist() {
-        CreateArticleDto data = CreateArticleDto.builder()
-                .title("test-title")
-                .build();
+    void should_throw401_when_notAuthenticated() {
+        when(authenticationService.getRequiredCurrentUserName()).thenCallRealMethod();
+
         HttpStatusException exception = catchThrowableOfType(
-                () -> handler.handle(new CreateArticle(null, data)),
-                HttpStatusException.class
+                HttpStatusException.class,
+                () -> handler.handle(command("test-title", null))
+        );
+
+        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.UNAUTHORIZED.getCode());
+    }
+
+    @Test
+    void should_throw400_when_currentUserDoesNotExist() {
+        when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME);
+
+        HttpStatusException exception = catchThrowableOfType(
+                HttpStatusException.class,
+                () -> handler.handle(command("test-title", null))
         );
 
         assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
@@ -91,28 +105,25 @@ class CreateArticleHandlerTest {
 
     @Test
     void should_returnCorrectArticleData() {
-        User user = User.builder()
-                .username("test-username")
-                .build();
-        when(userRepository.findByUsername("test-username")).thenReturn(Optional.of(user));
-
+        when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME);
+        when(userRepository.findByUsername(TEST_USERNAME))
+                .thenReturn(Optional.of(User.builder().username(TEST_USERNAME).build()));
         when(articleRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        CreateArticleDto data = CreateArticleDto.builder()
-                .title("test-title")
-                .description("test-description")
-                .body("test-body")
-                .tagList(Arrays.asList("tag1", "tag2"))
-                .build();
-        ArticleDto result = handler.handle(new CreateArticle("test-username", data)).getArticle();
+        ArticleDto result = handler.handle(command("test-title", List.of("tag1", "tag2"))).article();
 
-        assertThat(result.getSlug()).isEqualTo("test-title");
-        assertThat(result.getTitle()).isEqualTo("test-title");
-        assertThat(result.getDescription()).isEqualTo("test-description");
-        assertThat(result.getBody()).isEqualTo("test-body");
-        assertThat(result.getAuthor().getUsername()).isEqualTo("test-username");
-        assertThat(result.getCreatedAt()).isNotNull();
-        assertThat(result.getUpdatedAt()).isNotNull();
-        assertThat(result.getTagList()).containsExactlyInAnyOrder("tag1", "tag2");
+        assertThat(result.slug()).isEqualTo("test-title");
+        assertThat(result.title()).isEqualTo("test-title");
+        assertThat(result.description()).isEqualTo("test-description");
+        assertThat(result.body()).isEqualTo("test-body");
+        assertThat(result.author().username()).isEqualTo(TEST_USERNAME);
+        assertThat(result.createdAt()).isNotNull();
+        assertThat(result.updatedAt()).isNotNull();
+        assertThat(result.tagList()).containsExactly("tag1", "tag2");
     }
+
+    private static CreateArticle command(String title, List<String> tagList) {
+        return new CreateArticle(new CreateArticle.Data(title, "test-description", "test-body", tagList));
+    }
+
 }

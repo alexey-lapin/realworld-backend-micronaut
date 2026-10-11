@@ -23,14 +23,9 @@
  */
 package com.github.al.realworld.api.query;
 
-import com.github.al.bus.Query;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.github.al.realworld.bus.Query;
 
-@AllArgsConstructor
-@Getter
-public class GetCurrentUser implements Query<GetCurrentUserResult> {
-
-    private String username;
+public record GetCurrentUser()
+        implements Query<GetCurrentUserResult> {
 
 }

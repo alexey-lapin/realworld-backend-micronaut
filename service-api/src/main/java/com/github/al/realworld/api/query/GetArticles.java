@@ -23,23 +23,15 @@
  */
 package com.github.al.realworld.api.query;
 
-import com.github.al.bus.Query;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.github.al.realworld.bus.Query;
+import org.jspecify.annotations.Nullable;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-@Getter
-public class GetArticles implements Query<GetArticlesResult> {
-
-    private String currentUsername;
-    private String tag;
-    private String author;
-    private String favorited;
-    private Integer limit;
-    private Integer offset;
+public record GetArticles(
+        @Nullable String tag,
+        @Nullable String author,
+        @Nullable String favorited,
+        int limit,
+        long offset
+) implements Query<GetArticlesResult> {
 
 }

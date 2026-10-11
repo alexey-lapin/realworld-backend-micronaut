@@ -26,15 +26,15 @@ package com.github.al.realworld.application.command;
 import com.github.al.realworld.api.command.FavoriteArticle;
 import com.github.al.realworld.api.command.FavoriteArticleResult;
 import com.github.al.realworld.application.ArticleAssembler;
-import com.github.al.bus.CommandHandler;
+import com.github.al.realworld.application.service.AuthenticationService;
+import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 import static com.github.al.realworld.application.exception.Exceptions.notFound;
@@ -43,22 +43,23 @@ import static com.github.al.realworld.application.exception.Exceptions.notFound;
 @Singleton
 public class FavoriteArticleHandler implements CommandHandler<FavoriteArticleResult, FavoriteArticle> {
 
+    private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
 
     @Transactional
     @Override
     public FavoriteArticleResult handle(FavoriteArticle command) {
-        Article article = articleRepository.findBySlug(command.getSlug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.getSlug()));
+        Article article = articleRepository.findBySlug(command.slug())
+                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.slug()));
 
-        User currentUser = userRepository.findByUsername(command.getCurrentUsername())
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getCurrentUsername()));
+        var currentUsername = authenticationService.getRequiredCurrentUserName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
 
         Article alteredArticle = article.toBuilder()
                 .favoredUser(currentUser)
                 .build();
-
         Article savedArticle = articleRepository.save(alteredArticle);
 
         return new FavoriteArticleResult(ArticleAssembler.assemble(savedArticle, currentUser));

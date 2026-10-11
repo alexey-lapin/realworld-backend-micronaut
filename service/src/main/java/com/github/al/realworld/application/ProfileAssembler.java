@@ -25,14 +25,15 @@ package com.github.al.realworld.application;
 
 import com.github.al.realworld.api.dto.ProfileDto;
 import com.github.al.realworld.domain.model.User;
+import org.jspecify.annotations.Nullable;
 
 public class ProfileAssembler {
 
-    public static ProfileDto assemble(User user, User currentUser) {
-        boolean isFollow = currentUser != null && user.getFollowers().stream()
+    public static ProfileDto assemble(User user, @Nullable User currentUser) {
+        boolean following = currentUser != null && user.getFollowers().stream()
                 .map(followRelation -> followRelation.getFollower().getId())
-                .anyMatch(uuid -> uuid.equals(currentUser.getId()));
-        return new ProfileDto(user.getUsername(), user.getBio(), user.getImage(), isFollow);
+                .anyMatch(id -> id.equals(currentUser.getId()));
+        return new ProfileDto(user.getUsername(), user.getBio(), user.getImage(), following);
     }
 
 }
