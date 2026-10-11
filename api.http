@@ -1,0 +1,180 @@
+@host_api = http://localhost:8080/api
+
+###
+# User Api
+###
+
+# @name Register user1
+POST {{host_api}}/users
+Content-Type: application/json
+
+{
+  "user": {
+    "email": "user1@example.com",
+    "username": "user1",
+    "password": "user1"
+  }
+}
+
+> {%
+    client.global.set("token", response.body.user.token)
+%}
+
+###
+# @name Register user2
+POST {{host_api}}/users
+Content-Type: application/json
+
+{
+  "user": {
+    "email": "user2@example.com",
+    "username": "user2",
+    "password": "user2"
+  }
+}
+
+> {%
+    client.global.set("token", response.body.user.token)
+%}
+
+###
+# @name Login user1
+POST {{host_api}}/users/login
+Content-Type: application/json
+
+{
+  "user": {
+    "email": "user1@example.com",
+    "password": "user1"
+  }
+}
+
+> {%
+    client.global.set("token", response.body.user.token)
+%}
+
+###
+# @name Current user
+GET {{host_api}}/user
+Authorization: Token {{token}}
+
+###
+# @name Update User
+PUT {{host_api}}/user
+Authorization: Token {{token}}
+Content-Type: application/json
+
+{
+  "user": {
+    "bio": "I like to skateboard",
+    "image": "https://i.stack.imgur.com/xHWGW.png"
+  }
+}
+
+###
+# Profile Api
+###
+
+# @name Get profile
+GET {{host_api}}/profiles/user1
+Authorization: Token {{token}}
+
+###
+# @name Follow profile
+POST {{host_api}}/profiles/user1/follow
+Authorization: Token {{token}}
+
+###
+# @name Unfollow profile
+DELETE {{host_api}}/profiles/user1/follow
+Authorization: Token {{token}}
+
+###
+# Article Api
+###
+
+# @name Feed articles
+GET {{host_api}}/articles/feed?offset=0&limit=100
+Authorization: Token {{token}}
+
+###
+# @name Filter articles
+GET {{host_api}}/articles?tag=&author=&favorited=&offset=0&limit=100
+
+###
+# @name Create article
+POST {{host_api}}/articles
+Authorization: Token {{token}}
+Content-Type: application/json
+
+{
+  "article": {
+    "title": "How to train your dragon",
+    "description": "Ever wonder how?",
+    "body": "You have to believe",
+    "tagList": ["dragons", "training"]
+  }
+}
+
+> {%
+    client.global.set("article_slug", response.body.article.slug)
+%}
+
+###
+# @name Get article
+GET {{host_api}}/articles/{{article_slug}}
+
+###
+# @name Update article
+PUT {{host_api}}/articles/{{article_slug}}
+Authorization: Token {{token}}
+Content-Type: application/json
+
+{
+  "article": {
+    "body": "With a lot of patience"
+  }
+}
+
+###
+# @name Delete article
+DELETE {{host_api}}/articles/{{article_slug}}
+Authorization: Token {{token}}
+
+###
+# @name List comments
+GET {{host_api}}/articles/{{article_slug}}/comments
+
+###
+# @name Add comment
+POST {{host_api}}/articles/{{article_slug}}/comments
+Authorization: Token {{token}}
+Content-Type: application/json
+
+{
+  "comment": {
+    "body": "Great article!"
+  }
+}
+
+###
+# @name Delete comment
+DELETE {{host_api}}/articles/{{article_slug}}/comments/1
+Authorization: Token {{token}}
+
+###
+# @name Favorite article
+POST {{host_api}}/articles/{{article_slug}}/favorite
+Authorization: Token {{token}}
+
+###
+# @name Unfavorite article
+DELETE {{host_api}}/articles/{{article_slug}}/favorite
+Authorization: Token {{token}}
+
+###
+# Tags Api
+###
+
+# @name List tags
+GET {{host_api}}/tags
