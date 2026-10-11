@@ -218,6 +218,19 @@ public class ArticleApiTest {
         }
 
         @Test
+        void should_keepOtherComments_when_deleteComment() {
+            register().login();
+            ArticleDto article = articleClient.create(createArticleCommand()).article();
+            CommentDto first = articleClient.addComment(article.slug(), new AddComment(null, new AddComment.Data("first"))).comment();
+            CommentDto second = articleClient.addComment(article.slug(), new AddComment(null, new AddComment.Data("second"))).comment();
+
+            articleClient.deleteComment(article.slug(), first.id());
+
+            List<CommentDto> comments = articleClient.findAllComments(article.slug()).comments();
+            assertThat(comments).extracting(CommentDto::id).containsExactly(second.id());
+        }
+
+        @Test
         void should_throw403_when_commentIsNotOwned() {
             register().login();
 

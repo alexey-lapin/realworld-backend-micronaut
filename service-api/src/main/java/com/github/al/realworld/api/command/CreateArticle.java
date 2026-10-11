@@ -41,7 +41,7 @@ public record CreateArticle(
             @NotBlank @Nullable String title,
             @NotBlank @Nullable String description,
             @NotBlank @Nullable String body,
-            @Nullable List<String> tagList
+            @Nullable List<@NotBlank String> tagList
     ) {
 
     }

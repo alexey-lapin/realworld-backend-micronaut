@@ -55,7 +55,7 @@ public record UpdateArticle(
             @Nullable JsonNullable<@NotBlank String> title,
             @Nullable JsonNullable<@NotBlank String> description,
             @Nullable JsonNullable<@NotBlank String> body,
-            @Nullable JsonNullable<@NotNull List<String>> tagList
+            @Nullable JsonNullable<@NotNull List<@NotBlank String>> tagList
     ) {
 
     }
