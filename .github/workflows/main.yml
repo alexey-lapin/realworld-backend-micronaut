@@ -7,18 +7,29 @@ on:
     tags:
       - 'v*.*.*'
   pull_request:
-    branches:
-      - '*'
 
 env:
-  CR_REGISTRY: ghcr.io
-  CR_NAMESPACE: ${{ github.repository_owner }}
-  CR_USERNAME: ${{ github.actor }}
-  CR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+  APP_NAME: ${{ github.event.repository.name }}
+  # Legacy Postman collection, pinned to the last revision before the v2 spec rewrite.
+  # Gating until the app conforms to the hurl spec below; then it goes.
+  POSTMAN_COLLECTION: https://raw.githubusercontent.com/realworld-apps/realworld/dedb6969fe2e025ccac06464f01bc25584d9290c/api/Conduit.postman_collection.json
+  # RealWorld API spec (hurl collection), pinned to a main-branch commit; Renovate bumps SPEC_REF.
+  SPEC_REPO: realworld-apps/realworld
+  SPEC_REF: ebbcdeb8d55b42a3a613c787560498b8ef10003f
+  HURL_VERSION: 8.0.1
+
+# Least privilege by default; jobs that need more elevate individually.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build-jvm:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -26,60 +37,93 @@ jobs:
           fetch-depth: 0
 
       - name: Setup JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 25
 
       - name: Setup NodeJS
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
+
+      - name: Checkout API spec
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.SPEC_REPO }}
+          ref: ${{ env.SPEC_REF }}
+          sparse-checkout: specs/api/hurl
+          path: .realworld-spec
+
+      - name: Setup hurl
+        uses: gacts/install-hurl@v1
+        with:
+          version: ${{ env.HURL_VERSION }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
       - name: Gradle build
-        run: ./gradlew build
+        run: ./gradlew build jacocoReport
+
+      - name: Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Run app for testing
+        shell: bash
         run: |
-          nohup java -jar service/build/libs/realworld-backend-micronaut*.jar &
-          sleep 5
+          nohup java -jar "service/build/libs/${APP_NAME}"*.jar &
+          for _ in {1..60}; do
+            curl --fail --silent --output /dev/null http://localhost:8080/health && exit 0
+            sleep 1
+          done
+          echo "::error::app did not become healthy within 60s"
+          exit 1
 
       - name: Run postman collection
         run: >
-          npx newman run
-          https://raw.githubusercontent.com/realworld-apps/realworld/dedb6969fe2e025ccac06464f01bc25584d9290c/api/Conduit.postman_collection.json
+          npx newman run ${{ env.POSTMAN_COLLECTION }}
           --delay-request 200
           --global-var "APIURL=http://localhost:8080/api"
           --global-var "USERNAME=username"
           --global-var "EMAIL=username@example.com"
           --global-var "PASSWORD=password"
 
+      # Not gating yet: the app predates the v2 spec. The summary tracks progress until it conforms.
+      - name: Run API spec tests
+        continue-on-error: true
+        shell: bash
+        run: .github/scripts/hurl-report.sh http://localhost:8080 ${{ github.run_id }}
+
       - name: Upload app-jar
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: app-jar
           path: |
-            service/build/libs/realworld-backend-micronaut*.jar
+            service/build/libs/${{ env.APP_NAME }}*.jar
           retention-days: 7
 
   build-native:
     strategy:
       matrix:
         include:
-          - name: linux
+          - name: linux-amd
             os: ubuntu-22.04
-            artifact: app-native-linux
+            artifact: app-native-linux-amd64
+          - name: linux-arm
+            os: ubuntu-22.04-arm
+            artifact: app-native-linux-arm64
           - name: windows
             os: windows-latest
-            artifact: app-native-windows
+            artifact: app-native-windows-amd64
           - name: macos
             os: macos-latest
-            artifact: app-native-macos
+            artifact: app-native-macos-arm64
     runs-on: ${{ matrix.os }}
     name: build-native-${{ matrix.name }}
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -90,76 +134,84 @@ jobs:
         uses: graalvm/setup-graalvm@v1
         with:
           java-version: 25
-          distribution: 'liberica'
+          distribution: liberica
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
 
       - name: Setup NodeJS
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
+
+      - name: Checkout API spec
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.SPEC_REPO }}
+          ref: ${{ env.SPEC_REF }}
+          sparse-checkout: specs/api/hurl
+          path: .realworld-spec
+
+      - name: Setup hurl
+        uses: gacts/install-hurl@v1
+        with:
+          version: ${{ env.HURL_VERSION }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
       - name: Gradle nativeCompile
         env:
+          # Needed for Windows; to resolve issue with temp folder during native image build, due to relativization
+          # problem when different drives are used, such as in GHA runners.
+          # https://github.com/graalvm/native-build-tools/issues/754
           GRADLE_OPTS: -Djava.io.tmpdir=${{ runner.temp }}
         run: ./gradlew :service:nativeCompile -x check
 
+      - name: Prepare Artifacts
+        shell: bash
+        run: |
+          mkdir -p "${{ runner.temp }}/${{ matrix.artifact }}"
+          cp service/build/native/nativeCompile/${{ env.APP_NAME }}* "${{ runner.temp }}/${{ matrix.artifact }}"
+
       - name: Upload app-native
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact }}
           path: |
-            service/build/native/nativeCompile/realworld-backend-micronaut*
-            service/build/native/nativeCompile/gradle-artifact.txt
+            ${{ runner.temp }}/${{ matrix.artifact }}/*
 
       - name: Run app for testing
-        run: |
-          nohup ./service/build/native/nativeCompile/realworld-backend-micronaut* &
-          sleep 5
         shell: bash
+        run: |
+          nohup "./service/build/native/nativeCompile/${APP_NAME}"* &
+          for _ in {1..60}; do
+            curl --fail --silent --output /dev/null http://localhost:8080/health && exit 0
+            sleep 1
+          done
+          echo "::error::app did not become healthy within 60s"
+          exit 1
 
       - name: Run postman collection
         run: >
-          npx newman run
-          https://raw.githubusercontent.com/realworld-apps/realworld/dedb6969fe2e025ccac06464f01bc25584d9290c/api/Conduit.postman_collection.json
+          npx newman run ${{ env.POSTMAN_COLLECTION }}
           --delay-request 200
           --global-var "APIURL=http://localhost:8080/api"
           --global-var "USERNAME=username"
           --global-var "EMAIL=username@example.com"
           --global-var "PASSWORD=password"
 
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup JDK
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 25
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-
-      - name: Gradle jacocoReport
+      - name: Run API spec tests
+        continue-on-error: true
         shell: bash
-        run: |
-          ./gradlew --version
-          ./gradlew --scan --no-parallel --stacktrace --warning-mode=all jacocoReport
+        run: .github/scripts/hurl-report.sh http://localhost:8080 ${{ github.run_id }}${{ strategy.job-index }}
 
-      - name: Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-  release-notes:
+  release:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [build-jvm, build-native]
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -167,55 +219,53 @@ jobs:
           fetch-depth: 0
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
 
-      - name: Prepare Linux Artifacts
-        run: |
-          cd app-native-linux
-          chmod +x realworld-backend-micronaut
-          tar -czf $(cat gradle-artifact.txt).tar.gz realworld-backend-micronaut
-
-      - name: Prepare macOS Artifacts
-        run: |
-          cd app-native-macos
-          chmod +x realworld-backend-micronaut
-          tar -czf $(cat gradle-artifact.txt).tar.gz realworld-backend-micronaut
-
-      - name: Prepare Windows Artifacts
-        run: |
-          cd app-native-windows
-          zip $(cat gradle-artifact.txt).zip realworld-backend-micronaut.exe
-
-      - name: Build Changelog
-        uses: mikepenz/release-changelog-builder-action@v5
-        with:
-          outputFile: changelog.txt
-          configuration: ".github/release-changelog-builder.json"
+      # Platform names come from the artifact directory names set by the matrix.
+      - name: Package Artifacts
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          for dir in app-native-*; do
+            name="${APP_NAME}-${VERSION#v}-${dir#app-native-}"
+            if [ -f "${dir}/${APP_NAME}.exe" ]; then
+              (cd "${dir}" && zip "${name}.zip" "${APP_NAME}.exe")
+            else
+              chmod +x "${dir}/${APP_NAME}"
+              (cd "${dir}" && tar --create --gzip --file "${name}.tar.gz" "${APP_NAME}")
+            fi
+          done
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          body_path: changelog.txt
-          draft: true
-          files: |
-            app-jar/*.jar
-            app-native-linux/*.tar.gz
-            app-native-macos/*.tar.gz
-            app-native-windows/*.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh release create ${{ github.ref_name }}
+          app-jar/*.jar
+          app-native-*/*.tar.gz
+          app-native-*/*.zip
+          --title ${{ github.ref_name }}
+          --generate-notes
+          --fail-on-no-commits
 
   build-docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: read
+      packages: write
+    env:
+      CR_REGISTRY: ghcr.io
+      CR_NAMESPACE: ${{ github.repository_owner }}
+      CR_USERNAME: ${{ github.actor }}
+      CR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
       - name: Setup JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 25
@@ -234,5 +284,6 @@ jobs:
         run: ./gradlew dockerPushNative
 
       - name: Deploy on Render
-        run: |
-          curl -X POST ${{ secrets.RENDER_WEBHOOK }}
+        env:
+          RENDER_WEBHOOK: ${{ secrets.RENDER_WEBHOOK }}
+        run: curl --fail --silent --show-error --request POST "$RENDER_WEBHOOK"
