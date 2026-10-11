@@ -57,7 +57,7 @@ Check out the live application on [**Render**](https://render.com/):
 
 ## Getting started
 
-Note that Java 17 or above is required to build the project with Gradle.
+Note that Java 25 or above is required to build the project with Gradle.
 
 ### JVM
 
