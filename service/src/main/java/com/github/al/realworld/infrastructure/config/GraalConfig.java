@@ -30,7 +30,14 @@ import io.micronaut.core.annotation.TypeHint;
                 "ch.qos.logback.classic.jul.LevelChangePropagator",
                 "java.util.UUID",
                 "io.jsonwebtoken.impl.DefaultJwtBuilder",
-                "io.jsonwebtoken.impl.DefaultJwtParserBuilder"
+                "io.jsonwebtoken.impl.DefaultJwtParserBuilder",
+                // the XML changelog parser populates these through setters, which the
+                // community liquibase-core metadata doesn't register
+                "liquibase.change.ColumnConfig",
+                "liquibase.change.ConstraintsConfig",
+                "liquibase.change.core.AddPrimaryKeyChange",
+                "liquibase.change.core.CreateSequenceChange",
+                "liquibase.change.core.CreateTableChange"
         },
         accessType = {
                 TypeHint.AccessType.ALL_DECLARED_CONSTRUCTORS,
