@@ -72,6 +72,17 @@ class ErrorResponseApiTest {
     }
 
     @Test
+    void should_return422_when_tagContainsComma() {
+        AuthSupport.register().login();
+        var response = exchangeError(HttpRequest.POST("/articles", """
+                {"article":{"title":"t","description":"d","body":"b","tagList":["a,b"]}}"""));
+        AuthSupport.logout();
+
+        assertThat(response.getStatus().getCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY.getCode());
+        assertThat(errors(response)).isEqualTo(Map.of("tagList", List.of("is invalid")));
+    }
+
+    @Test
     void should_return401TokenMissing_when_noAuthorizationHeader() {
         var response = exchangeError(HttpRequest.GET("/user"));
 

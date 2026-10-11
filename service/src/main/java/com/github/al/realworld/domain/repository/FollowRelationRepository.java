@@ -29,14 +29,22 @@ import java.util.List;
 
 public interface FollowRelationRepository {
 
-    boolean exists(FollowRelation followRelation);
-
     List<FollowRelation> findByFollowerId(long followerId);
 
     List<FollowRelation> findByFolloweeId(long followeeId);
 
-    FollowRelation save(FollowRelation followRelation);
+    /**
+     * Records the follow unless it already exists.
+     *
+     * @return {@code true} if a row was added
+     */
+    boolean add(FollowRelation followRelation);
 
-    void delete(FollowRelation followRelation);
+    /**
+     * Removes the follow if it exists.
+     *
+     * @return {@code true} if a row was removed
+     */
+    boolean remove(FollowRelation followRelation);
 
 }

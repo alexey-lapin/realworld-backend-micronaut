@@ -66,7 +66,10 @@ public class TagJdbcRepositoryAdapter implements TagRepository {
         try {
             return toDomain(repository.save(new TagJdbcEntity(null, tag.name())));
         } catch (DataAccessException e) {
-            return findByName(tag.name()).orElseThrow(() -> e);
+            if (JdbcErrors.isDuplicateKey(e)) {
+                return findByName(tag.name()).orElseThrow(() -> e);
+            }
+            throw e;
         }
     }
 

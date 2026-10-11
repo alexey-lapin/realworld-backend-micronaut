@@ -31,6 +31,7 @@ import io.micronaut.serde.annotation.Serdeable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import lombok.With;
 import org.jspecify.annotations.Nullable;
@@ -55,7 +56,7 @@ public record UpdateArticle(
             @Nullable JsonNullable<@NotBlank String> title,
             @Nullable JsonNullable<@NotBlank String> description,
             @Nullable JsonNullable<@NotBlank String> body,
-            @Nullable JsonNullable<@NotNull List<@NotBlank String>> tagList
+            @Nullable JsonNullable<@NotNull List<@NotBlank @Pattern(regexp = "[^,]*", message = "is invalid") String>> tagList
     ) {
 
     }

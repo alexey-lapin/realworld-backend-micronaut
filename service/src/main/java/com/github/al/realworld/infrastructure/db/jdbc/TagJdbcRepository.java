@@ -38,6 +38,8 @@ public interface TagJdbcRepository extends CrudRepository<TagJdbcEntity, Long> {
 
     List<TagJdbcEntity> findByNameIn(Collection<String> names);
 
+    List<TagJdbcEntity> findByIdIn(Collection<Long> ids);
+
     @Override
     List<TagJdbcEntity> findAll();
 

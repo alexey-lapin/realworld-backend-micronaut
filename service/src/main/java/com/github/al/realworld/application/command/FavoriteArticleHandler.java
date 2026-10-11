@@ -55,8 +55,7 @@ public class FavoriteArticleHandler implements CommandHandler<FavoriteArticleRes
 
         // the counter only moves when the favorite row actually changes
         var articleFavorite = new ArticleFavorite(articleId, currentUserId);
-        if (!articleFavoriteRepository.exists(articleFavorite)) {
-            articleFavoriteRepository.save(articleFavorite);
+        if (articleFavoriteRepository.add(articleFavorite)) {
             articleRepository.incrementFavoriteCount(articleId);
         }
 

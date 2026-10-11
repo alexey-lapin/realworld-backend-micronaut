@@ -55,8 +55,7 @@ public class UnfavoriteArticleHandler implements CommandHandler<UnfavoriteArticl
 
         // the counter only moves when the favorite row actually changes
         var articleFavorite = new ArticleFavorite(articleId, currentUserId);
-        if (articleFavoriteRepository.exists(articleFavorite)) {
-            articleFavoriteRepository.delete(articleFavorite);
+        if (articleFavoriteRepository.remove(articleFavorite)) {
             articleRepository.decrementFavoriteCount(articleId);
         }
 

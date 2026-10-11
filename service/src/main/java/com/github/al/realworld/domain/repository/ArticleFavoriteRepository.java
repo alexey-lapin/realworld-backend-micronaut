@@ -27,11 +27,19 @@ import com.github.al.realworld.domain.model.ArticleFavorite;
 
 public interface ArticleFavoriteRepository {
 
-    boolean exists(ArticleFavorite articleFavorite);
+    /**
+     * Records the favorite unless it already exists.
+     *
+     * @return {@code true} if a row was added
+     */
+    boolean add(ArticleFavorite articleFavorite);
 
-    ArticleFavorite save(ArticleFavorite articleFavorite);
-
-    void delete(ArticleFavorite articleFavorite);
+    /**
+     * Removes the favorite if it exists.
+     *
+     * @return {@code true} if a row was removed
+     */
+    boolean remove(ArticleFavorite articleFavorite);
 
     void deleteAllByArticleId(long articleId);
 

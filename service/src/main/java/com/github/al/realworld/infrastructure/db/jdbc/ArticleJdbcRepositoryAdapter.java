@@ -33,6 +33,7 @@ import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +50,7 @@ public class ArticleJdbcRepositoryAdapter implements ArticleRepository {
 
     private final ArticleJdbcRepository repository;
     private final ArticleTagJdbcRepository articleTagRepository;
+    private final TagJdbcRepository tagRepository;
     private final ArticleAssemblyJdbcRepository assemblyRepository;
 
     @Override
@@ -63,18 +65,36 @@ public class ArticleJdbcRepositoryAdapter implements ArticleRepository {
 
     @Override
     public Article save(Article article) {
-        var entity = new ArticleJdbcEntity(JdbcIds.toEntityId(article.id()),
-                article.createdAt(),
-                article.updatedAt(),
-                article.authorId(),
-                article.slug(),
-                article.title(),
-                article.description(),
-                article.body(),
-                tagList(article.tags()),
-                article.favoritesCount());
-        var saved = entity.id() == null ? repository.save(entity) : repository.update(entity);
-        long articleId = saved.id();
+        long articleId;
+        Instant createdAt;
+        Instant updatedAt;
+        if (article.id() == 0) {
+            var saved = repository.save(new ArticleJdbcEntity(null,
+                    null,
+                    null,
+                    article.authorId(),
+                    article.slug(),
+                    article.title(),
+                    article.description(),
+                    article.body(),
+                    tagList(article.tags()),
+                    0));
+            articleId = saved.id();
+            createdAt = saved.createdAt();
+            updatedAt = saved.updatedAt();
+        } else {
+            // content only: a concurrent favorite must not be overwritten by a stale counter
+            articleId = article.id();
+            createdAt = article.createdAt();
+            updatedAt = Instant.now();
+            repository.update(articleId,
+                    article.slug(),
+                    article.title(),
+                    article.description(),
+                    article.body(),
+                    tagList(article.tags()),
+                    updatedAt);
+        }
 
         articleTagRepository.deleteByArticleId(articleId);
         var rows = new ArrayList<ArticleTagJdbcEntity>();
@@ -85,8 +105,8 @@ public class ArticleJdbcRepositoryAdapter implements ArticleRepository {
 
         return article.toBuilder()
                 .id(articleId)
-                .createdAt(saved.createdAt())
-                .updatedAt(saved.updatedAt())
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
                 .build();
     }
 
@@ -145,16 +165,18 @@ public class ArticleJdbcRepositoryAdapter implements ArticleRepository {
         return assemblyRepository.countFeed(userId);
     }
 
+    /**
+     * Rebuilds the tags from the ordered tag rows and the tag table, which are authoritative;
+     * {@code tag_list} is only the denormalized copy the read view exposes.
+     */
     private Article toDomain(ArticleJdbcEntity entity) {
         long articleId = entity.id();
-        var names = tagNames(entity.tagList());
         var rows = articleTagRepository.findByArticleIdOrderByPosition(articleId);
-        var tags = new ArrayList<Tag>();
-        if (names.size() == rows.size()) {
-            for (var i = 0; i < rows.size(); i++) {
-                tags.add(new Tag(rows.get(i).tagId(), names.get(i)));
-            }
-        }
+        var namesById = tagRepository.findByIdIn(rows.stream().map(ArticleTagJdbcEntity::tagId).toList()).stream()
+                .collect(Collectors.toMap(TagJdbcEntity::id, TagJdbcEntity::name));
+        var tags = rows.stream()
+                .map(row -> new Tag(row.tagId(), namesById.get(row.tagId())))
+                .toList();
         return new Article(articleId,
                 entity.createdAt(),
                 entity.updatedAt(),

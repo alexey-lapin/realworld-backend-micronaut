@@ -25,6 +25,7 @@ package com.github.al.realworld.infrastructure.db.jdbc;
 
 import com.github.al.realworld.domain.model.FollowRelation;
 import com.github.al.realworld.domain.repository.FollowRelationRepository;
+import io.micronaut.data.exceptions.DataAccessException;
 import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 
@@ -37,11 +38,6 @@ public class FollowRelationJdbcRepositoryAdapter implements FollowRelationReposi
     private final FollowRelationJdbcRepository repository;
 
     @Override
-    public boolean exists(FollowRelation followRelation) {
-        return repository.existsByFollowerIdAndFolloweeId(followRelation.followerId(), followRelation.followeeId());
-    }
-
-    @Override
     public List<FollowRelation> findByFollowerId(long followerId) {
         return repository.findByFollowerId(followerId).stream().map(FollowRelationJdbcRepositoryAdapter::toDomain).toList();
     }
@@ -52,14 +48,20 @@ public class FollowRelationJdbcRepositoryAdapter implements FollowRelationReposi
     }
 
     @Override
-    public FollowRelation save(FollowRelation followRelation) {
-        repository.save(new FollowRelationJdbcEntity(null, followRelation.followerId(), followRelation.followeeId()));
-        return followRelation;
+    public boolean add(FollowRelation followRelation) {
+        try {
+            return repository.insertIfAbsent(followRelation.followerId(), followRelation.followeeId()) > 0;
+        } catch (DataAccessException e) {
+            if (JdbcErrors.isDuplicateKey(e)) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     @Override
-    public void delete(FollowRelation followRelation) {
-        repository.deleteByFollowerIdAndFolloweeId(followRelation.followerId(), followRelation.followeeId());
+    public boolean remove(FollowRelation followRelation) {
+        return repository.deleteByFollowerIdAndFolloweeId(followRelation.followerId(), followRelation.followeeId()) > 0;
     }
 
     private static FollowRelation toDomain(FollowRelationJdbcEntity entity) {

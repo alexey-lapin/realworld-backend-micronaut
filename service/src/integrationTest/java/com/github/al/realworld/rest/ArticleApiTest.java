@@ -185,6 +185,36 @@ public class ArticleApiTest {
     }
 
     @Test
+    void should_countFavoriteOnce_when_favoritedAndUnfavoritedTwice() {
+        register().login();
+        String slug = articleClient.create(createArticleCommand()).article().slug();
+
+        articleClient.favorite(slug);
+        assertThat(articleClient.favorite(slug).article().favoritesCount()).isEqualTo(1);
+
+        articleClient.unfavorite(slug);
+        assertThat(articleClient.unfavorite(slug).article().favoritesCount()).isZero();
+    }
+
+    @Test
+    void should_keepFavoritesCount_when_articleIsEdited() {
+        AuthSupport.RegisteredUser author = register().login();
+        String slug = articleClient.create(createArticleCommand()).article().slug();
+        logout();
+        register().login();
+        articleClient.favorite(slug);
+        logout();
+
+        // edits write content columns only, never a counter read before the favorite
+        author.login();
+        var data = new UpdateArticle.Data(null, null, new JsonNullable<>(ALTERED_BODY), null);
+        ArticleDto updated = articleClient.updateBySlug(slug, new UpdateArticle(null, data)).article();
+
+        assertThat(updated.body()).isEqualTo(ALTERED_BODY);
+        assertThat(updated.favoritesCount()).isEqualTo(1);
+    }
+
+    @Test
     void should_acceptDuplicateTitle_withDistinctSlugs() {
         register().login();
         CreateArticle command = createArticleCommand();

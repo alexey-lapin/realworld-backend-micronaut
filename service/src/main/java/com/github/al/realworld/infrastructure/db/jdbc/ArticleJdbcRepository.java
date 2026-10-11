@@ -25,9 +25,13 @@ package com.github.al.realworld.infrastructure.db.jdbc;
 
 import io.micronaut.data.jdbc.annotation.JdbcRepository;
 import io.micronaut.data.model.query.builder.sql.Dialect;
+import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.Query;
 import io.micronaut.data.repository.CrudRepository;
 
+import org.jspecify.annotations.Nullable;
+
+import java.time.Instant;
 import java.util.Optional;
 
 @JdbcRepository(dialect = Dialect.H2)
@@ -38,6 +42,18 @@ public interface ArticleJdbcRepository extends CrudRepository<ArticleJdbcEntity,
     Optional<Long> findIdBySlug(String slug);
 
     Optional<ArticleJdbcEntity> findBySlug(String slug);
+
+    /**
+     * Updates the content columns only, leaving {@code favorites_count} to its atomic
+     * increment and decrement queries.
+     */
+    void update(@Id long id,
+                String slug,
+                String title,
+                String description,
+                String body,
+                @Nullable String tagList,
+                Instant updatedAt);
 
     @Query("""
             update t_articles set favorites_count = favorites_count + 1 where id = :id""")

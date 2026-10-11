@@ -25,6 +25,7 @@ package com.github.al.realworld.infrastructure.db.jdbc;
 
 import com.github.al.realworld.domain.model.ArticleFavorite;
 import com.github.al.realworld.domain.repository.ArticleFavoriteRepository;
+import io.micronaut.data.exceptions.DataAccessException;
 import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 
@@ -34,20 +35,25 @@ public class ArticleFavoriteJdbcRepositoryAdapter implements ArticleFavoriteRepo
 
     private final ArticleFavoriteJdbcRepository repository;
 
+    /**
+     * Inserts only when absent; a concurrent insert that wins the race surfaces as a duplicate key,
+     * which also means the favorite exists.
+     */
     @Override
-    public boolean exists(ArticleFavorite articleFavorite) {
-        return repository.existsByArticleIdAndUserId(articleFavorite.articleId(), articleFavorite.userId());
+    public boolean add(ArticleFavorite articleFavorite) {
+        try {
+            return repository.insertIfAbsent(articleFavorite.articleId(), articleFavorite.userId()) > 0;
+        } catch (DataAccessException e) {
+            if (JdbcErrors.isDuplicateKey(e)) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     @Override
-    public ArticleFavorite save(ArticleFavorite articleFavorite) {
-        repository.save(new ArticleFavoriteJdbcEntity(null, articleFavorite.articleId(), articleFavorite.userId()));
-        return articleFavorite;
-    }
-
-    @Override
-    public void delete(ArticleFavorite articleFavorite) {
-        repository.deleteByArticleIdAndUserId(articleFavorite.articleId(), articleFavorite.userId());
+    public boolean remove(ArticleFavorite articleFavorite) {
+        return repository.deleteByArticleIdAndUserId(articleFavorite.articleId(), articleFavorite.userId()) > 0;
     }
 
     @Override

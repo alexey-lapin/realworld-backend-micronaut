@@ -25,14 +25,19 @@ package com.github.al.realworld.infrastructure.db.jdbc;
 
 import io.micronaut.data.jdbc.annotation.JdbcRepository;
 import io.micronaut.data.model.query.builder.sql.Dialect;
+import io.micronaut.data.annotation.Query;
 import io.micronaut.data.repository.CrudRepository;
 
 @JdbcRepository(dialect = Dialect.H2)
 public interface ArticleFavoriteJdbcRepository extends CrudRepository<ArticleFavoriteJdbcEntity, Long> {
 
-    boolean existsByArticleIdAndUserId(long articleId, long userId);
+    @Query("""
+            insert into t_favorites (article_id, user_id) \
+            select :articleId, :userId \
+            where not exists (select 1 from t_favorites where article_id = :articleId and user_id = :userId)""")
+    int insertIfAbsent(long articleId, long userId);
 
-    void deleteByArticleIdAndUserId(long articleId, long userId);
+    long deleteByArticleIdAndUserId(long articleId, long userId);
 
     void deleteByArticleId(long articleId);
 

@@ -25,6 +25,7 @@ package com.github.al.realworld.infrastructure.db.jdbc;
 
 import io.micronaut.data.jdbc.annotation.JdbcRepository;
 import io.micronaut.data.model.query.builder.sql.Dialect;
+import io.micronaut.data.annotation.Query;
 import io.micronaut.data.repository.CrudRepository;
 
 import java.util.List;
@@ -32,12 +33,16 @@ import java.util.List;
 @JdbcRepository(dialect = Dialect.H2)
 public interface FollowRelationJdbcRepository extends CrudRepository<FollowRelationJdbcEntity, Long> {
 
-    boolean existsByFollowerIdAndFolloweeId(long followerId, long followeeId);
+    @Query("""
+            insert into t_follows (follower_id, followee_id) \
+            select :followerId, :followeeId \
+            where not exists (select 1 from t_follows where follower_id = :followerId and followee_id = :followeeId)""")
+    int insertIfAbsent(long followerId, long followeeId);
 
     List<FollowRelationJdbcEntity> findByFollowerId(long followerId);
 
     List<FollowRelationJdbcEntity> findByFolloweeId(long followeeId);
 
-    void deleteByFollowerIdAndFolloweeId(long followerId, long followeeId);
+    long deleteByFollowerIdAndFolloweeId(long followerId, long followeeId);
 
 }
