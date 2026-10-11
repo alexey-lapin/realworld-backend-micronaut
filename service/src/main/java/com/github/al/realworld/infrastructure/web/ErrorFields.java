@@ -21,21 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.application.service;
+package com.github.al.realworld.infrastructure.web;
 
-import jakarta.inject.Singleton;
-import java.util.Objects;
+/**
+ * Derives error envelope keys from paths reported by validation and binding errors.
+ */
+final class ErrorFields {
 
-@Singleton
-public class NoopPasswordEncoder implements PasswordEncoder {
+    static final String FALLBACK = "body";
 
-    @Override
-    public String encode(String rawPassword) {
-        return rawPassword;
+    private ErrorFields() {
     }
 
-    @Override
-    public boolean matches(String rawPassword, String encodedPassword) {
-        return Objects.equals(rawPassword, encodedPassword);
+    /**
+     * Returns the last segment of a {@code .} or {@code /} separated path, without any index or
+     * container element suffix, falling back to {@code body}.
+     */
+    static String leaf(String path) {
+        var leaf = path.substring(Math.max(path.lastIndexOf('.'), path.lastIndexOf('/')) + 1);
+        var end = leaf.length();
+        for (char c : new char[]{'[', '<'}) {
+            var index = leaf.indexOf(c);
+            if (index >= 0) {
+                end = Math.min(end, index);
+            }
+        }
+        leaf = leaf.substring(0, end);
+        return leaf.isEmpty() ? FALLBACK : leaf;
     }
+
 }

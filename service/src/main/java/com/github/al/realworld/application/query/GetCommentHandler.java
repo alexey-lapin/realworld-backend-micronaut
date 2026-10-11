@@ -37,7 +37,8 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -51,7 +52,7 @@ public class GetCommentHandler implements QueryHandler<GetCommentResult, GetComm
     @Override
     public GetCommentResult handle(GetComment query) {
         Article article = articleRepository.findBySlug(query.slug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", query.slug()));
+                .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", query.slug()));
 
         var currentUsername = authenticationService.getCurrentUserName();
         User currentUser = currentUsername == null
@@ -61,7 +62,7 @@ public class GetCommentHandler implements QueryHandler<GetCommentResult, GetComm
         Comment comment = article.getComments().stream()
                 .filter(c -> c.getId() == query.id())
                 .findFirst()
-                .orElseThrow(() -> notFound("comment [id=%s] does not exist", query.id()));
+                .orElseThrow(() -> notFound("comment", "comment [id=%s] does not exist", query.id()));
 
         return new GetCommentResult(CommentAssembler.assemble(comment, currentUser));
     }

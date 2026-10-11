@@ -42,10 +42,10 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
-import static com.github.al.realworld.application.exception.Exceptions.forbidden;
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
+import static com.github.al.realworld.application.exception.ForbiddenException.forbidden;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
 import static com.github.al.realworld.api.dto.JsonNullable.unwrap;
 import static java.util.Objects.requireNonNullElse;
 
@@ -65,14 +65,14 @@ public class UpdateArticleHandler implements CommandHandler<UpdateArticleResult,
         var currentUsername = authenticationService.getRequiredCurrentUserName();
 
         Article article = articleRepository.findBySlug(command.slug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.slug()));
+                .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", command.slug()));
 
         if (!Objects.equals(article.getAuthor().getUsername(), currentUsername)) {
-            throw forbidden("article [slug=%s] is not owned by %s", command.slug(), currentUsername);
+            throw forbidden("article", "article [slug=%s] is not owned by %s", command.slug(), currentUsername);
         }
 
         User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
 
         var data = command.article();
         var newTitle = unwrap(data.title());

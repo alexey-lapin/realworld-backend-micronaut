@@ -41,7 +41,9 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
+import static com.github.al.realworld.application.exception.ConflictException.alreadyTaken;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -59,12 +61,12 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
         var data = command.article();
 
         if (articleRepository.findByTitle(data.title()).isPresent()) {
-            throw badRequest("article [title=%s] already exists", data.title());
+            throw alreadyTaken("title", "article [title=%s] already exists", data.title());
         }
 
         var currentUsername = authenticationService.getRequiredCurrentUserName();
         User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
 
         ZonedDateTime now = ZonedDateTime.now();
 

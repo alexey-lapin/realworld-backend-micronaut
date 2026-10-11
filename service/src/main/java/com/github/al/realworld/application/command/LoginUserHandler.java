@@ -34,9 +34,10 @@ import com.github.al.realworld.domain.repository.UserRepository;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
-import static com.github.al.realworld.application.exception.Exceptions.unauthorized;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidCredentials;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -46,19 +47,35 @@ public class LoginUserHandler implements CommandHandler<LoginUserResult, LoginUs
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
+    private volatile @Nullable String dummyHash;
+
     @Transactional
     @Override
     public LoginUserResult handle(LoginUser command) {
         var data = command.user();
 
-        User user = userRepository.findByEmail(data.email())
-                .orElseThrow(() -> badRequest("user [email=%s] does not exist", data.email()));
+        var userOptional = userRepository.findByEmail(data.email());
+        if (userOptional.isEmpty()) {
+            // spend the same hashing time as a real check, so timing does not reveal unknown emails
+            passwordEncoder.matches(data.password(), dummyHash());
+            throw invalidCredentials("user [email=%s] does not exist", data.email());
+        }
+        User user = userOptional.get();
 
         if (!passwordEncoder.matches(data.password(), user.getPassword())) {
-            throw unauthorized("user [email=%s] password is incorrect", data.email());
+            throw invalidCredentials("user [email=%s] password is incorrect", data.email());
         }
 
         return new LoginUserResult(UserAssembler.assemble(user, jwtService));
+    }
+
+    private String dummyHash() {
+        var hash = dummyHash;
+        if (hash == null) {
+            hash = passwordEncoder.encode("dummy-password-for-timing");
+            dummyHash = hash;
+        }
+        return hash;
     }
 
 }

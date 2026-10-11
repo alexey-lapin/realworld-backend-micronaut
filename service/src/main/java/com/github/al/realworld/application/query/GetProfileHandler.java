@@ -34,7 +34,8 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -52,7 +53,7 @@ public class GetProfileHandler implements QueryHandler<GetProfileResult, GetProf
                 : userRepository.findByUsername(currentUsername).orElse(null);
 
         User user = userRepository.findByUsername(query.username())
-                .orElseThrow(() -> notFound("user [name=%s] does not exist", query.username()));
+                .orElseThrow(() -> notFound("profile", "user [name=%s] does not exist", query.username()));
 
         return new GetProfileResult(ProfileAssembler.assemble(user, currentUser));
     }

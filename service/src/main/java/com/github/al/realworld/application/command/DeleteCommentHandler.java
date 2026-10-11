@@ -36,8 +36,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.forbidden;
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+import static com.github.al.realworld.application.exception.ForbiddenException.forbidden;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -52,15 +53,15 @@ public class DeleteCommentHandler implements CommandHandler<DeleteCommentResult,
         var currentUsername = authenticationService.getRequiredCurrentUserName();
 
         Article article = articleRepository.findBySlug(command.slug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.slug()));
+                .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", command.slug()));
 
         Comment comment = article.getComments().stream()
                 .filter(c -> c.getId() == command.id())
                 .findFirst()
-                .orElseThrow(() -> notFound("comment [id=%s] does not exist", command.id()));
+                .orElseThrow(() -> notFound("comment", "comment [id=%s] does not exist", command.id()));
 
         if (!comment.getAuthor().getUsername().equals(currentUsername)) {
-            throw forbidden("comment [id=%s] is not owned by %s", comment.getId(), currentUsername);
+            throw forbidden("comment", "comment [id=%s] is not owned by %s", comment.getId(), currentUsername);
         }
 
         // keep every comment except the deleted one

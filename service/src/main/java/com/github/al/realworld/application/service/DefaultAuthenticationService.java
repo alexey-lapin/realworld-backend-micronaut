@@ -28,11 +28,21 @@ import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Singleton
 public class DefaultAuthenticationService implements AuthenticationService {
 
     private final SecurityService securityService;
+
+    @Override
+    public @Nullable UUID getCurrentUserId() {
+        return securityService.getAuthentication()
+                .map(authentication -> authentication.getAttributes().get(JwtService.CLAIM_UID))
+                .map(uid -> UUID.fromString(uid.toString()))
+                .orElse(null);
+    }
 
     @Override
     public @Nullable String getCurrentUserName() {

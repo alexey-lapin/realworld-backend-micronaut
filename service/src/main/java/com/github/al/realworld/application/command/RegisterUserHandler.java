@@ -36,7 +36,8 @@ import jakarta.transaction.Transactional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
+import static com.github.al.realworld.application.exception.ConflictException.alreadyTaken;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -52,11 +53,11 @@ public class RegisterUserHandler implements CommandHandler<RegisterUserResult, R
         var data = command.user();
 
         if (userRepository.findByEmail(data.email()).isPresent()) {
-            throw badRequest("user [email=%s] already exists", data.email());
+            throw alreadyTaken("email", "user [email=%s] already exists", data.email());
         }
 
         if (userRepository.findByUsername(data.username()).isPresent()) {
-            throw badRequest("user [name=%s] already exists", data.username());
+            throw alreadyTaken("username", "user [name=%s] already exists", data.username());
         }
 
         User user = User.builder()

@@ -31,6 +31,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -51,7 +52,7 @@ public record UpdateUser(
     public record Data(
             @Nullable JsonNullable<@NotBlank @Email String> email,
             @Nullable JsonNullable<@NotBlank String> username,
-            @Nullable JsonNullable<@NotBlank String> password,
+            @Nullable JsonNullable<@NotBlank @Size(min = 8, message = "is too short (minimum is 8 characters)") String> password,
             @Nullable JsonNullable<String> image,
             @Nullable JsonNullable<String> bio
     ) {
