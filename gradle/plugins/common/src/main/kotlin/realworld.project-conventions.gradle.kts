@@ -1,7 +1,8 @@
 import pl.allegro.tech.build.axion.release.domain.VersionConfig
 
-plugins {
-    id("pl.allegro.tech.build.axion-release")
+// one version for the whole build: axion lives on the root only, so release tasks aren't duplicated per module
+if (project == rootProject) {
+    pluginManager.apply("pl.allegro.tech.build.axion-release")
 }
 
 group = "com.github.alexey-lapin.realworld"
