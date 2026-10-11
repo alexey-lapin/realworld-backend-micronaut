@@ -1,9 +1,33 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
+    "config:recommended",
     "schedule:daily",
     ":semanticPrefixChore",
     ":label(chore)"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [".github/workflows/main.yml"],
+      "matchStrings": ["SPEC_REF: (?<currentDigest>[0-9a-f]{40})"],
+      "currentValueTemplate": "main",
+      "depNameTemplate": "realworld-apps/realworld",
+      "packageNameTemplate": "https://github.com/realworld-apps/realworld",
+      "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [".github/workflows/main.yml"],
+      "matchStrings": ["HURL_VERSION: (?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "Orange-OpenSource/hurl",
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDepNames": ["realworld-apps/realworld"],
+      "extends": ["schedule:weekly"]
+    }
   ]
 }

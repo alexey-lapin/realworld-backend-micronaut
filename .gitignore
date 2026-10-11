@@ -12,3 +12,5 @@ out/
 .project
 .settings
 .classpath
+# RealWorld API spec checkout
+.realworld-spec/

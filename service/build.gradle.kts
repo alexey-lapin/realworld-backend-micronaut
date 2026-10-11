@@ -2,8 +2,6 @@ import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.gorylenko.GenerateGitPropertiesTask
 import com.gorylenko.GitPropertiesPluginExtension
-import org.graalvm.buildtools.gradle.tasks.BuildNativeImageTask
-import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id("realworld.java-conventions")
@@ -145,33 +143,8 @@ tasks {
         )
     }
 
-    val writeArtifactFile = register("writeArtifactFile") {
-        doLast {
-            val outputDirectory = getByName<BuildNativeImageTask>("nativeCompile").outputDirectory
-            outputDirectory.get().asFile.mkdirs()
-            outputDirectory.file("gradle-artifact.txt")
-                .get().asFile
-                .writeText("${rootProject.name}-${project.version}-${platform()}")
-        }
-    }
-
-    named("nativeCompile") {
-        finalizedBy(writeArtifactFile)
-    }
-
     named("check") {
         dependsOn(testing.suites.named("integrationTest"))
     }
 
-}
-
-fun platform(): String {
-    val os = OperatingSystem.current()
-    val arc = System.getProperty("os.arch")
-    return when {
-        OperatingSystem.current().isWindows -> "windows-${arc}"
-        OperatingSystem.current().isLinux -> "linux-${arc}"
-        OperatingSystem.current().isMacOsX -> "darwin-${arc}"
-        else -> os.nativePrefix
-    }
 }

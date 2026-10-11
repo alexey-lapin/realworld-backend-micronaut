@@ -1,0 +1,18 @@
+name: Label PRs
+
+# pull_request_target so fork PRs get a token that can write labels; safe because
+# this workflow never checks out or runs code from the PR
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/labeler@v7
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
