@@ -33,6 +33,8 @@ spotless {
 tasks {
     withType<Test> {
         useJUnitPlatform()
+        // tests start the context without App.main, so switch Liquibase analytics off here too
+        systemProperty("liquibase.analytics.enabled", "false")
         testLogging {
             showStackTraces = true
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL

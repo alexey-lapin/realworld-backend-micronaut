@@ -28,7 +28,14 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class App {
 
+    private static final String LIQUIBASE_ANALYTICS = "liquibase.analytics.enabled";
+
     public static void main(String[] args) {
+        // Liquibase sends anonymous usage analytics on every migration run unless told not to:
+        // an outbound HTTP call on each startup, which costs seconds and stalls without egress.
+        if (System.getProperty(LIQUIBASE_ANALYTICS) == null) {
+            System.setProperty(LIQUIBASE_ANALYTICS, "false");
+        }
         // make liquibase and other jul-lovers log to slf4j
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
