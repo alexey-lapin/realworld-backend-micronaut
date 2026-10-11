@@ -43,8 +43,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.github.al.realworld.rest.auth.AuthSupport.logout;
 import static com.github.al.realworld.rest.auth.AuthSupport.register;
@@ -194,6 +198,19 @@ public class ArticleApiTest {
 
         articleClient.unfavorite(slug);
         assertThat(articleClient.unfavorite(slug).article().favoritesCount()).isZero();
+    }
+
+    @Test
+    void should_countFavoriteOnce_when_favoritedConcurrently() throws Exception {
+        register().login();
+        String slug = articleClient.create(createArticleCommand()).article().slug();
+
+        // overlapping requests race on the same favorite row; exactly one may insert or delete it
+        runConcurrently(8, () -> articleClient.favorite(slug));
+        assertThat(articleClient.findBySlug(slug).article().favoritesCount()).isEqualTo(1);
+
+        runConcurrently(8, () -> articleClient.unfavorite(slug));
+        assertThat(articleClient.findBySlug(slug).article().favoritesCount()).isZero();
     }
 
     @Test
@@ -396,6 +413,24 @@ public class ArticleApiTest {
             GetFeedResult feed2 = articleClient.feed(4, 0);
             assertThat(feed2.articles()).hasSize(4);
             assertThat(feed2.articlesCount()).isEqualTo(5);
+        }
+    }
+
+    private static void runConcurrently(int count, Runnable action) throws Exception {
+        try (var executor = Executors.newFixedThreadPool(count)) {
+            var start = new CountDownLatch(1);
+            var futures = new ArrayList<Future<?>>();
+            for (var i = 0; i < count; i++) {
+                futures.add(executor.submit(() -> {
+                    start.await();
+                    action.run();
+                    return null;
+                }));
+            }
+            start.countDown();
+            for (var future : futures) {
+                future.get();
+            }
         }
     }
 
