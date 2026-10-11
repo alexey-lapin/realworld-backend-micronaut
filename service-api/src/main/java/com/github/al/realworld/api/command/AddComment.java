@@ -24,32 +24,25 @@
 package com.github.al.realworld.api.command;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.al.bus.Command;
-import com.github.al.realworld.api.dto.AddCommentDto;
-import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.github.al.realworld.bus.Command;
+import io.micronaut.serde.annotation.Serdeable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.With;
+import org.jspecify.annotations.Nullable;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-@Introspected
-@ReflectiveAccess
-public class AddComment implements Command<AddCommentResult> {
+@Serdeable
+public record AddComment(
+        @JsonIgnore @With @Nullable String slug,
+        @Valid @NotNull @Nullable Data comment
+) implements Command<AddCommentResult> {
 
-    @With
-    @JsonIgnore
-    private String slug;
+    @Serdeable
+    public record Data(
+            @NotBlank @Nullable String body
+    ) {
 
-    @With
-    @JsonIgnore
-    private String currentUsername;
-
-    private AddCommentDto comment;
+    }
 
 }

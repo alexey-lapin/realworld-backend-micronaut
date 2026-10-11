@@ -23,5 +23,9 @@
  */
 package com.github.al.realworld.api.command;
 
-public class DeleteCommentResult {
+import io.micronaut.serde.annotation.Serdeable;
+
+@Serdeable
+public record DeleteCommentResult() {
+
 }

@@ -26,14 +26,14 @@ package com.github.al.realworld.application.query;
 import com.github.al.realworld.api.query.GetCurrentUser;
 import com.github.al.realworld.api.query.GetCurrentUserResult;
 import com.github.al.realworld.application.UserAssembler;
+import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.JwtService;
-import com.github.al.bus.QueryHandler;
+import com.github.al.realworld.bus.QueryHandler;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 
@@ -41,16 +41,18 @@ import static com.github.al.realworld.application.exception.Exceptions.badReques
 @Singleton
 public class GetCurrentUserHandler implements QueryHandler<GetCurrentUserResult, GetCurrentUser> {
 
+    private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
     @Transactional
     @Override
     public GetCurrentUserResult handle(GetCurrentUser query) {
-        User user = userRepository.findByUsername(query.getUsername())
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", query.getUsername()));
+        var currentUsername = authenticationService.getRequiredCurrentUserName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
 
-        return new GetCurrentUserResult(UserAssembler.assemble(user, jwtService));
+        return new GetCurrentUserResult(UserAssembler.assemble(currentUser, jwtService));
     }
 
 }

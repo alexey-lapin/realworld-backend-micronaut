@@ -68,7 +68,7 @@ public class Article {
     private User author;
 
     @Singular
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "article_id")
     private Set<Comment> comments;
 

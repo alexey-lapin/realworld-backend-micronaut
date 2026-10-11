@@ -23,27 +23,27 @@
  */
 package com.github.al.realworld.api.command;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.al.bus.Command;
-import com.github.al.realworld.api.dto.CreateArticleDto;
-import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import com.github.al.realworld.bus.Command;
+import io.micronaut.serde.annotation.Serdeable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
+import org.jspecify.annotations.Nullable;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Introspected
-@ReflectiveAccess
-public class CreateArticle implements Command<CreateArticleResult> {
+@Serdeable
+public record CreateArticle(
+        @Valid @NotNull @Nullable Data article
+) implements Command<CreateArticleResult> {
 
-    @With
-    @JsonIgnore
-    private String currentUsername;
+    @Serdeable
+    public record Data(
+            @NotBlank @Nullable String title,
+            @NotBlank @Nullable String description,
+            @NotBlank @Nullable String body,
+            @Nullable List<@NotBlank String> tagList
+    ) {
 
-    private CreateArticleDto article;
+    }
 
 }

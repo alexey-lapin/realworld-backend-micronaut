@@ -23,21 +23,25 @@
  */
 package com.github.al.realworld.api.command;
 
-import com.github.al.bus.Command;
-import com.github.al.realworld.api.dto.LoginUserDto;
-import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.github.al.realworld.bus.Command;
+import io.micronaut.serde.annotation.Serdeable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Introspected
-@ReflectiveAccess
-public class LoginUser implements Command<LoginUserResult> {
+@Serdeable
+public record LoginUser(
+        @Valid @NotNull @Nullable Data user
+) implements Command<LoginUserResult> {
 
-    private LoginUserDto user;
+    @Serdeable
+    public record Data(
+            @Email @NotBlank @Nullable String email,
+            @NotBlank @Nullable String password
+    ) {
+
+    }
 
 }

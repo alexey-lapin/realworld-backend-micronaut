@@ -26,9 +26,7 @@ package com.github.al.realworld.rest;
 import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.RegisterUser;
 import com.github.al.realworld.api.command.UpdateUser;
-import com.github.al.realworld.api.dto.LoginUserDto;
-import com.github.al.realworld.api.dto.RegisterUserDto;
-import com.github.al.realworld.api.dto.UpdateUserDto;
+import com.github.al.realworld.api.dto.JsonNullable;
 import com.github.al.realworld.api.dto.UserDto;
 import com.github.al.realworld.api.operation.UserClient;
 import com.github.al.realworld.rest.auth.AuthSupport;
@@ -60,11 +58,11 @@ public class UserApiTest {
     void should_returnCorrectData_whenRegisterUser() {
         RegisterUser command = registerCommand();
 
-        UserDto user = userClient.register(command).getUser();
+        UserDto user = userClient.register(command).user();
 
-        assertThat(user.getUsername()).isEqualTo(command.getUser().getUsername());
-        assertThat(user.getEmail()).isEqualTo(command.getUser().getEmail());
-        assertThat(user.getToken()).isNotBlank();
+        assertThat(user.username()).isEqualTo(command.user().username());
+        assertThat(user.email()).isEqualTo(command.user().email());
+        assertThat(user.token()).isNotBlank();
     }
 
     @Test
@@ -73,10 +71,10 @@ public class UserApiTest {
 
         userClient.register(command);
 
-        LoginUserDto data = new LoginUserDto(command.getUser().getEmail(), command.getUser().getPassword());
-        UserDto user = userClient.login(new LoginUser(data)).getUser();
+        var data = new LoginUser.Data(command.user().email(), command.user().password());
+        UserDto user = userClient.login(new LoginUser(data)).user();
 
-        assertThat(user.getToken()).isNotBlank();
+        assertThat(user.token()).isNotBlank();
     }
 
     @Test
@@ -85,7 +83,7 @@ public class UserApiTest {
 
         userClient.register(command);
 
-        LoginUserDto data = new LoginUserDto(command.getUser().getEmail(), UUID.randomUUID().toString());
+        var data = new LoginUser.Data(command.user().email(), UUID.randomUUID().toString());
         HttpClientResponseException exception = catchThrowableOfType(
                 () -> userClient.login(new LoginUser(data)),
                 HttpClientResponseException.class
@@ -98,7 +96,7 @@ public class UserApiTest {
     void should_return400_whenLoginUser() {
         String s = UUID.randomUUID().toString();
         HttpClientResponseException exception = catchThrowableOfType(
-                () -> userClient.login(new LoginUser(new LoginUserDto(s + "@ex.com", s))),
+                () -> userClient.login(new LoginUser(new LoginUser.Data(s + "@ex.com", s))),
                 HttpClientResponseException.class
         );
 
@@ -109,20 +107,19 @@ public class UserApiTest {
     void should_returnCorrectData_whenUpdateUser() {
         register().login();
 
-        UpdateUserDto data = UpdateUserDto.builder()
-                .email(ALTERED_EMAIL)
-                .username(ALTERED_USERNAME)
-                .password(ALTERED_PASSWORD)
-                .bio(ALTERED_BIO)
-                .image(ALTERED_IMAGE)
-                .build();
+        var data = new UpdateUser.Data(
+                new JsonNullable<>(ALTERED_EMAIL),
+                new JsonNullable<>(ALTERED_USERNAME),
+                new JsonNullable<>(ALTERED_PASSWORD),
+                new JsonNullable<>(ALTERED_IMAGE),
+                new JsonNullable<>(ALTERED_BIO));
 
-        UserDto user = userClient.update(new UpdateUser(null, data)).getUser();
+        UserDto user = userClient.update(new UpdateUser(data)).user();
 
-        assertThat(user.getEmail()).isEqualTo(ALTERED_EMAIL);
-        assertThat(user.getUsername()).isEqualTo(ALTERED_USERNAME);
-        assertThat(user.getBio()).isEqualTo(ALTERED_BIO);
-        assertThat(user.getImage()).isEqualTo(ALTERED_IMAGE);
+        assertThat(user.email()).isEqualTo(ALTERED_EMAIL);
+        assertThat(user.username()).isEqualTo(ALTERED_USERNAME);
+        assertThat(user.bio()).isEqualTo(ALTERED_BIO);
+        assertThat(user.image()).isEqualTo(ALTERED_IMAGE);
     }
 
     @Test
@@ -131,12 +128,10 @@ public class UserApiTest {
 
         register().login();
 
-        UpdateUserDto data = UpdateUserDto.builder()
-                .email(registeredUser.getEmail())
-                .build();
+        var data = new UpdateUser.Data(new JsonNullable<>(registeredUser.email()), null, null, null, null);
 
         HttpClientResponseException exception = catchThrowableOfType(
-                () -> userClient.update(new UpdateUser(null, data)),
+                () -> userClient.update(new UpdateUser(data)),
                 HttpClientResponseException.class
         );
 
@@ -149,12 +144,10 @@ public class UserApiTest {
 
         register().login();
 
-        UpdateUserDto data = UpdateUserDto.builder()
-                .username(registeredUser.getUsername())
-                .build();
+        var data = new UpdateUser.Data(null, new JsonNullable<>(registeredUser.username()), null, null, null);
 
         HttpClientResponseException exception = catchThrowableOfType(
-                () -> userClient.update(new UpdateUser(null, data)),
+                () -> userClient.update(new UpdateUser(data)),
                 HttpClientResponseException.class
         );
 
@@ -162,11 +155,10 @@ public class UserApiTest {
     }
 
     private static RegisterUser registerCommand() {
-        RegisterUserDto data = RegisterUserDto.builder()
-                .username(UUID.randomUUID().toString())
-                .email(UUID.randomUUID().toString() + "@ex.com")
-                .password(UUID.randomUUID().toString())
-                .build();
+        var data = new RegisterUser.Data(
+                UUID.randomUUID() + "@ex.com",
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString());
         return new RegisterUser(data);
     }
 

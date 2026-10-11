@@ -23,7 +23,6 @@
  */
 package com.github.al.realworld.infrastructure.web;
 
-import com.github.al.bus.Bus;
 import com.github.al.realworld.api.command.LoginUser;
 import com.github.al.realworld.api.command.LoginUserResult;
 import com.github.al.realworld.api.command.RegisterUser;
@@ -33,12 +32,11 @@ import com.github.al.realworld.api.command.UpdateUserResult;
 import com.github.al.realworld.api.operation.UserOperations;
 import com.github.al.realworld.api.query.GetCurrentUser;
 import com.github.al.realworld.api.query.GetCurrentUserResult;
-import com.github.al.realworld.application.service.AuthenticationService;
+import com.github.al.realworld.bus.Bus;
 import io.micronaut.http.annotation.Controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Tag(name = "Users")
@@ -46,7 +44,6 @@ import jakarta.validation.Valid;
 public class UserController implements UserOperations {
 
     private final Bus bus;
-    private final AuthenticationService auth;
 
     @Override
     public LoginUserResult login(@Valid LoginUser command) {
@@ -60,12 +57,12 @@ public class UserController implements UserOperations {
 
     @Override
     public GetCurrentUserResult current() {
-        return bus.executeQuery(new GetCurrentUser(auth.currentUsername()));
+        return bus.executeQuery(new GetCurrentUser());
     }
 
     @Override
     public UpdateUserResult update(@Valid UpdateUser command) {
-        return bus.executeCommand(command.withCurrentUsername(auth.currentUsername()));
+        return bus.executeCommand(command);
     }
 
 }

@@ -23,25 +23,16 @@
  */
 package com.github.al.realworld.api.dto;
 
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
+import io.micronaut.serde.annotation.Serdeable;
 import java.time.ZonedDateTime;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-@ReflectiveAccess
-public class CommentDto {
-
-    private Long id;
-    private ZonedDateTime createdAt;
-    private ZonedDateTime updatedAt;
-    private String body;
-    private ProfileDto author;
+@Serdeable
+public record CommentDto(
+        long id,
+        ZonedDateTime createdAt,
+        ZonedDateTime updatedAt,
+        String body,
+        ProfileDto author
+) {
 
 }

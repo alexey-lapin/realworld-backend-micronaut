@@ -25,15 +25,14 @@ package com.github.al.realworld.application.command;
 
 import com.github.al.realworld.api.command.DeleteArticle;
 import com.github.al.realworld.api.command.DeleteArticleResult;
-import com.github.al.bus.CommandHandler;
+import com.github.al.realworld.application.service.AuthenticationService;
+import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.repository.ArticleRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.forbidden;
 import static com.github.al.realworld.application.exception.Exceptions.notFound;
@@ -42,16 +41,19 @@ import static com.github.al.realworld.application.exception.Exceptions.notFound;
 @Singleton
 public class DeleteArticleHandler implements CommandHandler<DeleteArticleResult, DeleteArticle> {
 
+    private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
 
     @Transactional
     @Override
     public DeleteArticleResult handle(DeleteArticle command) {
-        Article article = articleRepository.findBySlug(command.getSlug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.getSlug()));
+        var currentUsername = authenticationService.getRequiredCurrentUserName();
 
-        if (!Objects.equals(article.getAuthor().getUsername(), command.getCurrentUsername())) {
-            throw forbidden("article [slug=%s] is not owned by %s", command.getSlug(), command.getCurrentUsername());
+        Article article = articleRepository.findBySlug(command.slug())
+                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.slug()));
+
+        if (!Objects.equals(article.getAuthor().getUsername(), currentUsername)) {
+            throw forbidden("article [slug=%s] is not owned by %s", command.slug(), currentUsername);
         }
 
         articleRepository.delete(article);

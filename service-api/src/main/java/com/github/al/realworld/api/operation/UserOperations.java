@@ -30,11 +30,12 @@ import com.github.al.realworld.api.command.RegisterUserResult;
 import com.github.al.realworld.api.command.UpdateUser;
 import com.github.al.realworld.api.command.UpdateUserResult;
 import com.github.al.realworld.api.query.GetCurrentUserResult;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Put;
-
+import io.micronaut.http.annotation.Status;
 import jakarta.validation.Valid;
 
 public interface UserOperations {
@@ -42,6 +43,7 @@ public interface UserOperations {
     @Post("/users/login")
     LoginUserResult login(@Valid @Body LoginUser command);
 
+    @Status(HttpStatus.CREATED)
     @Post("/users")
     RegisterUserResult register(@Valid @Body RegisterUser command);
 

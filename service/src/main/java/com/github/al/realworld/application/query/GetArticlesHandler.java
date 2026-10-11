@@ -23,41 +23,41 @@
  */
 package com.github.al.realworld.application.query;
 
-import com.github.al.bus.QueryHandler;
-import com.github.al.realworld.api.dto.ArticleDto;
+import com.github.al.realworld.api.dto.ArticleItemDto;
 import com.github.al.realworld.api.query.GetArticles;
 import com.github.al.realworld.api.query.GetArticlesResult;
 import com.github.al.realworld.application.ArticleAssembler;
-import com.github.al.realworld.domain.model.Article;
+import com.github.al.realworld.application.service.AuthenticationService;
+import com.github.al.realworld.bus.QueryHandler;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Singleton
 public class GetArticlesHandler implements QueryHandler<GetArticlesResult, GetArticles> {
 
+    private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
 
     @Transactional
     @Override
     public GetArticlesResult handle(GetArticles query) {
-        List<Article> articles = articleRepository
-                .findByFilters(query.getTag(), query.getAuthor(), query.getFavorited(), query.getLimit(), query.getOffset());
+        var currentUsername = authenticationService.getCurrentUserName();
+        User currentUser = currentUsername == null
+                ? null
+                : userRepository.findByUsername(currentUsername).orElse(null);
 
-        User currentUser = userRepository.findByUsername(query.getCurrentUsername())
-                .orElse(null);
-
-        List<ArticleDto> results = new ArrayList<>();
-
-        articles.forEach(article -> results.add(ArticleAssembler.assemble(article, currentUser)));
+        List<ArticleItemDto> results = articleRepository
+                .findByFilters(query.tag(), query.author(), query.favorited(), query.limit(), query.offset())
+                .stream()
+                .map(article -> ArticleAssembler.assembleItem(article, currentUser))
+                .toList();
 
         return new GetArticlesResult(results, results.size());
     }

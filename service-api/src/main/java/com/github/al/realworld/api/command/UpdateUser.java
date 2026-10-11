@@ -23,27 +23,47 @@
  */
 package com.github.al.realworld.api.command;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.al.bus.Command;
-import com.github.al.realworld.api.dto.UpdateUserDto;
-import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.github.al.realworld.api.dto.JsonNullable;
+import com.github.al.realworld.bus.Command;
+import io.micronaut.serde.annotation.Serdeable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Introspected
-@ReflectiveAccess
-public class UpdateUser implements Command<UpdateUserResult> {
+/**
+ * Partial update of the authenticated user. An absent field leaves the current value unchanged.
+ */
+@Serdeable
+public record UpdateUser(
+        @Valid @NotNull @Nullable Data user
+) implements Command<UpdateUserResult> {
 
-    @With
-    @JsonIgnore
-    private String currentUsername;
+    /**
+     * Constraints on the type argument apply to a present field only, so {@code email},
+     * {@code username} and {@code password} reject an explicit null while {@code bio} and
+     * {@code image} accept one.
+     */
+    @Serdeable
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record Data(
+            @Nullable JsonNullable<@NotBlank @Email String> email,
+            @Nullable JsonNullable<@NotBlank String> username,
+            @Nullable JsonNullable<@NotBlank String> password,
+            @Nullable JsonNullable<String> image,
+            @Nullable JsonNullable<String> bio
+    ) {
 
-    private UpdateUserDto user;
+        public boolean isEmpty() {
+            return email == null
+                   && username == null
+                   && password == null
+                   && image == null
+                   && bio == null;
+        }
+
+    }
 
 }

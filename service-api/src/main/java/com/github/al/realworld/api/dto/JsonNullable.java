@@ -21,19 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.bus;
+package com.github.al.realworld.api.dto;
 
-import io.micronaut.context.ApplicationContext;
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonValue;
+import org.jspecify.annotations.Nullable;
 
-@RequiredArgsConstructor
-class CommandHandlerProvider<H extends CommandHandler<?, ?>> {
+/**
+ * A payload field that distinguishes an absent JSON property from one explicitly set to null.
+ *
+ * <p>A {@code null} reference denotes an absent property. A non-null instance denotes a present
+ * property, holding {@code null} when the client sent a JSON null.
+ *
+ * <p>Serialization unwraps to the contained value. Deserialization requires a deserializer that
+ * maps an absent property to {@code null} and a JSON null to an instance holding {@code null}.
+ *
+ * @param <T>   the contained value type
+ * @param value the contained value, {@code null} for a JSON null
+ */
+public record JsonNullable<T>(@Nullable T value) {
 
-    private final ApplicationContext applicationContext;
-    private final Class<H> type;
+    /**
+     * Returns the value contained in {@code field}, or {@code null} if the field is absent.
+     */
+    public static <T> @Nullable T unwrap(@Nullable JsonNullable<T> field) {
+        return field == null ? null : field.value();
+    }
 
-    H get() {
-        return applicationContext.getBean(type);
+    public boolean isNull() {
+        return value == null;
+    }
+
+    @JsonValue
+    public @Nullable T json() {
+        return value;
     }
 
 }

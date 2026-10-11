@@ -23,25 +23,23 @@
  */
 package com.github.al.realworld.application.command;
 
-import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.CreateArticle;
 import com.github.al.realworld.api.command.CreateArticleResult;
-import com.github.al.realworld.api.dto.CreateArticleDto;
 import com.github.al.realworld.application.ArticleAssembler;
+import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.SlugService;
+import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.Tag;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.TagRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.badRequest;
 
@@ -49,6 +47,7 @@ import static com.github.al.realworld.application.exception.Exceptions.badReques
 @Singleton
 public class CreateArticleHandler implements CommandHandler<CreateArticleResult, CreateArticle> {
 
+    private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
@@ -57,29 +56,31 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
     @Transactional
     @Override
     public CreateArticleResult handle(CreateArticle command) {
-        CreateArticleDto data = command.getArticle();
-        Optional<Article> articleByTitleOptional = articleRepository.findByTitle(data.getTitle());
-        if (articleByTitleOptional.isPresent()) {
-            throw badRequest("article [title=%s] already exists", data.getTitle());
+        var data = command.article();
+
+        if (articleRepository.findByTitle(data.title()).isPresent()) {
+            throw badRequest("article [title=%s] already exists", data.title());
         }
 
-        User currentUser = userRepository.findByUsername(command.getCurrentUsername())
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", command.getCurrentUsername()));
+        var currentUsername = authenticationService.getRequiredCurrentUserName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
 
         ZonedDateTime now = ZonedDateTime.now();
 
         Article.ArticleBuilder articleBuilder = Article.builder()
                 .id(UUID.randomUUID())
-                .slug(slugService.makeSlug(data.getTitle()))
-                .title(data.getTitle())
-                .description(data.getDescription())
-                .body(data.getBody())
+                .slug(slugService.makeSlug(data.title()))
+                .title(data.title())
+                .description(data.description())
+                .body(data.body())
                 .createdAt(now)
                 .updatedAt(now)
                 .author(currentUser);
 
-        if (data.getTagList() != null) {
-            data.getTagList().stream()
+        if (data.tagList() != null) {
+            data.tagList().stream()
+                    .distinct()
                     .map(t -> tagRepository.findByName(t).orElseGet(() -> new Tag(t)))
                     .forEach(articleBuilder::tag);
         }

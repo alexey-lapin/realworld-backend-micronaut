@@ -23,8 +23,20 @@
  */
 package com.github.al.realworld.application.service;
 
+import org.jspecify.annotations.Nullable;
+
+import static com.github.al.realworld.application.exception.Exceptions.unauthorized;
+
 public interface AuthenticationService {
 
-    String currentUsername();
+    @Nullable String getCurrentUserName();
+
+    default String getRequiredCurrentUserName() {
+        var currentUsername = getCurrentUserName();
+        if (currentUsername == null) {
+            throw unauthorized("current user is not present");
+        }
+        return currentUsername;
+    }
 
 }

@@ -23,19 +23,18 @@
  */
 package com.github.al.realworld.application.command;
 
-import com.github.al.bus.CommandHandler;
 import com.github.al.realworld.api.command.DeleteComment;
 import com.github.al.realworld.api.command.DeleteCommentResult;
+import com.github.al.realworld.application.service.AuthenticationService;
+import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.Comment;
 import com.github.al.realworld.domain.repository.ArticleRepository;
-import lombok.RequiredArgsConstructor;
-
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.Exceptions.forbidden;
 import static com.github.al.realworld.application.exception.Exceptions.notFound;
@@ -44,28 +43,32 @@ import static com.github.al.realworld.application.exception.Exceptions.notFound;
 @Singleton
 public class DeleteCommentHandler implements CommandHandler<DeleteCommentResult, DeleteComment> {
 
+    private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
 
     @Transactional
     @Override
     public DeleteCommentResult handle(DeleteComment command) {
-        Article article = articleRepository.findBySlug(command.getSlug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.getSlug()));
+        var currentUsername = authenticationService.getRequiredCurrentUserName();
+
+        Article article = articleRepository.findBySlug(command.slug())
+                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.slug()));
 
         Comment comment = article.getComments().stream()
-                .filter(c -> c.getId().equals(command.getId()))
+                .filter(c -> c.getId() == command.id())
                 .findFirst()
-                .orElseThrow(() -> notFound("comment [id=%s] does not exist", command.getId()));
+                .orElseThrow(() -> notFound("comment [id=%s] does not exist", command.id()));
 
-        if (!comment.getAuthor().getUsername().equals(command.getCurrentUsername())) {
-            throw forbidden("comment [id=%s] is not owned by %s", comment.getId(), command.getCurrentUsername());
+        if (!comment.getAuthor().getUsername().equals(currentUsername)) {
+            throw forbidden("comment [id=%s] is not owned by %s", comment.getId(), currentUsername);
         }
 
-        Set<Comment> alteredComments = article.getComments().stream()
-                .filter(comment1 -> Objects.equals(comment1, comment))
+        // keep every comment except the deleted one
+        Set<Comment> remainingComments = article.getComments().stream()
+                .filter(c -> !c.equals(comment))
                 .collect(Collectors.toSet());
 
-        Article alteredArticle = article.toBuilder().comments(alteredComments).build();
+        Article alteredArticle = article.toBuilder().clearComments().comments(remainingComments).build();
         articleRepository.save(alteredArticle);
 
         return new DeleteCommentResult();

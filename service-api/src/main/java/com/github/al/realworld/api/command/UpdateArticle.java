@@ -24,32 +24,40 @@
 package com.github.al.realworld.api.command;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.al.bus.Command;
-import com.github.al.realworld.api.dto.UpdateArticleDto;
-import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.github.al.realworld.api.dto.JsonNullable;
+import com.github.al.realworld.bus.Command;
+import io.micronaut.serde.annotation.Serdeable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.With;
+import org.jspecify.annotations.Nullable;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-@Introspected
-@ReflectiveAccess
-public class UpdateArticle implements Command<UpdateArticleResult> {
+/**
+ * Partial update of an article. An absent field leaves the current value unchanged; an empty
+ * {@code tagList} removes all tags.
+ */
+@Serdeable
+public record UpdateArticle(
+        @JsonIgnore @With @Nullable String slug,
+        @Valid @NotNull @Nullable Data article
+) implements Command<UpdateArticleResult> {
 
-    @With
-    @JsonIgnore
-    private String currentUsername;
+    /**
+     * Constraints on the type argument apply to a present field only, so each field rejects an
+     * explicit null.
+     */
+    @Serdeable
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record Data(
+            @Nullable JsonNullable<@NotBlank String> title,
+            @Nullable JsonNullable<@NotBlank String> description,
+            @Nullable JsonNullable<@NotBlank String> body,
+            @Nullable JsonNullable<@NotNull List<@NotBlank String>> tagList
+    ) {
 
-    @With
-    @JsonIgnore
-    private String slug;
-
-    private UpdateArticleDto article;
+    }
 
 }

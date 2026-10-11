@@ -23,31 +23,25 @@
  */
 package com.github.al.realworld.api.dto;
 
-import io.micronaut.core.annotation.ReflectiveAccess;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.inject.Singleton;
+import jakarta.validation.valueextraction.ExtractedValue;
+import jakarta.validation.valueextraction.ValueExtractor;
+import org.jspecify.annotations.Nullable;
 
-import java.util.List;
+/**
+ * Exposes the value contained in a {@link JsonNullable} to Bean Validation, so that constraints
+ * declared on the type argument apply to that value.
+ *
+ * <p>An absent field holds no container and is therefore not validated. Micronaut Validation
+ * collects value extractors from the bean context, so this is a bean rather than a
+ * {@code META-INF/services} entry.
+ */
+@Singleton
+public class JsonNullableValueExtractor implements ValueExtractor<JsonNullable<@ExtractedValue ?>> {
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder(toBuilder = true)
-@Getter
-@ReflectiveAccess
-public class CreateArticleDto {
-
-    @NotBlank
-    private String title;
-
-    @NotBlank
-    private String description;
-
-    @NotBlank
-    private String body;
-
-    private List<String> tagList;
+    @Override
+    public void extractValues(JsonNullable<@Nullable ?> originalValue, ValueReceiver receiver) {
+        receiver.value(null, originalValue.value());
+    }
 
 }

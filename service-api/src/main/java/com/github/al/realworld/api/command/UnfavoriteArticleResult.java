@@ -24,19 +24,11 @@
 package com.github.al.realworld.api.command;
 
 import com.github.al.realworld.api.dto.ArticleDto;
-import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.micronaut.serde.annotation.Serdeable;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Introspected
-@ReflectiveAccess
-@Getter
-public class UnfavoriteArticleResult {
-
-    private ArticleDto article;
+@Serdeable
+public record UnfavoriteArticleResult(
+        ArticleDto article
+) {
 
 }

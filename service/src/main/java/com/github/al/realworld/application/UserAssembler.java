@@ -30,13 +30,12 @@ import com.github.al.realworld.domain.model.User;
 public class UserAssembler {
 
     public static UserDto assemble(User user, JwtService jwtService) {
-        return UserDto.builder()
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .token(jwtService.getToken(user))
-                .bio(user.getBio())
-                .image(user.getImage())
-                .build();
+        return new UserDto(
+                user.getEmail(),
+                jwtService.getToken(user),
+                user.getUsername(),
+                user.getBio(),
+                user.getImage());
     }
 
 }

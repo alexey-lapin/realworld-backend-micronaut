@@ -36,7 +36,6 @@ import com.github.al.realworld.api.query.GetArticlesResult;
 import com.github.al.realworld.api.query.GetCommentResult;
 import com.github.al.realworld.api.query.GetCommentsResult;
 import com.github.al.realworld.api.query.GetFeedResult;
-import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Delete;
@@ -46,31 +45,32 @@ import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Put;
 import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.annotation.Status;
-
 import jakarta.validation.Valid;
+import org.jspecify.annotations.Nullable;
 
 public interface ArticleOperations {
 
     @Get("/articles{?tag,author,favorited,limit,offset}")
-    GetArticlesResult findByFilters(@QueryValue(value = "tag") @Nullable String tag,
-                                    @QueryValue(value = "author") @Nullable String author,
-                                    @QueryValue(value = "favourited") @Nullable String favorited,
-                                    @QueryValue(value = "limit", defaultValue = "20") Integer limit,
-                                    @QueryValue(value = "offset", defaultValue = "0") Integer offset);
+    GetArticlesResult findByFilters(@QueryValue("tag") @Nullable String tag,
+                                    @QueryValue("author") @Nullable String author,
+                                    @QueryValue("favorited") @Nullable String favorited,
+                                    @QueryValue(value = "limit", defaultValue = "20") int limit,
+                                    @QueryValue(value = "offset", defaultValue = "0") long offset);
 
     @Status(HttpStatus.CREATED)
     @Post("/articles")
     CreateArticleResult create(@Valid @Body CreateArticle command);
 
-    @Get("/articles/feed")
-    GetFeedResult feed(@QueryValue(value = "limit", defaultValue = "20") Integer limit,
-                       @QueryValue(value = "offset", defaultValue = "0") Integer offset);
+    @Get("/articles/feed{?limit,offset}")
+    GetFeedResult feed(@QueryValue(value = "limit", defaultValue = "20") int limit,
+                       @QueryValue(value = "offset", defaultValue = "0") long offset);
 
     @Get("/articles/{slug}")
     GetArticleResult findBySlug(@PathVariable("slug") String slug);
 
     @Put("/articles/{slug}")
-    UpdateArticleResult updateBySlug(@PathVariable("slug") String slug, @Valid @Body UpdateArticle command);
+    UpdateArticleResult updateBySlug(@PathVariable("slug") String slug,
+                                     @Valid @Body UpdateArticle command);
 
     @Status(HttpStatus.NO_CONTENT)
     @Delete("/articles/{slug}")
@@ -86,13 +86,17 @@ public interface ArticleOperations {
     GetCommentsResult findAllComments(@PathVariable("slug") String slug);
 
     @Get("/articles/{slug}/comments/{id}")
-    GetCommentResult findComment(@PathVariable("slug") String slug, @PathVariable("id") Long id);
+    GetCommentResult findComment(@PathVariable("slug") String slug,
+                                 @PathVariable("id") long id);
 
+    @Status(HttpStatus.CREATED)
     @Post("/articles/{slug}/comments")
-    AddCommentResult addComment(@PathVariable("slug") String slug, @Valid @Body AddComment command);
+    AddCommentResult addComment(@PathVariable("slug") String slug,
+                                @Valid @Body AddComment command);
 
     @Status(HttpStatus.NO_CONTENT)
     @Delete("/articles/{slug}/comments/{id}")
-    void deleteComment(@PathVariable("slug") String slug, @PathVariable("id") Long id);
+    void deleteComment(@PathVariable("slug") String slug,
+                       @PathVariable("id") long id);
 
 }
