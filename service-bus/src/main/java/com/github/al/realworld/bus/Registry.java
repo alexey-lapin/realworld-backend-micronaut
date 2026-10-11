@@ -60,11 +60,19 @@ public class Registry {
     }
 
     <R, C extends Command<R>> CommandHandler<R, C> getCommandHandler(Class<C> commandType) {
-        return commandHandlerProviders.get(commandType).get();
+        var provider = commandHandlerProviders.get(commandType);
+        if (provider == null) {
+            throw new IllegalStateException("no handler registered for command " + commandType.getName());
+        }
+        return provider.get();
     }
 
     <R, Q extends Query<R>> QueryHandler<R, Q> getQueryHandler(Class<Q> queryType) {
-        return queryHandlerProviders.get(queryType).get();
+        var provider = queryHandlerProviders.get(queryType);
+        if (provider == null) {
+            throw new IllegalStateException("no handler registered for query " + queryType.getName());
+        }
+        return provider.get();
     }
 
 }

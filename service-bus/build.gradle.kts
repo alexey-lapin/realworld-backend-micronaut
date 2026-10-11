@@ -13,4 +13,17 @@ micronaut {
 dependencies {
     annotationProcessor(mn.lombok)
     compileOnly(mn.lombok)
+
+    testAnnotationProcessor(mn.micronaut.inject.java)
+    testImplementation(mn.micronaut.test.junit5)
+    testImplementation(mn.assertj.core)
+}
+
+testing {
+    suites {
+        withType<JvmTestSuite>().configureEach {
+            // keep the engine and launcher on the version the Micronaut platform manages
+            useJUnitJupiter(mn.versions.junit5)
+        }
+    }
 }

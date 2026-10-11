@@ -10,9 +10,6 @@ on:
 
 env:
   APP_NAME: ${{ github.event.repository.name }}
-  # Legacy Postman collection, pinned to the last revision before the v2 spec rewrite.
-  # Gating until the app conforms to the hurl spec below; then it goes.
-  POSTMAN_COLLECTION: https://raw.githubusercontent.com/realworld-apps/realworld/dedb6969fe2e025ccac06464f01bc25584d9290c/api/Conduit.postman_collection.json
   # RealWorld API spec (hurl collection), pinned to a main-branch commit; Renovate bumps SPEC_REF.
   SPEC_REPO: realworld-apps/realworld
   SPEC_REF: ebbcdeb8d55b42a3a613c787560498b8ef10003f
@@ -41,11 +38,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-
-      - name: Setup NodeJS
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
 
       - name: Checkout API spec
         uses: actions/checkout@v7
@@ -82,18 +74,7 @@ jobs:
           echo "::error::app did not become healthy within 60s"
           exit 1
 
-      - name: Run postman collection
-        run: >
-          npx newman run ${{ env.POSTMAN_COLLECTION }}
-          --delay-request 200
-          --global-var "APIURL=http://localhost:8080/api"
-          --global-var "USERNAME=username"
-          --global-var "EMAIL=username@example.com"
-          --global-var "PASSWORD=password"
-
-      # Not gating yet: the app predates the v2 spec. The summary tracks progress until it conforms.
       - name: Run API spec tests
-        continue-on-error: true
         shell: bash
         run: .github/scripts/hurl-report.sh http://localhost:8080 ${{ github.run_id }}
 
@@ -137,11 +118,6 @@ jobs:
           distribution: liberica
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
-
-      - name: Setup NodeJS
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
 
       - name: Checkout API spec
         uses: actions/checkout@v7
@@ -191,17 +167,7 @@ jobs:
           echo "::error::app did not become healthy within 60s"
           exit 1
 
-      - name: Run postman collection
-        run: >
-          npx newman run ${{ env.POSTMAN_COLLECTION }}
-          --delay-request 200
-          --global-var "APIURL=http://localhost:8080/api"
-          --global-var "USERNAME=username"
-          --global-var "EMAIL=username@example.com"
-          --global-var "PASSWORD=password"
-
       - name: Run API spec tests
-        continue-on-error: true
         shell: bash
         run: .github/scripts/hurl-report.sh http://localhost:8080 ${{ github.run_id }}${{ strategy.job-index }}
 
