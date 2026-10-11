@@ -26,6 +26,7 @@ package com.github.al.realworld.infrastructure.web;
 import com.github.al.realworld.api.dto.GenericError;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.http.HttpHeaders;
+import io.micronaut.http.HttpMethod;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.MutableHttpResponse;
@@ -41,16 +42,21 @@ import java.util.Map;
  * rejections and unreadable request bodies, in the {@link GenericError} envelope.
  *
  * <p>A 401 reports {@code token} as {@code is missing} when no {@code Authorization} header was
- * sent and {@code is invalid} otherwise. Other client errors except 403 and 404 become 422, as
- * the spec reports every malformed request that way.
+ * sent and {@code is invalid} otherwise. A 400, such as an unreadable body, becomes 422, as the
+ * spec reports malformed requests that way; other statuses are kept. HEAD responses carry no
+ * body.
  */
 @Singleton
 @Replaces(ErrorResponseProcessor.class)
 public class GenericErrorResponseProcessor implements ErrorResponseProcessor<GenericError> {
 
     @Override
+    @SuppressWarnings("unchecked")
     public MutableHttpResponse<GenericError> processResponse(ErrorContext errorContext,
                                                              MutableHttpResponse<?> response) {
+        if (errorContext.getRequest().getMethod() == HttpMethod.HEAD) {
+            return (MutableHttpResponse<GenericError>) response;
+        }
         var status = response.status();
         GenericError body;
         if (status == HttpStatus.UNAUTHORIZED) {
@@ -59,17 +65,20 @@ public class GenericErrorResponseProcessor implements ErrorResponseProcessor<Gen
         } else if (status == HttpStatus.FORBIDDEN) {
             body = GenericError.of(ErrorFields.FALLBACK, "forbidden");
         } else {
-            if (status.getCode() >= 400 && status.getCode() < 500 && status != HttpStatus.NOT_FOUND) {
+            if (status == HttpStatus.BAD_REQUEST) {
                 response.status(HttpStatus.UNPROCESSABLE_ENTITY);
             }
-            body = errorsOf(errorContext);
+            body = errorsOf(errorContext, status);
         }
         return response.contentType(MediaType.APPLICATION_JSON_TYPE).body(body);
     }
 
-    private static GenericError errorsOf(ErrorContext errorContext) {
+    private static GenericError errorsOf(ErrorContext errorContext, HttpStatus status) {
         if (!errorContext.hasErrors()) {
-            var message = errorContext.getExceptionMessage().orElse("is invalid");
+            // never echo a raw exception message for a server error
+            var message = status.getCode() >= 500
+                    ? status.getReason()
+                    : errorContext.getExceptionMessage().orElse(status.getReason());
             return GenericError.of(ErrorFields.FALLBACK, message);
         }
         var pairs = errorContext.getErrors().stream()

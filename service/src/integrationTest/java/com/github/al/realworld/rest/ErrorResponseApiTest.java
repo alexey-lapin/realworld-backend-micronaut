@@ -23,6 +23,7 @@
  */
 package com.github.al.realworld.rest;
 
+import com.github.al.realworld.rest.auth.AuthSupport;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.HttpClient;
@@ -84,6 +85,36 @@ class ErrorResponseApiTest {
 
         assertThat(response.getStatus().getCode()).isEqualTo(HttpStatus.UNAUTHORIZED.getCode());
         assertThat(errors(response)).isEqualTo(Map.of("token", List.of("is invalid")));
+    }
+
+    @Test
+    void should_serveAnonymously_when_tokenIsInvalidOnPublicRoute() {
+        var response = client.toBlocking()
+                .exchange(HttpRequest.GET("/tags").header("Authorization", "Token not-a-jwt"), Map.class);
+
+        assertThat(response.getStatus().getCode()).isEqualTo(HttpStatus.OK.getCode());
+    }
+
+    @Test
+    void should_return401CredentialsInvalid_when_passwordIsOverlong() {
+        var user = AuthSupport.register();
+        for (var password : List.of("a".repeat(73), "é".repeat(40))) {
+            var response = exchangeError(HttpRequest.POST("/users/login", """
+                    {"user":{"email":"%s","password":"%s"}}""".formatted(user.email(), password)));
+
+            assertThat(response.getStatus().getCode()).isEqualTo(HttpStatus.UNAUTHORIZED.getCode());
+            assertThat(errors(response)).isEqualTo(Map.of("credentials", List.of("invalid")));
+        }
+    }
+
+    @Test
+    void should_keepProtocolStatus_when_methodIsNotAllowed() {
+        // authenticated, since security rejects anonymous calls before routing
+        AuthSupport.register().login();
+        var response = exchangeError(HttpRequest.PATCH("/tags", "{}"));
+        AuthSupport.logout();
+
+        assertThat(response.getStatus().getCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED.getCode());
     }
 
     @Test

@@ -45,8 +45,7 @@ public class BCryptPasswordEncoder implements PasswordEncoder {
 
     @Override
     public String encode(String rawPassword) {
-        var password = rawPassword.getBytes(StandardCharsets.UTF_8);
-        if (password.length > MAX_PASSWORD_BYTES) {
+        if (isTooLong(rawPassword)) {
             throw badRequest("password", "is too long (maximum is 72 bytes)",
                     "password exceeds %d bytes", MAX_PASSWORD_BYTES);
         }
@@ -55,7 +54,15 @@ public class BCryptPasswordEncoder implements PasswordEncoder {
 
     @Override
     public boolean matches(String rawPassword, String encodedPassword) {
+        // a password that could never have been encoded cannot match; the verifier would throw
+        if (isTooLong(rawPassword)) {
+            return false;
+        }
         return BCrypt.verifyer().verify(rawPassword.toCharArray(), encodedPassword).verified;
+    }
+
+    private static boolean isTooLong(String rawPassword) {
+        return rawPassword.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES;
     }
 
 }
