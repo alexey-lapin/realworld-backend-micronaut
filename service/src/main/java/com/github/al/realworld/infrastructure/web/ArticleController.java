@@ -40,8 +40,6 @@ import com.github.al.realworld.api.query.GetArticle;
 import com.github.al.realworld.api.query.GetArticleResult;
 import com.github.al.realworld.api.query.GetArticles;
 import com.github.al.realworld.api.query.GetArticlesResult;
-import com.github.al.realworld.api.query.GetComment;
-import com.github.al.realworld.api.query.GetCommentResult;
 import com.github.al.realworld.api.query.GetComments;
 import com.github.al.realworld.api.query.GetCommentsResult;
 import com.github.al.realworld.api.query.GetFeed;
@@ -107,11 +105,6 @@ public class ArticleController implements ArticleOperations {
     @Override
     public GetCommentsResult findAllComments(String slug) {
         return bus.executeQuery(new GetComments(slug));
-    }
-
-    @Override
-    public GetCommentResult findComment(String slug, long id) {
-        return bus.executeQuery(new GetComment(slug, id));
     }
 
     @Override

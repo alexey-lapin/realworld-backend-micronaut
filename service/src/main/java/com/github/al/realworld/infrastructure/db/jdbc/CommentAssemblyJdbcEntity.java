@@ -21,29 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.db.jpa;
+package com.github.al.realworld.infrastructure.db.jdbc;
 
-import com.github.al.realworld.domain.model.Tag;
-import com.github.al.realworld.domain.repository.TagRepository;
-import lombok.RequiredArgsConstructor;
+import io.micronaut.data.annotation.Id;
+import io.micronaut.data.annotation.MappedEntity;
+import org.jspecify.annotations.Nullable;
 
-import jakarta.inject.Singleton;
-import java.util.Optional;
+import java.time.Instant;
 
-@RequiredArgsConstructor
-@Singleton
-public class JpaTagRepositoryAdapter implements TagRepository {
-
-    private final DataTagRepository repository;
-
-    @Override
-    public Optional<Tag> findByName(String name) {
-        return repository.findByName(name);
-    }
-
-    @Override
-    public Iterable<Tag> findAll() {
-        return repository.findAll();
-    }
+@MappedEntity("v_comments_read")
+public record CommentAssemblyJdbcEntity(
+        @Id long id,
+        Instant createdAt,
+        Instant updatedAt,
+        long articleId,
+        String body,
+        long authorId,
+        String authorUsername,
+        @Nullable String authorBio,
+        @Nullable String authorImage,
+        boolean authorFollowing
+) {
 
 }

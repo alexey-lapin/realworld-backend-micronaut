@@ -31,16 +31,14 @@ import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.JwtService;
 import com.github.al.realworld.application.service.PasswordEncoder;
 import com.github.al.realworld.bus.CommandHandler;
-import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
-
-import static com.github.al.realworld.application.exception.ConflictException.alreadyTaken;
 import static com.github.al.realworld.application.exception.BadRequestException.badRequest;
+import static com.github.al.realworld.application.exception.ConflictException.alreadyTaken;
 import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
 import static com.github.al.realworld.api.dto.JsonNullable.unwrap;
 import static java.util.Objects.requireNonNullElse;
@@ -57,43 +55,44 @@ public class UpdateUserHandler implements CommandHandler<UpdateUserResult, Updat
     @Transactional
     @Override
     public UpdateUserResult handle(UpdateUser command) {
-        var currentUsername = authenticationService.getRequiredCurrentUserName();
+        var currentUserId = authenticationService.getRequiredCurrentUserId();
 
-        User user = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
+        var user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist",
+                        authenticationService.getCurrentUserName()));
 
-        var data = command.user();
-        if (data.isEmpty()) {
+        var userData = command.user();
+        if (userData.isEmpty()) {
             throw badRequest("body", "can't be empty", "update payload contains no fields");
         }
 
-        var newUsername = unwrap(data.username());
+        var newUsername = unwrap(userData.username());
         if (newUsername != null
-            && !newUsername.equals(user.getUsername())
-            && userRepository.findByUsername(newUsername).isPresent()) {
+            && !newUsername.equals(user.username())
+            && userRepository.existsByUsername(newUsername)) {
             throw alreadyTaken("username", "user [name=%s] already exists", newUsername);
         }
 
-        var newEmail = unwrap(data.email());
+        var newEmail = unwrap(userData.email());
         if (newEmail != null
-            && !newEmail.equals(user.getEmail())
-            && userRepository.findByEmail(newEmail).isPresent()) {
+            && !newEmail.equals(user.email())
+            && userRepository.existsByEmail(newEmail)) {
             throw alreadyTaken("email", "user [email=%s] already exists", newEmail);
         }
 
-        var newPassword = unwrap(data.password());
+        var newPassword = unwrap(userData.password());
 
-        User alteredUser = user.toBuilder()
-                .email(requireNonNullElse(newEmail, user.getEmail()))
-                .username(requireNonNullElse(newUsername, user.getUsername()))
-                .password(newPassword == null ? user.getPassword() : encoder.encode(newPassword))
-                .bio(normalized(data.bio(), user.getBio()))
-                .image(normalized(data.image(), user.getImage()))
+        var alteredUser = user.toBuilder()
+                .email(requireNonNullElse(newEmail, user.email()))
+                .username(requireNonNullElse(newUsername, user.username()))
+                .password(newPassword == null ? user.password() : encoder.encode(newPassword))
+                .bio(normalized(userData.bio(), user.bio()))
+                .image(normalized(userData.image(), user.image()))
                 .build();
 
-        User savedUser = userRepository.save(alteredUser);
+        var savedUser = userRepository.save(alteredUser);
 
-        return new UpdateUserResult(UserAssembler.assemble(savedUser, jwtService));
+        return new UpdateUserResult(UserAssembler.assemble(savedUser, jwtService.getToken(savedUser)));
     }
 
     /**

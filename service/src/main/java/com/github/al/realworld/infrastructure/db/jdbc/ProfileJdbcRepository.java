@@ -21,37 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.db.jpa;
+package com.github.al.realworld.infrastructure.db.jdbc;
 
-import com.github.al.realworld.domain.model.User;
-import com.github.al.realworld.domain.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import io.micronaut.data.jdbc.annotation.JdbcRepository;
+import io.micronaut.data.model.query.builder.sql.Dialect;
+import io.micronaut.data.annotation.Query;
+import io.micronaut.data.repository.GenericRepository;
+import org.jspecify.annotations.Nullable;
 
-import jakarta.inject.Singleton;
 import java.util.Optional;
 
-@RequiredArgsConstructor
-@Singleton
-public class JpaUserRepositoryAdapter implements UserRepository {
+@JdbcRepository(dialect = Dialect.H2)
+public interface ProfileJdbcRepository extends GenericRepository<UserJdbcEntity, Long> {
 
-    private final DataUserRepository repository;
-
-    @Override
-    public Optional<User> findByEmail(String email) {
-        return repository.findByEmail(email);
-    }
-
-    @Override
-    public Optional<User> findByUsername(String username) {
-        return repository.findByUsername(username);
-    }
-
-    @Override
-    public User save(User user) {
-        if (repository.existsById(user.getId())) {
-            return repository.update(user);
-        }
-        return repository.save(user);
-    }
+    @Query("""
+            select u.username, u.bio, u.image, \
+                   case \
+                       when :currentUserId is null then false \
+                       else exists (select 1 \
+                                    from t_follows fl \
+                                    where fl.followee_id = u.id \
+                                      and fl.follower_id = :currentUserId) \
+                       end as following \
+            from t_users u \
+            where u.username = :username""")
+    Optional<ProfileJdbcView> findByUsername(String username, @Nullable Long currentUserId);
 
 }

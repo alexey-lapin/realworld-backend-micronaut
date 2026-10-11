@@ -28,19 +28,14 @@ import com.github.al.realworld.api.command.UnfavoriteArticleResult;
 import com.github.al.realworld.application.ArticleAssembler;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.bus.CommandHandler;
-import com.github.al.realworld.domain.model.Article;
-import com.github.al.realworld.domain.model.User;
+import com.github.al.realworld.domain.model.ArticleFavorite;
+import com.github.al.realworld.domain.repository.ArticleFavoriteRepository;
 import com.github.al.realworld.domain.repository.ArticleRepository;
-import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
 import static com.github.al.realworld.application.exception.NotFoundException.notFound;
-
 
 @RequiredArgsConstructor
 @Singleton
@@ -48,29 +43,24 @@ public class UnfavoriteArticleHandler implements CommandHandler<UnfavoriteArticl
 
     private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
-    private final UserRepository userRepository;
+    private final ArticleFavoriteRepository articleFavoriteRepository;
 
     @Transactional
     @Override
     public UnfavoriteArticleResult handle(UnfavoriteArticle command) {
-        Article article = articleRepository.findBySlug(command.slug())
+        var currentUserId = authenticationService.getRequiredCurrentUserId();
+
+        var articleId = articleRepository.findIdBySlug(command.slug())
                 .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", command.slug()));
 
-        var currentUsername = authenticationService.getRequiredCurrentUserName();
-        User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
+        // the counter only moves when the favorite row actually changes
+        var articleFavorite = new ArticleFavorite(articleId, currentUserId);
+        if (articleFavoriteRepository.remove(articleFavorite)) {
+            articleRepository.decrementFavoriteCount(articleId);
+        }
 
-        Set<User> remainingFavoredUsers = article.getFavoredUsers().stream()
-                .filter(favoredUser -> !favoredUser.equals(currentUser))
-                .collect(Collectors.toSet());
-
-        Article alteredArticle = article.toBuilder()
-                .clearFavoredUsers()
-                .favoredUsers(remainingFavoredUsers)
-                .build();
-        Article savedArticle = articleRepository.save(alteredArticle);
-
-        return new UnfavoriteArticleResult(ArticleAssembler.assemble(savedArticle, currentUser));
+        var articleAssembly = articleRepository.findAssemblyById(currentUserId, articleId).orElseThrow();
+        return new UnfavoriteArticleResult(ArticleAssembler.assemble(articleAssembly));
     }
 
 }

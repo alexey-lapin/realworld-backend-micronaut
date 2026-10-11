@@ -23,24 +23,15 @@
  */
 package com.github.al.realworld.application.query;
 
-import com.github.al.realworld.api.dto.ArticleItemDto;
 import com.github.al.realworld.api.query.GetFeed;
 import com.github.al.realworld.api.query.GetFeedResult;
 import com.github.al.realworld.application.ArticleAssembler;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.bus.QueryHandler;
-import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
-import com.github.al.realworld.domain.repository.FollowRelationRepository;
-import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-
-import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
-
 
 @RequiredArgsConstructor
 @Singleton
@@ -48,27 +39,17 @@ public class GetFeedHandler implements QueryHandler<GetFeedResult, GetFeed> {
 
     private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
-    private final UserRepository userRepository;
-    private final FollowRelationRepository followRelationRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public GetFeedResult handle(GetFeed query) {
-        var currentUsername = authenticationService.getRequiredCurrentUserName();
-        User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
+        var currentUserId = authenticationService.getRequiredCurrentUserId();
 
-        List<UUID> followeeIds = followRelationRepository.findByFollowerId(currentUser.getId()).stream()
-                .map(followRelation -> followRelation.getFollowee().getId())
+        var results = articleRepository.findAllItemsByFollowerId(currentUserId, query.limit(), query.offset()).stream()
+                .map(ArticleAssembler::assembleItem)
                 .toList();
 
-        List<ArticleItemDto> results = articleRepository
-                .findByFollowees(followeeIds, query.limit(), query.offset())
-                .stream()
-                .map(article -> ArticleAssembler.assembleItem(article, currentUser))
-                .toList();
-
-        return new GetFeedResult(results, results.size());
+        return new GetFeedResult(results, articleRepository.countFeed(currentUserId));
     }
 
 }

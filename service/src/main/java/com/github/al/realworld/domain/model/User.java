@@ -23,47 +23,22 @@
  */
 package com.github.al.realworld.domain.model;
 
-import io.micronaut.configuration.hibernate.jpa.proxy.GenerateProxy;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Singular;
+import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import java.util.Set;
-import java.util.UUID;
+import java.time.Instant;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder(toBuilder = true)
-@Getter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@GenerateProxy
-@Entity
-@Table(name = "tbl_user")
-public class User {
-
-    @EqualsAndHashCode.Include
-    @Id
-    private UUID id;
-    private String username;
-    private String email;
-    private String password;
-    private String bio;
-    private String image;
-
-    @Singular
-    @OneToMany(
-            mappedBy = "followee",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private Set<FollowRelation> followers;
+public record User(
+        long id,
+        Instant createdAt,
+        Instant updatedAt,
+        @NonNull String username,
+        @NonNull String email,
+        @NonNull String password,
+        @Nullable String bio,
+        @Nullable String image
+) {
 
 }

@@ -23,147 +23,137 @@
  */
 package com.github.al.realworld.application.command;
 
-import com.github.al.realworld.application.exception.NotFoundException;
-import com.github.al.realworld.application.exception.ForbiddenException;
-import com.github.al.realworld.application.exception.UnauthorizedException;
 import com.github.al.realworld.api.command.UpdateArticle;
-import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.api.dto.JsonNullable;
+import com.github.al.realworld.application.exception.ForbiddenException;
+import com.github.al.realworld.application.exception.NotFoundException;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.domain.model.Article;
+import com.github.al.realworld.domain.model.ArticleAssembly;
+import com.github.al.realworld.domain.model.Profile;
 import com.github.al.realworld.domain.model.Tag;
-import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.TagRepository;
-import com.github.al.realworld.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class UpdateArticleHandlerTest {
 
-    private static final String TEST_SLUG = "test-slug";
-    private static final String TEST_USERNAME = "test-username";
-    private static final String TEST_USERNAME_2 = "test-username-2";
-    private static final String TEST_BODY = "test-body";
-    private static final String ALTERED_TITLE = "altered-title";
-    private static final String ALTERED_DESCRIPTION = "altered-description";
-    private static final String ALTERED_BODY = "altered-body";
+    private static final String SLUG = "test-slug";
+    private static final long AUTHOR_ID = 7;
 
     private AuthenticationService authenticationService;
     private ArticleRepository articleRepository;
-    private UserRepository userRepository;
+    private TagRepository tagRepository;
     private UpdateArticleHandler handler;
 
     @BeforeEach
     void setUp() {
         authenticationService = mock(AuthenticationService.class);
         articleRepository = mock(ArticleRepository.class);
-        userRepository = mock(UserRepository.class);
-        handler = new UpdateArticleHandler(authenticationService,
-                articleRepository,
-                mock(TagRepository.class),
-                userRepository,
-                new SlugService());
-        when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME);
+        tagRepository = mock(TagRepository.class);
+        handler = new UpdateArticleHandler(authenticationService, articleRepository, tagRepository, new SlugService());
+        when(authenticationService.getRequiredCurrentUserId()).thenReturn(AUTHOR_ID);
+        when(tagRepository.saveOrGet(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(articleRepository.findAssemblyById(eq(AUTHOR_ID), anyLong())).thenReturn(Optional.of(assembly()));
     }
 
     @Test
     void should_throw404_when_articleDoesNotExist() {
-        assertThatThrownBy(() -> handler.handle(command(emptyData())))
+        assertThatThrownBy(() -> handler.handle(command(data(null, null, null))))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
     void should_throw403_when_articleIsNotOwnedByCurrentUser() {
         givenArticle();
-        when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME_2);
+        when(authenticationService.getRequiredCurrentUserId()).thenReturn(AUTHOR_ID + 1);
 
-        assertThatThrownBy(() -> handler.handle(command(emptyData())))
+        assertThatThrownBy(() -> handler.handle(command(data(null, null, null))))
                 .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
-    void should_throw401_when_currentUserDoesNotExist() {
+    void should_keepCurrentValues_when_fieldsAreAbsent() {
         givenArticle();
 
-        assertThatThrownBy(() -> handler.handle(command(emptyData())))
-                .isInstanceOf(UnauthorizedException.class);
+        var saved = handleAndCaptureSaved(data(null, null, null));
+
+        assertThat(saved.slug()).isEqualTo(SLUG);
+        assertThat(saved.title()).isEqualTo("title");
+        assertThat(saved.tags()).extracting(Tag::name).containsExactly("old");
     }
 
     @Test
-    void should_returnCorrectArticleData_when_commandHasAllProperties() {
+    void should_changeSlugAndReplaceTags_when_titleAndTagsArePresent() {
         givenArticle();
-        givenCurrentUser();
 
-        var data = new UpdateArticle.Data(
-                new JsonNullable<>(ALTERED_TITLE),
-                new JsonNullable<>(ALTERED_DESCRIPTION),
-                new JsonNullable<>(ALTERED_BODY),
-                new JsonNullable<>(List.of("tag2")));
-        ArticleDto result = handler.handle(command(data)).article();
+        var saved = handleAndCaptureSaved(data(new JsonNullable<>("New Title"), "body2", List.of("z", "a")));
 
-        assertThat(result.body()).isEqualTo(ALTERED_BODY);
-        assertThat(result.title()).isEqualTo(ALTERED_TITLE);
-        assertThat(result.description()).isEqualTo(ALTERED_DESCRIPTION);
-        assertThat(result.slug()).isEqualTo(ALTERED_TITLE);
-        assertThat(result.tagList()).containsExactly("tag2");
-    }
-
-    @Test
-    void should_keepCurrentValues_when_commandHasNoProperties() {
-        givenArticle();
-        givenCurrentUser();
-
-        ArticleDto result = handler.handle(command(emptyData())).article();
-
-        assertThat(result.slug()).isEqualTo(TEST_SLUG);
-        assertThat(result.body()).isEqualTo(TEST_BODY);
-        assertThat(result.tagList()).containsExactly("tag1");
+        assertThat(saved.title()).isEqualTo("New Title");
+        assertThat(saved.slug()).startsWith("new-title-");
+        assertThat(saved.body()).isEqualTo("body2");
+        assertThat(saved.tags()).extracting(Tag::name).containsExactly("a", "z");
     }
 
     @Test
     void should_removeAllTags_when_tagListIsEmpty() {
         givenArticle();
-        givenCurrentUser();
 
-        var data = new UpdateArticle.Data(null, null, null, new JsonNullable<>(List.of()));
-        ArticleDto result = handler.handle(command(data)).article();
+        var saved = handleAndCaptureSaved(data(null, null, List.of()));
 
-        assertThat(result.tagList()).isEmpty();
+        assertThat(saved.tags()).isEmpty();
+    }
+
+    private Article handleAndCaptureSaved(UpdateArticle.Data data) {
+        handler.handle(command(data));
+        var captor = ArgumentCaptor.forClass(Article.class);
+        verify(articleRepository).save(captor.capture());
+        return captor.getValue();
     }
 
     private void givenArticle() {
-        Article article = Article.builder()
-                .slug(TEST_SLUG)
-                .title("test-title")
-                .description("test-description")
-                .author(User.builder().username(TEST_USERNAME).build())
-                .body(TEST_BODY)
-                .tag(new Tag("tag1"))
+        var article = Article.builder()
+                .id(10)
+                .authorId(AUTHOR_ID)
+                .slug(SLUG)
+                .title("title")
+                .description("description")
+                .body("body")
+                .tag(new Tag(1, "old"))
                 .build();
-        when(articleRepository.findBySlug(TEST_SLUG)).thenReturn(Optional.of(article));
+        when(articleRepository.findBySlug(SLUG)).thenReturn(Optional.of(article));
     }
 
-    private void givenCurrentUser() {
-        when(userRepository.findByUsername(TEST_USERNAME))
-                .thenReturn(Optional.of(User.builder().username(TEST_USERNAME).build()));
-    }
-
-    private static UpdateArticle.Data emptyData() {
-        return new UpdateArticle.Data(null, null, null, null);
+    private static UpdateArticle.Data data(JsonNullable<String> title, String body, List<String> tags) {
+        return new UpdateArticle.Data(title,
+                null,
+                body == null ? null : new JsonNullable<>(body),
+                tags == null ? null : new JsonNullable<>(tags));
     }
 
     private static UpdateArticle command(UpdateArticle.Data data) {
-        return new UpdateArticle(TEST_SLUG, data);
+        return new UpdateArticle(SLUG, data);
+    }
+
+    private static ArticleAssembly assembly() {
+        return new ArticleAssembly(10, Instant.now(), Instant.now(), AUTHOR_ID, "slug", "title", "description",
+                "body", List.of(), 0, false, new Profile("user", null, null, false));
     }
 
 }

@@ -23,69 +23,26 @@
  */
 package com.github.al.realworld.domain.model;
 
-import io.micronaut.configuration.hibernate.jpa.proxy.GenerateProxy;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Singular;
 
-import java.time.ZonedDateTime;
-import java.util.Set;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.List;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder(toBuilder = true)
-@Getter
-@GenerateProxy
-@Entity
-@Table(name = "tbl_article")
-public class Article {
-
-    @Id
-    private UUID id;
-    private String slug;
-    private String title;
-    private String description;
-    private ZonedDateTime createdAt;
-    private ZonedDateTime updatedAt;
-
-    @Lob
-    private String body;
-
-    @OneToOne
-    private User author;
-
-    @Singular
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "article_id")
-    private Set<Comment> comments;
-
-    @Singular
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "tbl_article_tags",
-            joinColumns = @JoinColumn(name = "article_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
-    private Set<Tag> tags;
-
-    @Singular
-    @ManyToMany
-    @JoinTable(name = "tbl_article_favorites",
-            joinColumns = @JoinColumn(name = "article_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> favoredUsers;
+public record Article(
+        long id,
+        Instant createdAt,
+        Instant updatedAt,
+        long authorId,
+        @NonNull String slug,
+        @NonNull String title,
+        @NonNull String description,
+        @NonNull String body,
+        int favoritesCount,
+        @Singular
+        List<Tag> tags
+) {
 
 }

@@ -21,40 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.infrastructure.db.jpa;
+package com.github.al.realworld.domain.repository;
 
-import com.github.al.realworld.domain.model.FollowRelation;
-import com.github.al.realworld.domain.model.User;
-import com.github.al.realworld.domain.repository.FollowRelationRepository;
-import lombok.RequiredArgsConstructor;
+import com.github.al.realworld.domain.model.ArticleFavorite;
 
-import jakarta.inject.Singleton;
-import java.util.List;
-import java.util.UUID;
+public interface ArticleFavoriteRepository {
 
-@RequiredArgsConstructor
-@Singleton
-public class JpaFollowRelationRepositoryAdapter implements FollowRelationRepository {
+    /**
+     * Records the favorite unless it already exists.
+     *
+     * @return {@code true} if a row was added
+     */
+    boolean add(ArticleFavorite articleFavorite);
 
-    private final DataFollowRelationRepository repository;
+    /**
+     * Removes the favorite if it exists.
+     *
+     * @return {@code true} if a row was removed
+     */
+    boolean remove(ArticleFavorite articleFavorite);
 
-    @Override
-    public FollowRelation save(FollowRelation entity) {
-        return repository.save(entity);
-    }
+    void deleteAllByArticleId(long articleId);
 
-    @Override
-    public List<FollowRelation> findByFollowerId(UUID followerId) {
-        return repository.findByFollowerId(followerId);
-    }
-
-    @Override
-    public List<FollowRelation> findByFolloweeId(UUID followeeId) {
-        return repository.findByFolloweeId(followeeId);
-    }
-
-    @Override
-    public void deleteByFollowerAndFollowee(User follower, User followee) {
-        repository.deleteByFollowerAndFollowee(follower, followee);
-    }
 }

@@ -31,13 +31,11 @@ import com.github.al.realworld.application.service.PasswordEncoder;
 import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.ConflictException.alreadyTaken;
-
 
 @RequiredArgsConstructor
 @Singleton
@@ -50,25 +48,24 @@ public class RegisterUserHandler implements CommandHandler<RegisterUserResult, R
     @Transactional
     @Override
     public RegisterUserResult handle(RegisterUser command) {
-        var data = command.user();
+        var userData = command.user();
 
-        if (userRepository.findByEmail(data.email()).isPresent()) {
-            throw alreadyTaken("email", "user [email=%s] already exists", data.email());
+        if (userRepository.existsByEmail(userData.email())) {
+            throw alreadyTaken("email", "user [email=%s] already exists", userData.email());
         }
 
-        if (userRepository.findByUsername(data.username()).isPresent()) {
-            throw alreadyTaken("username", "user [name=%s] already exists", data.username());
+        if (userRepository.existsByUsername(userData.username())) {
+            throw alreadyTaken("username", "user [name=%s] already exists", userData.username());
         }
 
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .username(data.username())
-                .email(data.email())
-                .password(passwordEncoder.encode(data.password()))
+        var user = User.builder()
+                .username(userData.username())
+                .email(userData.email())
+                .password(passwordEncoder.encode(userData.password()))
                 .build();
-        userRepository.save(user);
+        var savedUser = userRepository.save(user);
 
-        return new RegisterUserResult(UserAssembler.assemble(user, jwtService));
+        return new RegisterUserResult(UserAssembler.assemble(savedUser, jwtService.getToken(savedUser)));
     }
 
 }

@@ -27,16 +27,15 @@ import com.github.al.realworld.api.command.DeleteArticle;
 import com.github.al.realworld.api.command.DeleteArticleResult;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.bus.CommandHandler;
-import com.github.al.realworld.domain.model.Article;
+import com.github.al.realworld.domain.repository.ArticleFavoriteRepository;
 import com.github.al.realworld.domain.repository.ArticleRepository;
+import com.github.al.realworld.domain.repository.CommentRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.ForbiddenException.forbidden;
 import static com.github.al.realworld.application.exception.NotFoundException.notFound;
-
 
 @RequiredArgsConstructor
 @Singleton
@@ -44,20 +43,26 @@ public class DeleteArticleHandler implements CommandHandler<DeleteArticleResult,
 
     private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
+    private final CommentRepository commentRepository;
+    private final ArticleFavoriteRepository articleFavoriteRepository;
 
     @Transactional
     @Override
     public DeleteArticleResult handle(DeleteArticle command) {
-        var currentUsername = authenticationService.getRequiredCurrentUserName();
+        var currentUserId = authenticationService.getRequiredCurrentUserId();
 
-        Article article = articleRepository.findBySlug(command.slug())
+        var article = articleRepository.findBySlug(command.slug())
                 .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", command.slug()));
 
-        if (!Objects.equals(article.getAuthor().getUsername(), currentUsername)) {
-            throw forbidden("article", "article [slug=%s] is not owned by %s", command.slug(), currentUsername);
+        if (article.authorId() != currentUserId) {
+            throw forbidden("article", "article [slug=%s] is not owned by %s", command.slug(),
+                    authenticationService.getCurrentUserName());
         }
 
-        articleRepository.delete(article);
+        // dependent rows first; the schema has foreign keys and no cascades
+        commentRepository.deleteAllByArticleId(article.id());
+        articleFavoriteRepository.deleteAllByArticleId(article.id());
+        articleRepository.deleteById(article.id());
 
         return new DeleteArticleResult();
     }

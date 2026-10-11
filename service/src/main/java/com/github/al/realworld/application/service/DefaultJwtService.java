@@ -44,9 +44,9 @@ public class DefaultJwtService implements JwtService {
 
     @Override
     public String getToken(User user) {
-        var authentication = new ServerAuthentication(user.getUsername(),
+        var authentication = new ServerAuthentication(user.username(),
                 List.of(),
-                Map.of(CLAIM_UID, user.getId().toString()));
+                Map.of(CLAIM_UID, user.id()));
         return tokenGenerator.generate(authentication)
                 .map(AccessRefreshToken::getAccessToken)
                 .orElseThrow(() -> new IllegalStateException("token generation failed"));

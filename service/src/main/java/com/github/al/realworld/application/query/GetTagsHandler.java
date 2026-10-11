@@ -28,9 +28,8 @@ import com.github.al.realworld.api.query.GetTagsResult;
 import com.github.al.realworld.bus.QueryHandler;
 import com.github.al.realworld.domain.model.Tag;
 import com.github.al.realworld.domain.repository.TagRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
-import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -39,11 +38,12 @@ public class GetTagsHandler implements QueryHandler<GetTagsResult, GetTags> {
 
     private final TagRepository tagRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public GetTagsResult handle(GetTags query) {
-        var tags = StreamSupport.stream(tagRepository.findAll().spliterator(), false)
-                .map(Tag::getName)
+        var tags = tagRepository.findAll().stream()
+                .map(Tag::name)
+                .sorted()
                 .toList();
 
         return new GetTagsResult(tags);

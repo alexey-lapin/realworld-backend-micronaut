@@ -21,13 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.api.query;
+package com.github.al.realworld.infrastructure.db.jdbc;
 
-import com.github.al.realworld.bus.Query;
+import io.micronaut.data.annotation.GeneratedValue;
+import io.micronaut.data.annotation.Id;
+import io.micronaut.data.annotation.MappedEntity;
+import org.jspecify.annotations.Nullable;
 
-public record GetComment(
-        String slug,
-        long id
-) implements Query<GetCommentResult> {
+@MappedEntity("t_article_tags")
+public record ArticleTagJdbcEntity(
+        @Id @GeneratedValue @Nullable Long id,
+        long articleId,
+        long tagId,
+        long position
+) {
 
 }

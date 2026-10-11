@@ -24,24 +24,48 @@
 package com.github.al.realworld.domain.repository;
 
 import com.github.al.realworld.domain.model.Article;
-
+import com.github.al.realworld.domain.model.ArticleAssembly;
+import com.github.al.realworld.domain.model.ArticleItem;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface ArticleRepository {
 
+    Optional<Long> findIdBySlug(String slug);
+
     Optional<Article> findBySlug(String slug);
 
-    Optional<Article> findByTitle(String title);
-
-    List<Article> findByFilters(@Nullable String tag, @Nullable String author, @Nullable String favorited, int limit, long offset);
-
-    List<Article> findByFollowees(List<UUID> followees, int limit, long offset);
-
-    void delete(Article article);
-
     Article save(Article article);
+
+    void incrementFavoriteCount(long id);
+
+    void decrementFavoriteCount(long id);
+
+    void deleteById(long id);
+
+    // read model
+
+    Optional<ArticleAssembly> findAssemblyById(@Nullable Long userId,
+                                               long id);
+
+    Optional<ArticleAssembly> findAssemblyBySlug(@Nullable Long userId,
+                                                 String slug);
+
+    List<ArticleItem> findAllItemsByFilters(@Nullable Long userId,
+                                            @Nullable Long tagId,
+                                            @Nullable Long authorId,
+                                            @Nullable Long favoritedById,
+                                            int limit,
+                                            long offset);
+
+    List<ArticleItem> findAllItemsByFollowerId(long userId,
+                                               int limit,
+                                               long offset);
+
+    long countByFilters(@Nullable Long tagId, @Nullable Long authorId, @Nullable Long favoritedById);
+
+    long countFeed(long userId);
+
 }

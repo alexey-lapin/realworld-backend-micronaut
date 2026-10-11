@@ -25,15 +25,13 @@ package com.github.al.realworld.application.service;
 
 import org.jspecify.annotations.Nullable;
 
-import java.util.UUID;
-
 import static com.github.al.realworld.application.exception.UnauthorizedException.missingToken;
 
 public interface AuthenticationService {
 
-    @Nullable UUID getCurrentUserId();
+    @Nullable Long getCurrentUserId();
 
-    default UUID getRequiredCurrentUserId() {
+    default long getRequiredCurrentUserId() {
         var currentUserId = getCurrentUserId();
         if (currentUserId == null) {
             throw missingToken("current user id is not present");

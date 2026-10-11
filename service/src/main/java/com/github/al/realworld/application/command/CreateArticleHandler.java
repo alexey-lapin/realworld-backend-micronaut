@@ -31,19 +31,14 @@ import com.github.al.realworld.application.service.SlugService;
 import com.github.al.realworld.bus.CommandHandler;
 import com.github.al.realworld.domain.model.Article;
 import com.github.al.realworld.domain.model.Tag;
-import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.TagRepository;
-import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
-import java.time.ZonedDateTime;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-
-import static com.github.al.realworld.application.exception.ConflictException.alreadyTaken;
-import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
-
 
 @RequiredArgsConstructor
 @Singleton
@@ -52,44 +47,46 @@ public class CreateArticleHandler implements CommandHandler<CreateArticleResult,
     private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
     private final TagRepository tagRepository;
-    private final UserRepository userRepository;
     private final SlugService slugService;
 
     @Transactional
     @Override
     public CreateArticleResult handle(CreateArticle command) {
-        var data = command.article();
+        var currentUserId = authenticationService.getRequiredCurrentUserId();
+        var articleData = command.article();
 
-        if (articleRepository.findByTitle(data.title()).isPresent()) {
-            throw alreadyTaken("title", "article [title=%s] already exists", data.title());
+        var article = Article.builder()
+                .slug(slugService.makeSlug(articleData.title()))
+                .title(articleData.title())
+                .description(articleData.description())
+                .body(articleData.body())
+                .authorId(currentUserId)
+                .tags(resolveTags(articleData.tagList()))
+                .build();
+        var savedArticle = articleRepository.save(article);
+
+        var articleAssembly = articleRepository.findAssemblyById(currentUserId, savedArticle.id()).orElseThrow();
+        return new CreateArticleResult(ArticleAssembler.assemble(articleAssembly));
+    }
+
+    /**
+     * Resolves tag names to tags, creating the missing ones, sorted by name.
+     */
+    private List<Tag> resolveTags(List<String> tagList) {
+        if (tagList == null || tagList.isEmpty()) {
+            return List.of();
         }
+        var names = tagList.stream().distinct().toList();
+        var existingTags = tagRepository.findAllByNameIn(names);
+        var existingNames = existingTags.stream().map(Tag::name).collect(Collectors.toSet());
 
-        var currentUsername = authenticationService.getRequiredCurrentUserName();
-        User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
-
-        ZonedDateTime now = ZonedDateTime.now();
-
-        Article.ArticleBuilder articleBuilder = Article.builder()
-                .id(UUID.randomUUID())
-                .slug(slugService.makeSlug(data.title()))
-                .title(data.title())
-                .description(data.description())
-                .body(data.body())
-                .createdAt(now)
-                .updatedAt(now)
-                .author(currentUser);
-
-        if (data.tagList() != null) {
-            data.tagList().stream()
-                    .distinct()
-                    .map(t -> tagRepository.findByName(t).orElseGet(() -> new Tag(t)))
-                    .forEach(articleBuilder::tag);
-        }
-
-        Article savedArticle = articleRepository.save(articleBuilder.build());
-
-        return new CreateArticleResult(ArticleAssembler.assemble(savedArticle, currentUser));
+        var tags = new ArrayList<>(existingTags);
+        names.stream()
+                .filter(name -> !existingNames.contains(name))
+                .map(name -> tagRepository.saveOrGet(new Tag(name)))
+                .forEach(tags::add);
+        tags.sort(null);
+        return tags;
     }
 
 }

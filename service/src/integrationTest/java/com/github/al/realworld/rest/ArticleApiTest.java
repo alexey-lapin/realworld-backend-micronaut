@@ -34,7 +34,6 @@ import com.github.al.realworld.api.operation.ProfileClient;
 import com.github.al.realworld.api.query.GetArticleResult;
 import com.github.al.realworld.api.query.GetArticlesResult;
 import com.github.al.realworld.api.query.GetFeedResult;
-import com.github.al.realworld.infrastructure.db.jpa.DataArticleRepository;
 import com.github.al.realworld.rest.auth.AuthSupport;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -44,8 +43,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.github.al.realworld.rest.auth.AuthSupport.logout;
 import static com.github.al.realworld.rest.auth.AuthSupport.register;
@@ -65,9 +68,6 @@ public class ArticleApiTest {
     @Inject
     private ArticleClient articleClient;
 
-    @Inject
-    private DataArticleRepository articleRepository;
-
     @AfterEach
     void afterEach() {
         logout();
@@ -80,7 +80,8 @@ public class ArticleApiTest {
         CreateArticle command = createArticleCommand();
         ArticleDto article = articleClient.create(command).article();
 
-        assertThat(article.slug()).isEqualTo(command.article().title());
+        // a random suffix keeps slugs unique
+        assertThat(article.slug()).startsWith(command.article().title() + "-");
         assertThat(article.title()).isEqualTo(command.article().title());
         assertThat(article.description()).isEqualTo(command.article().description());
         assertThat(article.body()).isEqualTo(command.article().body());
@@ -151,7 +152,7 @@ public class ArticleApiTest {
         UpdateArticle updateArticle = new UpdateArticle(null, data);
         ArticleDto updated = articleClient.updateBySlug(created.slug(), updateArticle).article();
 
-        assertThat(updated.slug()).isEqualTo(ALTERED_TITLE);
+        assertThat(updated.slug()).startsWith(ALTERED_TITLE + "-");
         assertThat(updated.title()).isEqualTo(ALTERED_TITLE);
         assertThat(updated.description()).isEqualTo(ALTERED_DESCRIPTION);
         assertThat(updated.body()).isEqualTo(ALTERED_BODY);
@@ -159,32 +160,86 @@ public class ArticleApiTest {
 
     @Test
     void should_returnCorrectArticleData_when_searchByFilters() {
-        GetArticlesResult r1 = articleClient.findByFilters(null, null, null, 20, 0);
-        System.out.println(r1.articlesCount());
-
-        articleRepository.deleteAll();
-
-        GetArticlesResult r2 = articleClient.findByFilters(null, null, null, 20, 0);
-        System.out.println(r2.articlesCount());
-
+        // unique names keep the counts independent of other tests sharing the database
+        String tag = "tag-" + UUID.randomUUID();
+        String otherTag = "tag-" + UUID.randomUUID();
         String user = register().login().username();
 
-        articleClient.create(createArticleCommand(List.of("tag1")));
+        articleClient.create(createArticleCommand(List.of(tag)));
+        articleClient.create(createArticleCommand(List.of(otherTag)));
 
-        GetArticlesResult result2 = articleClient.findByFilters(null, user, null, 20, 0);
-        assertThat(result2.articlesCount()).isEqualTo(1);
+        assertThat(articleClient.findByFilters(null, user, null, 20, 0).articlesCount()).isEqualTo(2);
+        assertThat(articleClient.findByFilters(null, UUID.randomUUID().toString(), null, 20, 0).articlesCount()).isZero();
+        assertThat(articleClient.findByFilters(tag, null, null, 20, 0).articlesCount()).isEqualTo(1);
+        assertThat(articleClient.findByFilters("tag-" + UUID.randomUUID(), null, null, 20, 0).articlesCount()).isZero();
+        assertThat(articleClient.findByFilters(tag, user, null, 20, 0).articlesCount()).isEqualTo(1);
+    }
 
-        GetArticlesResult result3 = articleClient.findByFilters(null, UUID.randomUUID().toString(), null, 20, 0);
-        assertThat(result3.articlesCount()).isEqualTo(0);
+    @Test
+    void should_returnTotalCount_when_pageIsSmallerThanResult() {
+        String user = register().login().username();
+        articleClient.create(createArticleCommand());
+        articleClient.create(createArticleCommand());
+        articleClient.create(createArticleCommand());
 
-        GetArticlesResult result4 = articleClient.findByFilters("tag1", null, null, 20, 0);
-        assertThat(result4.articlesCount()).isEqualTo(1);
+        GetArticlesResult page = articleClient.findByFilters(null, user, null, 2, 1);
 
-        GetArticlesResult result5 = articleClient.findByFilters("tag2", null, null, 20, 0);
-        assertThat(result5.articlesCount()).isEqualTo(0);
+        assertThat(page.articles()).hasSize(2);
+        assertThat(page.articlesCount()).isEqualTo(3);
+    }
 
-        GetArticlesResult result6 = articleClient.findByFilters("tag1", user, null, 20, 0);
-        assertThat(result6.articlesCount()).isEqualTo(1);
+    @Test
+    void should_countFavoriteOnce_when_favoritedAndUnfavoritedTwice() {
+        register().login();
+        String slug = articleClient.create(createArticleCommand()).article().slug();
+
+        articleClient.favorite(slug);
+        assertThat(articleClient.favorite(slug).article().favoritesCount()).isEqualTo(1);
+
+        articleClient.unfavorite(slug);
+        assertThat(articleClient.unfavorite(slug).article().favoritesCount()).isZero();
+    }
+
+    @Test
+    void should_countFavoriteOnce_when_favoritedConcurrently() throws Exception {
+        register().login();
+        String slug = articleClient.create(createArticleCommand()).article().slug();
+
+        // overlapping requests race on the same favorite row; exactly one may insert or delete it
+        runConcurrently(8, () -> articleClient.favorite(slug));
+        assertThat(articleClient.findBySlug(slug).article().favoritesCount()).isEqualTo(1);
+
+        runConcurrently(8, () -> articleClient.unfavorite(slug));
+        assertThat(articleClient.findBySlug(slug).article().favoritesCount()).isZero();
+    }
+
+    @Test
+    void should_keepFavoritesCount_when_articleIsEdited() {
+        AuthSupport.RegisteredUser author = register().login();
+        String slug = articleClient.create(createArticleCommand()).article().slug();
+        logout();
+        register().login();
+        articleClient.favorite(slug);
+        logout();
+
+        // edits write content columns only, never a counter read before the favorite
+        author.login();
+        var data = new UpdateArticle.Data(null, null, new JsonNullable<>(ALTERED_BODY), null);
+        ArticleDto updated = articleClient.updateBySlug(slug, new UpdateArticle(null, data)).article();
+
+        assertThat(updated.body()).isEqualTo(ALTERED_BODY);
+        assertThat(updated.favoritesCount()).isEqualTo(1);
+    }
+
+    @Test
+    void should_acceptDuplicateTitle_withDistinctSlugs() {
+        register().login();
+        CreateArticle command = createArticleCommand();
+
+        String first = articleClient.create(command).article().slug();
+        String second = articleClient.create(command).article().slug();
+
+        assertThat(first).isNotEqualTo(second);
     }
 
     @Nested
@@ -275,15 +330,16 @@ public class ArticleApiTest {
         }
 
         @Test
-        void should_returnCorrectCommentData() {
+        void should_keepComment_when_deletedThroughAnotherArticle() {
             register().login();
             ArticleDto article = articleClient.create(createArticleCommand()).article();
-            AddComment addComment = new AddComment(null, new AddComment.Data(TEST_BODY));
-            CommentDto createdComment = articleClient.addComment(article.slug(), addComment).comment();
+            ArticleDto other = articleClient.create(createArticleCommand()).article();
+            CommentDto comment = articleClient.addComment(article.slug(), new AddComment(null, new AddComment.Data(TEST_BODY))).comment();
 
-            CommentDto comment = articleClient.findComment(article.slug(), createdComment.id()).comment();
+            // answered with 404, which the declarative client maps to an empty result
+            articleClient.deleteComment(other.slug(), comment.id());
 
-            assertThat(comment.id()).isPositive();
+            assertThat(articleClient.findAllComments(article.slug()).comments()).hasSize(1);
         }
     }
 
@@ -355,7 +411,26 @@ public class ArticleApiTest {
             profileClient.follow(user2.username());
             profileClient.follow(user3.username());
             GetFeedResult feed2 = articleClient.feed(4, 0);
-            assertThat(feed2.articlesCount()).isEqualTo(4);
+            assertThat(feed2.articles()).hasSize(4);
+            assertThat(feed2.articlesCount()).isEqualTo(5);
+        }
+    }
+
+    private static void runConcurrently(int count, Runnable action) throws Exception {
+        try (var executor = Executors.newFixedThreadPool(count)) {
+            var start = new CountDownLatch(1);
+            var futures = new ArrayList<Future<?>>();
+            for (var i = 0; i < count; i++) {
+                futures.add(executor.submit(() -> {
+                    start.await();
+                    action.run();
+                    return null;
+                }));
+            }
+            start.countDown();
+            for (var future : futures) {
+                future.get();
+            }
         }
     }
 

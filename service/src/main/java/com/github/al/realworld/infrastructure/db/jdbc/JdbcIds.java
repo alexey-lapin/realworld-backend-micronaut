@@ -21,29 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.al.realworld.domain.model;
+package com.github.al.realworld.infrastructure.db.jdbc;
 
-import io.micronaut.core.annotation.ReflectiveAccess;
-import io.micronaut.core.annotation.TypeHint;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+/**
+ * Domain records use {@code 0} for an id not assigned yet; entities use {@code null}.
+ */
+final class JdbcIds {
 
-import jakarta.persistence.Embeddable;
-import java.io.Serializable;
-import java.util.UUID;
+    private JdbcIds() {
+    }
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@EqualsAndHashCode
-@TypeHint
-@ReflectiveAccess
-@Embeddable
-public class FollowRelationId implements Serializable {
+    static Long toEntityId(long id) {
+        return id == 0 ? null : id;
+    }
 
-    private UUID followerId;
-    private UUID followeeId;
+    static long toDomainId(Long id) {
+        return id == null ? 0 : id;
+    }
 
 }

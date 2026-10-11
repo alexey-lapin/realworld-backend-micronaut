@@ -28,34 +28,29 @@ import com.github.al.realworld.api.query.GetProfileResult;
 import com.github.al.realworld.application.ProfileAssembler;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.bus.QueryHandler;
-import com.github.al.realworld.domain.model.User;
-import com.github.al.realworld.domain.repository.UserRepository;
+import com.github.al.realworld.domain.repository.ProfileRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.NotFoundException.notFound;
-
 
 @RequiredArgsConstructor
 @Singleton
 public class GetProfileHandler implements QueryHandler<GetProfileResult, GetProfile> {
 
     private final AuthenticationService authenticationService;
-    private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public GetProfileResult handle(GetProfile query) {
-        var currentUsername = authenticationService.getCurrentUserName();
-        User currentUser = currentUsername == null
-                ? null
-                : userRepository.findByUsername(currentUsername).orElse(null);
+        var currentUserId = authenticationService.getCurrentUserId();
 
-        User user = userRepository.findByUsername(query.username())
+        var profile = profileRepository.findByUsername(query.username(), currentUserId)
                 .orElseThrow(() -> notFound("profile", "user [name=%s] does not exist", query.username()));
 
-        return new GetProfileResult(ProfileAssembler.assemble(user, currentUser));
+        return new GetProfileResult(ProfileAssembler.assemble(profile));
     }
 
 }

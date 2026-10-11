@@ -28,16 +28,12 @@ import com.github.al.realworld.api.query.GetArticleResult;
 import com.github.al.realworld.application.ArticleAssembler;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.bus.QueryHandler;
-import com.github.al.realworld.domain.model.Article;
-import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
-import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.NotFoundException.notFound;
-
 
 @RequiredArgsConstructor
 @Singleton
@@ -45,20 +41,16 @@ public class GetArticleHandler implements QueryHandler<GetArticleResult, GetArti
 
     private final AuthenticationService authenticationService;
     private final ArticleRepository articleRepository;
-    private final UserRepository userRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public GetArticleResult handle(GetArticle query) {
-        Article article = articleRepository.findBySlug(query.slug())
+        var currentUserId = authenticationService.getCurrentUserId();
+
+        var articleAssembly = articleRepository.findAssemblyBySlug(currentUserId, query.slug())
                 .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", query.slug()));
 
-        var currentUsername = authenticationService.getCurrentUserName();
-        User currentUser = currentUsername == null
-                ? null
-                : userRepository.findByUsername(currentUsername).orElse(null);
-
-        return new GetArticleResult(ArticleAssembler.assemble(article, currentUser));
+        return new GetArticleResult(ArticleAssembler.assemble(articleAssembly));
     }
 
 }

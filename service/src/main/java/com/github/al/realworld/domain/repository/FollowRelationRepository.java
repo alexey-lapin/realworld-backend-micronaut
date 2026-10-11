@@ -24,19 +24,27 @@
 package com.github.al.realworld.domain.repository;
 
 import com.github.al.realworld.domain.model.FollowRelation;
-import com.github.al.realworld.domain.model.User;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface FollowRelationRepository {
 
-    FollowRelation save(FollowRelation entity);
+    List<FollowRelation> findByFollowerId(long followerId);
 
-    List<FollowRelation> findByFollowerId(UUID followerId);
+    List<FollowRelation> findByFolloweeId(long followeeId);
 
-    List<FollowRelation> findByFolloweeId(UUID followeeId);
+    /**
+     * Records the follow unless it already exists.
+     *
+     * @return {@code true} if a row was added
+     */
+    boolean add(FollowRelation followRelation);
 
-    void deleteByFollowerAndFollowee(User follower, User followee);
+    /**
+     * Removes the follow if it exists.
+     *
+     * @return {@code true} if a row was removed
+     */
+    boolean remove(FollowRelation followRelation);
 
 }

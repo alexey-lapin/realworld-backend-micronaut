@@ -29,14 +29,12 @@ import com.github.al.realworld.application.UserAssembler;
 import com.github.al.realworld.application.service.AuthenticationService;
 import com.github.al.realworld.application.service.JwtService;
 import com.github.al.realworld.bus.QueryHandler;
-import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.UserRepository;
+import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
-
 
 @RequiredArgsConstructor
 @Singleton
@@ -46,14 +44,16 @@ public class GetCurrentUserHandler implements QueryHandler<GetCurrentUserResult,
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public GetCurrentUserResult handle(GetCurrentUser query) {
-        var currentUsername = authenticationService.getRequiredCurrentUserName();
-        User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
+        var currentUserId = authenticationService.getRequiredCurrentUserId();
 
-        return new GetCurrentUserResult(UserAssembler.assemble(currentUser, jwtService));
+        var user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist",
+                        authenticationService.getCurrentUserName()));
+
+        return new GetCurrentUserResult(UserAssembler.assemble(user, jwtService.getToken(user)));
     }
 
 }
