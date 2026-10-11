@@ -23,6 +23,9 @@
  */
 package com.github.al.realworld.application.command;
 
+import com.github.al.realworld.application.exception.ConflictException;
+import com.github.al.realworld.application.exception.UnauthorizedException;
+import com.github.al.realworld.application.exception.UnauthorizedException;
 import com.github.al.realworld.api.command.CreateArticle;
 import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.application.service.AuthenticationService;
@@ -32,8 +35,6 @@ import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.TagRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.http.exceptions.HttpStatusException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +42,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -68,39 +69,27 @@ class CreateArticleHandlerTest {
     }
 
     @Test
-    void should_throw400_when_articleAlreadyExist() {
+    void should_throw409_when_articleAlreadyExist() {
         when(articleRepository.findByTitle("test-title")).thenReturn(Optional.of(Article.builder().build()));
 
-        HttpStatusException exception = catchThrowableOfType(
-                HttpStatusException.class,
-                () -> handler.handle(command("test-title", null))
-        );
-
-        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        assertThatThrownBy(() -> handler.handle(command("test-title", null)))
+                .isInstanceOf(ConflictException.class);
     }
 
     @Test
     void should_throw401_when_notAuthenticated() {
         when(authenticationService.getRequiredCurrentUserName()).thenCallRealMethod();
 
-        HttpStatusException exception = catchThrowableOfType(
-                HttpStatusException.class,
-                () -> handler.handle(command("test-title", null))
-        );
-
-        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.UNAUTHORIZED.getCode());
+        assertThatThrownBy(() -> handler.handle(command("test-title", null)))
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @Test
-    void should_throw400_when_currentUserDoesNotExist() {
+    void should_throw401_when_currentUserDoesNotExist() {
         when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME);
 
-        HttpStatusException exception = catchThrowableOfType(
-                HttpStatusException.class,
-                () -> handler.handle(command("test-title", null))
-        );
-
-        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        assertThatThrownBy(() -> handler.handle(command("test-title", null)))
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @Test

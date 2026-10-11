@@ -38,7 +38,8 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -52,7 +53,7 @@ public class GetCommentsHandler implements QueryHandler<GetCommentsResult, GetCo
     @Override
     public GetCommentsResult handle(GetComments query) {
         Article article = articleRepository.findBySlug(query.slug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", query.slug()));
+                .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", query.slug()));
 
         var currentUsername = authenticationService.getCurrentUserName();
         User currentUser = currentUsername == null

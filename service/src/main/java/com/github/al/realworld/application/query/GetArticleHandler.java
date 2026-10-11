@@ -36,7 +36,8 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -50,7 +51,7 @@ public class GetArticleHandler implements QueryHandler<GetArticleResult, GetArti
     @Override
     public GetArticleResult handle(GetArticle query) {
         Article article = articleRepository.findBySlug(query.slug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", query.slug()));
+                .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", query.slug()));
 
         var currentUsername = authenticationService.getCurrentUserName();
         User currentUser = currentUsername == null

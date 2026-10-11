@@ -35,8 +35,8 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
-import static com.github.al.realworld.application.exception.Exceptions.unauthorized;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidCredentials;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -52,10 +52,10 @@ public class LoginUserHandler implements CommandHandler<LoginUserResult, LoginUs
         var data = command.user();
 
         User user = userRepository.findByEmail(data.email())
-                .orElseThrow(() -> badRequest("user [email=%s] does not exist", data.email()));
+                .orElseThrow(() -> invalidCredentials("user [email=%s] does not exist", data.email()));
 
         if (!passwordEncoder.matches(data.password(), user.getPassword())) {
-            throw unauthorized("user [email=%s] password is incorrect", data.email());
+            throw invalidCredentials("user [email=%s] password is incorrect", data.email());
         }
 
         return new LoginUserResult(UserAssembler.assemble(user, jwtService));

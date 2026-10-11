@@ -28,19 +28,28 @@ import io.micronaut.security.authentication.ServerAuthentication;
 import io.micronaut.security.token.generator.AccessRefreshTokenGenerator;
 import io.micronaut.security.token.render.AccessRefreshToken;
 import jakarta.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Issues tokens whose subject is the username, with the user id in the {@code uid} claim.
+ */
+@RequiredArgsConstructor
 @Singleton
 public class DefaultJwtService implements JwtService {
 
     private final AccessRefreshTokenGenerator tokenGenerator;
 
-    public DefaultJwtService(AccessRefreshTokenGenerator tokenGenerator) {
-        this.tokenGenerator = tokenGenerator;
-    }
-
     @Override
     public String getToken(User user) {
-        ServerAuthentication authentication = new ServerAuthentication(user.getUsername(), null, null);
-        return tokenGenerator.generate(authentication).map(AccessRefreshToken::getAccessToken).orElse(null);
+        var authentication = new ServerAuthentication(user.getUsername(),
+                List.of(),
+                Map.of(CLAIM_UID, user.getId().toString()));
+        return tokenGenerator.generate(authentication)
+                .map(AccessRefreshToken::getAccessToken)
+                .orElseThrow(() -> new IllegalStateException("token generation failed"));
     }
+
 }

@@ -38,9 +38,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
 
+import static com.github.al.realworld.application.exception.ConflictException.alreadyTaken;
+import static com.github.al.realworld.application.exception.BadRequestException.badRequest;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
 import static com.github.al.realworld.api.dto.JsonNullable.unwrap;
 import static java.util.Objects.requireNonNullElse;
 
@@ -59,25 +60,25 @@ public class UpdateUserHandler implements CommandHandler<UpdateUserResult, Updat
         var currentUsername = authenticationService.getRequiredCurrentUserName();
 
         User user = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> notFound("user [name=%s] does not exist", currentUsername));
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
 
         var data = command.user();
         if (data.isEmpty()) {
-            throw badRequest("update payload contains no fields");
+            throw badRequest("body", "can't be empty", "update payload contains no fields");
         }
 
         var newUsername = unwrap(data.username());
         if (newUsername != null
             && !newUsername.equals(user.getUsername())
             && userRepository.findByUsername(newUsername).isPresent()) {
-            throw badRequest("user [name=%s] already exists", newUsername);
+            throw alreadyTaken("username", "user [name=%s] already exists", newUsername);
         }
 
         var newEmail = unwrap(data.email());
         if (newEmail != null
             && !newEmail.equals(user.getEmail())
             && userRepository.findByEmail(newEmail).isPresent()) {
-            throw badRequest("user [email=%s] already exists", newEmail);
+            throw alreadyTaken("email", "user [email=%s] already exists", newEmail);
         }
 
         var newPassword = unwrap(data.password());

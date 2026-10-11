@@ -34,8 +34,9 @@ import jakarta.transaction.Transactional;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.forbidden;
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+import static com.github.al.realworld.application.exception.ForbiddenException.forbidden;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -50,10 +51,10 @@ public class DeleteArticleHandler implements CommandHandler<DeleteArticleResult,
         var currentUsername = authenticationService.getRequiredCurrentUserName();
 
         Article article = articleRepository.findBySlug(command.slug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.slug()));
+                .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", command.slug()));
 
         if (!Objects.equals(article.getAuthor().getUsername(), currentUsername)) {
-            throw forbidden("article [slug=%s] is not owned by %s", command.slug(), currentUsername);
+            throw forbidden("article", "article [slug=%s] is not owned by %s", command.slug(), currentUsername);
         }
 
         articleRepository.delete(article);

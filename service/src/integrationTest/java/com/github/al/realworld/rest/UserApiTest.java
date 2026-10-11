@@ -93,14 +93,14 @@ public class UserApiTest {
     }
 
     @Test
-    void should_return400_whenLoginUser() {
+    void should_throw401_when_loginUserDoesNotExist() {
         String s = UUID.randomUUID().toString();
         HttpClientResponseException exception = catchThrowableOfType(
                 () -> userClient.login(new LoginUser(new LoginUser.Data(s + "@ex.com", s))),
                 HttpClientResponseException.class
         );
 
-        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.UNAUTHORIZED.getCode());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class UserApiTest {
     }
 
     @Test
-    void should_throw400_whenUpdateUserWithExistingEmail() {
+    void should_throw409_when_updateUserWithExistingEmail() {
         AuthSupport.RegisteredUser registeredUser = register();
 
         register().login();
@@ -135,11 +135,11 @@ public class UserApiTest {
                 HttpClientResponseException.class
         );
 
-        assertThat(exception).isNotNull();
+        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.CONFLICT.getCode());
     }
 
     @Test
-    void should_throw400_whenUpdateUserWithExistingName() {
+    void should_throw409_when_updateUserWithExistingName() {
         AuthSupport.RegisteredUser registeredUser = register();
 
         register().login();
@@ -151,7 +151,7 @@ public class UserApiTest {
                 HttpClientResponseException.class
         );
 
-        assertThat(exception).isNotNull();
+        assertThat(exception.getStatus().getCode()).isEqualTo(HttpStatus.CONFLICT.getCode());
     }
 
     private static RegisterUser registerCommand() {

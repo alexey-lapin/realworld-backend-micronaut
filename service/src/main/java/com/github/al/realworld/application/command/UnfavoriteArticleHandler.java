@@ -38,8 +38,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -53,11 +54,11 @@ public class UnfavoriteArticleHandler implements CommandHandler<UnfavoriteArticl
     @Override
     public UnfavoriteArticleResult handle(UnfavoriteArticle command) {
         Article article = articleRepository.findBySlug(command.slug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.slug()));
+                .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", command.slug()));
 
         var currentUsername = authenticationService.getRequiredCurrentUserName();
         User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
 
         Set<User> remainingFavoredUsers = article.getFavoredUsers().stream()
                 .filter(favoredUser -> !favoredUser.equals(currentUser))

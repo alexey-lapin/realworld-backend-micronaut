@@ -27,6 +27,8 @@ import com.github.al.realworld.domain.model.User;
 
 public interface JwtService {
 
+    String CLAIM_UID = "uid";
+
     String getToken(User user);
 
 }

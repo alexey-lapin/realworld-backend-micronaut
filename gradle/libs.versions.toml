@@ -3,6 +3,7 @@ micronaut = "5.2.2"
 micronaut-gradle-plugin = "5.0.2"
 
 [libraries]
+bcrypt = { group = "at.favre.lib", name = "bcrypt", version = "0.10.2" }
 # renovate hint
 micronaut-platform = { module = "io.micronaut.platform:micronaut-platform", version.ref = "micronaut" }
 gradle-plugin-micronaut = { group = "io.micronaut.gradle", name = "micronaut-platform-catalog-plugin", version.ref = "micronaut-gradle-plugin" }

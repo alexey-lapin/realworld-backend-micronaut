@@ -25,16 +25,28 @@ package com.github.al.realworld.application.service;
 
 import org.jspecify.annotations.Nullable;
 
-import static com.github.al.realworld.application.exception.Exceptions.unauthorized;
+import java.util.UUID;
+
+import static com.github.al.realworld.application.exception.UnauthorizedException.missingToken;
 
 public interface AuthenticationService {
+
+    @Nullable UUID getCurrentUserId();
+
+    default UUID getRequiredCurrentUserId() {
+        var currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            throw missingToken("current user id is not present");
+        }
+        return currentUserId;
+    }
 
     @Nullable String getCurrentUserName();
 
     default String getRequiredCurrentUserName() {
         var currentUsername = getCurrentUserName();
         if (currentUsername == null) {
-            throw unauthorized("current user is not present");
+            throw missingToken("current user is not present");
         }
         return currentUsername;
     }

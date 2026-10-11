@@ -39,7 +39,8 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -55,7 +56,7 @@ public class GetFeedHandler implements QueryHandler<GetFeedResult, GetFeed> {
     public GetFeedResult handle(GetFeed query) {
         var currentUsername = authenticationService.getRequiredCurrentUserName();
         User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
 
         List<UUID> followeeIds = followRelationRepository.findByFollowerId(currentUser.getId()).stream()
                 .map(followRelation -> followRelation.getFollowee().getId())

@@ -35,7 +35,8 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -50,7 +51,7 @@ public class GetCurrentUserHandler implements QueryHandler<GetCurrentUserResult,
     public GetCurrentUserResult handle(GetCurrentUser query) {
         var currentUsername = authenticationService.getRequiredCurrentUserName();
         User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
 
         return new GetCurrentUserResult(UserAssembler.assemble(currentUser, jwtService));
     }

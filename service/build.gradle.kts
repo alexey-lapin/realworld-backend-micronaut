@@ -66,6 +66,8 @@ dependencies {
     implementation(project(":service-bus"))
     implementation(project(":service-api"))
 
+    implementation(libs.bcrypt)
+
     implementation(mn.micronaut.data.hibernate.jpa)
     implementation(mn.micronaut.hibernate.jpa)
     implementation(mn.micronaut.serde.jackson)

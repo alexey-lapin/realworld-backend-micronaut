@@ -36,8 +36,9 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -51,10 +52,10 @@ public class FollowProfileHandler implements CommandHandler<FollowProfileResult,
     public FollowProfileResult handle(FollowProfile command) {
         var currentUsername = authenticationService.getRequiredCurrentUserName();
         User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
 
         User followee = userRepository.findByUsername(command.followee())
-                .orElseThrow(() -> notFound("user [name=%s] does not exist", command.followee()));
+                .orElseThrow(() -> notFound("profile", "user [name=%s] does not exist", command.followee()));
 
         FollowRelation follow = new FollowRelation(
                 new FollowRelationId(currentUser.getId(), followee.getId()),

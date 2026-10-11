@@ -23,6 +23,9 @@
  */
 package com.github.al.realworld.application.command;
 
+import com.github.al.realworld.application.exception.NotFoundException;
+import com.github.al.realworld.application.exception.ForbiddenException;
+import com.github.al.realworld.application.exception.UnauthorizedException;
 import com.github.al.realworld.api.command.UpdateArticle;
 import com.github.al.realworld.api.dto.ArticleDto;
 import com.github.al.realworld.api.dto.JsonNullable;
@@ -34,8 +37,6 @@ import com.github.al.realworld.domain.model.User;
 import com.github.al.realworld.domain.repository.ArticleRepository;
 import com.github.al.realworld.domain.repository.TagRepository;
 import com.github.al.realworld.domain.repository.UserRepository;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.http.exceptions.HttpStatusException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -77,12 +78,8 @@ class UpdateArticleHandlerTest {
 
     @Test
     void should_throw404_when_articleDoesNotExist() {
-        HttpStatusException throwable = catchThrowableOfType(
-                HttpStatusException.class,
-                () -> handler.handle(command(emptyData()))
-        );
-
-        assertThat(throwable.getStatus().getCode()).isEqualTo(HttpStatus.NOT_FOUND.getCode());
+        assertThatThrownBy(() -> handler.handle(command(emptyData())))
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
@@ -90,24 +87,16 @@ class UpdateArticleHandlerTest {
         givenArticle();
         when(authenticationService.getRequiredCurrentUserName()).thenReturn(TEST_USERNAME_2);
 
-        HttpStatusException throwable = catchThrowableOfType(
-                HttpStatusException.class,
-                () -> handler.handle(command(emptyData()))
-        );
-
-        assertThat(throwable.getStatus().getCode()).isEqualTo(HttpStatus.FORBIDDEN.getCode());
+        assertThatThrownBy(() -> handler.handle(command(emptyData())))
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
-    void should_throw400_when_currentUserDoesNotExist() {
+    void should_throw401_when_currentUserDoesNotExist() {
         givenArticle();
 
-        HttpStatusException throwable = catchThrowableOfType(
-                HttpStatusException.class,
-                () -> handler.handle(command(emptyData()))
-        );
-
-        assertThat(throwable.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        assertThatThrownBy(() -> handler.handle(command(emptyData())))
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @Test

@@ -38,8 +38,9 @@ import jakarta.transaction.Transactional;
 import java.time.ZonedDateTime;
 import lombok.RequiredArgsConstructor;
 
-import static com.github.al.realworld.application.exception.Exceptions.badRequest;
-import static com.github.al.realworld.application.exception.Exceptions.notFound;
+import static com.github.al.realworld.application.exception.UnauthorizedException.invalidToken;
+import static com.github.al.realworld.application.exception.NotFoundException.notFound;
+
 
 @RequiredArgsConstructor
 @Singleton
@@ -53,11 +54,11 @@ public class AddCommentHandler implements CommandHandler<AddCommentResult, AddCo
     @Override
     public AddCommentResult handle(AddComment command) {
         Article article = articleRepository.findBySlug(command.slug())
-                .orElseThrow(() -> notFound("article [slug=%s] does not exist", command.slug()));
+                .orElseThrow(() -> notFound("article", "article [slug=%s] does not exist", command.slug()));
 
         var currentUsername = authenticationService.getRequiredCurrentUserName();
         User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> badRequest("user [name=%s] does not exist", currentUsername));
+                .orElseThrow(() -> invalidToken("user [name=%s] does not exist", currentUsername));
 
         ZonedDateTime now = ZonedDateTime.now();
 
