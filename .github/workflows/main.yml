@@ -184,8 +184,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      # app-* only: build-push-action also uploads *.dockerbuild records, which are not release assets
       - name: Download Artifacts
         uses: actions/download-artifact@v8
+        with:
+          pattern: app-*
 
       # Platform names come from the artifact directory names set by the matrix.
       - name: Package Artifacts
@@ -214,8 +217,9 @@ jobs:
           --generate-notes
           --fail-on-no-commits
 
-  # Packages the linux native binaries into a multi-arch image. Pull requests build it to
-  # catch Dockerfile breakage early; only tags push it and deploy.
+  # Packages the linux native binaries into a multi-arch image and smoke-tests each
+  # architecture. Pull requests build it to catch Dockerfile breakage early; only tags push
+  # it and deploy.
   build-docker:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -263,6 +267,32 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
 
+      # Every run, tags included, proves each image starts before anything is published.
+      - name: Smoke test the images
+        shell: bash
+        run: |
+          for arch in amd64 arm64; do
+            docker buildx build --load --platform "linux/${arch}" \
+              --build-arg APP_NAME="${APP_NAME}" \
+              --file Dockerfile.native --tag "smoke:${arch}" .
+            docker run --detach --platform "linux/${arch}" --publish 8080:8080 --name smoke "smoke:${arch}"
+            healthy=false
+            # arm64 runs under QEMU emulation, so it gets more time
+            for _ in {1..90}; do
+              if curl --fail --silent --output /dev/null http://localhost:8080/health; then
+                healthy=true
+                break
+              fi
+              sleep 1
+            done
+            if [ "$healthy" != true ]; then
+              docker logs smoke
+              echo "::error::${arch} container did not become healthy"
+              exit 1
+            fi
+            docker rm --force smoke
+          done
+
       - name: Build and push multi-arch image
         uses: docker/build-push-action@v7
         with:
@@ -275,23 +305,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Smoke test the amd64 image
-        if: env.PUBLISH != 'true'
-        shell: bash
-        run: |
-          docker buildx build --load --platform linux/amd64 \
-            --build-arg APP_NAME="${APP_NAME}" \
-            --file Dockerfile.native --tag smoke .
-          docker run --detach --publish 8080:8080 --name smoke smoke
-          for _ in {1..30}; do
-            curl --fail --silent --output /dev/null http://localhost:8080/health && exit 0
-            sleep 1
-          done
-          docker logs smoke
-          echo "::error::container did not become healthy within 30s"
-          exit 1
+          # a cache service hiccup must not fail an otherwise valid image
+          cache-to: type=gha,mode=max,ignore-error=true
 
       - name: Deploy on Render
         if: env.PUBLISH == 'true'
