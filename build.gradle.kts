@@ -4,6 +4,12 @@ plugins {
     alias(libs.plugins.versions)
     id("jacoco-report-aggregation")
     id("realworld.project-conventions")
+    // declared once here so every module loads them from the same classloader; applied per
+    // module, the GraalVM build service they share cannot be wired across modules, which
+    // breaks task creation such as IDE sync of collectReachabilityMetadata
+    alias(libs.plugins.micronaut.application) apply false
+    alias(libs.plugins.micronaut.library) apply false
+    alias(libs.plugins.shadow) apply false
 }
 
 description = "Real world backend API built in Micronaut"

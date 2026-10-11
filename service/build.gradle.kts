@@ -134,8 +134,9 @@ tasks {
     }
 
     named<DockerBuildImage>("dockerBuildNative") {
-        val registry = System.getenv("CR_REGISTRY")!!
-        val namespace = System.getenv("CR_NAMESPACE")!!
+        // CI sets these; defaults keep configuration from failing elsewhere, e.g. in an IDE sync
+        val registry = System.getenv("CR_REGISTRY") ?: "ghcr.io"
+        val namespace = System.getenv("CR_NAMESPACE") ?: "local"
         images.set(
             listOf(
                 "${registry}/${namespace}/${rootProject.name}:latest",
