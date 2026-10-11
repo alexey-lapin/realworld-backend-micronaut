@@ -137,11 +137,6 @@ Content-Type: application/json
 }
 
 ###
-# @name Delete article
-DELETE {{host_api}}/articles/{{article_slug}}
-Authorization: Token {{token}}
-
-###
 # @name List comments
 GET {{host_api}}/articles/{{article_slug}}/comments
 
@@ -157,9 +152,13 @@ Content-Type: application/json
   }
 }
 
+> {%
+    client.global.set("comment_id", response.body.comment.id)
+%}
+
 ###
 # @name Delete comment
-DELETE {{host_api}}/articles/{{article_slug}}/comments/1
+DELETE {{host_api}}/articles/{{article_slug}}/comments/{{comment_id}}
 Authorization: Token {{token}}
 
 ###
@@ -170,6 +169,12 @@ Authorization: Token {{token}}
 ###
 # @name Unfavorite article
 DELETE {{host_api}}/articles/{{article_slug}}/favorite
+Authorization: Token {{token}}
+
+###
+# @name Delete article
+# last, since the comment and favorite requests above need the article
+DELETE {{host_api}}/articles/{{article_slug}}
 Authorization: Token {{token}}
 
 ###

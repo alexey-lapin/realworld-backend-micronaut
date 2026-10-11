@@ -32,8 +32,8 @@ It is on a free tier, so the first request after a quiet period takes a few seco
 ### Stack
 
 - [Micronaut 5](https://docs.micronaut.io/latest/guide/) with the Netty HTTP server
-- [Micronaut Data JDBC](https://micronaut-projects.github.io/micronaut-data/latest/guide/#jdbc), with queries generated
-  and checked at compile time
+- [Micronaut Data JDBC](https://micronaut-projects.github.io/micronaut-data/latest/guide/#jdbc), which generates
+  repository queries at compile time
 - [Micronaut Serialization](https://micronaut-projects.github.io/micronaut-serialization/latest/guide/), which
   generates JSON code at compile time, so native images need no reflection metadata for API types
 - [Micronaut Security JWT](https://micronaut-projects.github.io/micronaut-security/latest/guide/#jwt), RS256 tokens
@@ -49,8 +49,8 @@ It is on a free tier, so the first request after a quiet period takes a few seco
   and the HTTP operation interfaces, and `service` the application.
 - Controllers implement the operation interfaces and hand each request record to the bus. The integration tests use
   the same interfaces as declarative HTTP clients.
-- Command handlers write through domain repositories. Query handlers read from database views that already join the
-  author and compute `favorited` and `following` for the current user.
+- Command handlers write through domain repositories. Article and comment reads go through database views that join
+  the author, and the repository queries compute `favorited` and `following` for the current user on each request.
 - Domain types are Java records. Partial updates use a small `JsonNullable` type to tell an absent field from an
   explicit `null`.
 - Every error renders in the spec's `{"errors": {"field": ["message"]}}` envelope with the spec's status codes.
@@ -64,8 +64,9 @@ It is on a free tier, so the first request after a quiet period takes a few seco
   and every native binary, pinned to a commit that Renovate keeps current
 - Builds a multi-arch Docker image from the Linux binaries and starts both architectures before publishing to the
   [GitHub Container Registry](https://github.com/alexey-lapin/realworld-backend-micronaut/pkgs/container/realworld-backend-micronaut)
-- Publishes a [GitHub release](https://github.com/alexey-lapin/realworld-backend-micronaut/releases) with the jar and
-  native archives for every tag, then redeploys the Render demo
+- For every `vX.Y.Z` tag, publishes a
+  [GitHub release](https://github.com/alexey-lapin/realworld-backend-micronaut/releases) with the jar and native
+  archives, and redeploys the Render demo in the same run
 
 ## Getting started
 
@@ -90,7 +91,8 @@ java -jar realworld-backend-micronaut-*.jar
 ```
 
 Or download the archive for your platform from the
-[latest release](https://github.com/alexey-lapin/realworld-backend-micronaut/releases/latest), unpack it and run:
+[latest release](https://github.com/alexey-lapin/realworld-backend-micronaut/releases/latest), unpack it and run it.
+Linux arm64 archives start with the first release built by this pipeline; v0.2.5 and earlier do not have them.
 
 ```bash
 ./realworld-backend-micronaut
@@ -150,9 +152,13 @@ git -C .realworld-spec sparse-checkout set specs/api
 # Before each run:
 git -C .realworld-spec fetch origin && git -C .realworld-spec checkout --detach "$SPEC_REF"
 
-./gradlew build
+# clean first, so the wildcard below matches only the jar just built
+./gradlew clean build
 java -jar service/build/libs/realworld-backend-micronaut-*.jar &
+APP_PID=$!
+until curl --fail --silent --output /dev/null http://localhost:8080/health; do sleep 1; done
 .github/scripts/hurl-report.sh http://localhost:8080 "$(date +%s)"
+kill "$APP_PID"
 ```
 
 The script runs each spec file and prints a failure's details. `.realworld-spec` is a separate clone with its own
@@ -170,8 +176,9 @@ article slug as they go, so you can run the file top to bottom.
 
 ### Load test
 
-`k6-create-articles.js` registers users and creates articles with random tags for 30 seconds with 5 virtual users. It
-fails if more than 1% of requests fail or p95 latency exceeds 750 ms.
+`k6-create-articles.js` registers one user, then has 5 virtual users create articles with random tags for 30 seconds.
+The run fails unless fewer than 1% of requests fail, more than 99% of status checks pass, and p95 latency stays under
+750 ms.
 
 ```bash
 k6 run k6-create-articles.js

@@ -51,9 +51,13 @@ git clone --filter=blob:none --sparse https://github.com/realworld-apps/realworl
 git -C .realworld-spec sparse-checkout set specs/api                                                  # first time
 git -C .realworld-spec fetch origin && git -C .realworld-spec checkout --detach "$SPEC_REF"
 
-./gradlew :service:shadowJar
+# clean first: service/build/libs may hold jars from other branches that the wildcard would match
+./gradlew clean :service:shadowJar
 java -jar service/build/libs/realworld-backend-micronaut-*.jar &
+APP_PID=$!
+until curl --fail --silent --output /dev/null http://localhost:8080/health; do sleep 1; done
 .github/scripts/hurl-report.sh http://localhost:8080 "$(date +%s)"
+kill "$APP_PID"
 ```
 
 Pass the host without `/api`. Always run the pinned `SPEC_REF`, since an older checkout enforces rules upstream has
@@ -68,7 +72,13 @@ run the binary, then run the spec suite against it:
 ```bash
 JAVA_HOME=/path/to/graalvm-25 ./gradlew :service:nativeCompile -x check
 ./service/build/native/nativeCompile/realworld-backend-micronaut &
+APP_PID=$!
+until curl --fail --silent --output /dev/null http://localhost:8080/health; do sleep 1; done
+.github/scripts/hurl-report.sh http://localhost:8080 "$(date +%s)"
+kill "$APP_PID"
 ```
+
+Stop any JVM instance first, or the check runs against it instead of the binary.
 
 Reflection hints the libraries do not ship go in `infrastructure/config/GraalConfig.java`. The Liquibase entries there
 cover the change types the changelog uses, so a new change type needs a new entry.
@@ -81,7 +91,8 @@ cover the change types the changelog uses, so a new change type needs a new entr
   imports; it does not reformat layout.
 - Four-space indentation, braces on the same line, no wildcard imports.
 - Records, pattern matching, sealed types and `var` where they make the code clearer.
-- JSpecify: packages are `@NullMarked`, and anything that can be null is `@Nullable`.
+- JSpecify: the API, domain, exception and JDBC packages are `@NullMarked`, and anything that can be null there is
+  `@Nullable`. Mark new packages the same way.
 
 ### Layering
 
@@ -107,7 +118,8 @@ cover the change types the changelog uses, so a new change type needs a new entr
 - Validation messages that contain an apostrophe double it (`can''t`), because the interpolator treats `'` as a quote.
 - Persistence is Micronaut Data JDBC with `@MappedEntity` records. Keep SQL identifiers unquoted: Micronaut's H2 dialect
   quotes with backticks, which H2 folds to upper case like unquoted names.
-- Native `@Query` SQL is checked when the module compiles, so a typo fails the build.
+- The compiler checks derived queries and `@Query` parameter bindings, but not table or column names inside native
+  SQL. Only executing a query proves it, so cover new SQL with an integration test.
 - Mapping between entities, domain records and DTOs is explicit code in the adapters and in the `*Assembler` classes.
 
 ### Errors

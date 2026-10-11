@@ -6,6 +6,8 @@ export const options = {
   duration: "30s",
   thresholds: {
     http_req_failed: ["rate<0.01"],
+    // a wrong status (say 200 instead of 201) fails a check, not the request, so gate on checks too
+    checks: ["rate>0.99"],
     http_req_duration: ["p(95)<750"],
   },
 };
