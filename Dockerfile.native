@@ -1,0 +1,13 @@
+FROM cgr.dev/chainguard/wolfi-base:latest
+
+ARG TARGETARCH
+ARG APP_NAME
+
+# --chmod restores the exec bit, which upload-artifact drops.
+COPY --chmod=755 app-native-linux-${TARGETARCH}/${APP_NAME} /app
+
+USER nonroot
+
+EXPOSE 8080
+
+ENTRYPOINT ["/app"]
